@@ -1,0 +1,61 @@
+:root {
+  --ink: #1d242c; --ink2: #5b6470; --mute: #8a8f96;
+  --gold: #c98a1c; --gold2: #e8b04a; --red: #c94a35; --green: #4f8a43; --slate: #5f7593;
+  --serif: "Noto Serif SC", serif; --sans: "Inter", "Noto Sans SC", sans-serif;
+}
+html, body { margin: 0; background: #e9e1d4; overflow: hidden; }
+#stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; font-family: var(--sans); color: var(--ink); }
+#bg, #rays, #gl, #vig, #ui, #grain, #fade { position: absolute; inset: 0; }
+#bg { background: radial-gradient(ellipse 75% 70% at 50% 42%, var(--c1, #f7f2ea), var(--c2, #e2d8c8)); }
+#rays { opacity: 0; mix-blend-mode: screen;
+  background: conic-gradient(from 200deg at 70% -10%, transparent 0deg, rgba(255,236,190,.55) 6deg, transparent 12deg, transparent 18deg, rgba(255,236,190,.4) 24deg, transparent 31deg, transparent 38deg, rgba(255,236,190,.5) 44deg, transparent 52deg, transparent 360deg); }
+#gl { width: 1920px; height: 1080px; }
+#vig { pointer-events: none; background: radial-gradient(ellipse 80% 80% at 50% 45%, transparent 55%, rgba(70, 50, 30, .16) 100%); }
+#grain { pointer-events: none; opacity: .055; mix-blend-mode: overlay; }
+#fade { pointer-events: none; opacity: 0; background: var(--c1, #f7f2ea); }
+#ui { pointer-events: none; }
+
+/* 标题字幕 */
+.cap { position: absolute; white-space: nowrap; }
+.cap .ln { overflow: hidden; padding: .06em .1em .1em; }
+.cap .ln > span { display: inline-block; will-change: transform; }
+.h0 { font-family: var(--serif); font-weight: 900; font-size: 128px; letter-spacing: .04em; line-height: 1.12; }
+.h1 { font-family: var(--serif); font-weight: 900; font-size: 76px; letter-spacing: .02em; line-height: 1.2; }
+.h2 { font-family: var(--serif); font-weight: 700; font-size: 56px; letter-spacing: .02em; line-height: 1.25; }
+.h3 { font-family: var(--sans); font-weight: 700; font-size: 40px; line-height: 1.3; }
+.sub { font-family: var(--sans); font-weight: 500; font-size: 32px; color: var(--ink2); line-height: 1.4; }
+.note { font-family: var(--sans); font-weight: 500; font-size: 21px; color: var(--mute); letter-spacing: .03em; }
+.light { color: #f4efe6; }
+.light.sub, .light .sub { color: #c9ccd2; }
+.light.note { color: #9aa1ab; }
+b.g, .g { color: var(--gold); font-weight: inherit; }
+b.r, .r { color: var(--red); font-weight: inherit; }
+b.gr, .gr { color: var(--green); font-weight: inherit; }
+b.s, .s { color: var(--slate); font-weight: inherit; }
+.light b.g, .light .g { color: #f2c063; }
+.light b.r, .light .r { color: #ff8a73; }
+.light b.gr, .light .gr { color: #9fd38c; }
+
+/* 章节角标 */
+.chap { font-family: var(--sans); font-weight: 700; font-size: 26px; letter-spacing: .3em; color: var(--ink2); }
+.chap i { font-style: normal; font-family: "Inter"; font-weight: 800; color: var(--gold); margin-right: 14px; letter-spacing: .05em; }
+
+/* 贴在 3D 物体上的标签 */
+.tag { position: absolute; left: 0; top: 0; white-space: nowrap; font-family: var(--sans); font-weight: 700; font-size: 28px; color: var(--ink); }
+.tag.pill { background: rgba(255,255,255,.88); padding: 8px 18px; border-radius: 999px; box-shadow: 0 6px 20px rgba(60,40,20,.12); }
+.tag.dark { background: rgba(29,36,44,.86); color: #f6efe3; padding: 8px 18px; border-radius: 999px; }
+.tag.small { font-size: 22px; font-weight: 600; color: var(--ink2); }
+.tag.num { font-family: "Inter", var(--sans); font-weight: 800; }
+.tag.big { font-family: var(--serif); font-weight: 900; font-size: 64px; }
+.tag.light { color: #f4efe6; }
+
+/* 面板 */
+.free { position: absolute; }
+.card { background: rgba(255,255,255,.9); border-radius: 22px; padding: 26px 34px; box-shadow: 0 14px 40px rgba(60,40,20,.14); }
+.card .k { font-size: 26px; font-weight: 700; color: var(--ink2); }
+.card .v { font-family: "Inter", var(--sans); font-weight: 800; font-size: 72px; line-height: 1.1; }
+.card .d { font-size: 22px; font-weight: 500; color: var(--mute); margin-top: 6px; }
+.counter { font-family: "Inter", var(--sans); font-weight: 800; }
+.yr { font-family: var(--sans); font-weight: 700; font-size: 34px; color: var(--ink2); letter-spacing: .08em; }
+.yr .n { font-family: "Inter"; font-weight: 800; font-size: 64px; color: var(--ink); margin: 0 10px; display: inline-block; min-width: 80px; text-align: center; }
+.badge { position: absolute; font-family: var(--sans); font-weight: 500; font-size: 20px; color: var(--mute); letter-spacing: .04em; }
