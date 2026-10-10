@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>月薪一万的两个人</title>
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/400.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/500.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/700.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/900.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-serif-sc/700.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-serif-sc/900.css">
+<script src="timeline.js"></script>
+<style>
+:root{
+  --bg:#07080b; --ink:#f3efe8; --mute:#8e8a83; --line:rgba(243,239,232,.14);
+  --red:#ff5a4e; --red2:#b8322a; --gold:#f2c063; --gold2:#b8862d; --green:#4fd1a5;
+  --sans:'Noto Sans SC',sans-serif; --serif:'Noto Serif SC',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#000;height:100%;overflow:hidden}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{position:relative;width:1920px;height:1080px;background:var(--bg);overflow:hidden;color:var(--ink);font-family:var(--sans);font-weight:400}
+#world{position:absolute;inset:0;transform-origin:50% 50%}
+canvas.layer{position:absolute;inset:0;width:1920px;height:1080px}
+#bgc{z-index:0} #fxc{z-index:30;pointer-events:none}
+.scene{position:absolute;inset:0;z-index:10}
+.a{opacity:0}
+.abs{position:absolute}
+.row{display:flex;align-items:center}
+.ctr{position:absolute;left:0;right:0;text-align:center}
+.gold{color:var(--gold)} .red{color:var(--red)} .mute{color:var(--mute)}
+.gg{background:linear-gradient(180deg,#fff6d6 0%,#f7cf74 40%,#c48a2c 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.rg{background:linear-gradient(180deg,#ffd0c9 0%,#ff6a5c 45%,#b8322a 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.k900{font-weight:900} .k700{font-weight:700}
+.serif{font-family:var(--serif)}
+.tag{font-size:26px;letter-spacing:.35em;color:var(--mute)}
+
+/* subtitles */
+#sub{position:absolute;left:0;right:0;bottom:46px;text-align:center;z-index:60;font-size:46px;font-weight:700;letter-spacing:.04em;
+  color:#fff;text-shadow:0 0 2px #000,0 2px 6px rgba(0,0,0,.95),0 0 18px rgba(0,0,0,.8)}
+#sub b{color:var(--gold);font-weight:900}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:70;pointer-events:none;mix-blend-mode:screen}
+.vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 50%,rgba(0,0,0,.7) 100%);pointer-events:none;z-index:50}
+#scan{position:absolute;inset:0;z-index:52;opacity:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 2px,rgba(0,0,0,.25) 2px 4px)}
+#osd{position:absolute;left:90px;top:70px;z-index:53;font:900 54px var(--sans);letter-spacing:.12em;color:#fff;opacity:0;text-shadow:3px 0 rgba(255,0,90,.7),-3px 0 rgba(0,240,255,.7)}
+
+/* person */
+.person{position:absolute;width:260px;height:380px}
+.person svg{width:100%;height:100%;overflow:visible}
+.name{position:absolute;font-size:30px;font-weight:700;letter-spacing:.2em;text-align:center;width:300px}
+
+/* phone notification card */
+.note{position:absolute;width:440px;padding:18px 22px;border-radius:24px;background:rgba(40,40,46,.82);
+  border:1px solid rgba(255,255,255,.08);box-shadow:0 18px 40px rgba(0,0,0,.5);display:flex;gap:16px;align-items:flex-start}
+.note .ic{flex:none;width:52px;height:52px;border-radius:13px;display:flex;align-items:center;justify-content:center;font:900 20px var(--sans);color:#fff}
+.note .tt{font-size:22px;color:#aaa;display:flex;justify-content:space-between;width:100%}
+.note .bd{font-size:26px;font-weight:500;color:#fff;margin-top:4px;line-height:1.35}
+.note .bd em{font-style:normal;color:#ff8a80;font-weight:900}
+.note .tx{flex:1}
+
+/* item / price card */
+.item{position:absolute;display:flex;align-items:center;gap:24px;padding:20px 28px;border-radius:20px;background:rgba(255,90,78,.08);border:1px solid rgba(255,90,78,.35)}
+.item svg{width:72px;height:72px}
+.item .l1{font-size:24px;color:#d9a8a3}
+.item .l2{font-size:36px;font-weight:900;color:#fff}
+.item .pr{font-size:38px;font-weight:900;color:var(--red);margin-left:12px}
+.stamp{position:absolute;padding:10px 26px;border:5px solid var(--red);color:var(--red);font:900 42px var(--sans);border-radius:10px;transform:rotate(-9deg);letter-spacing:.06em;background:rgba(7,8,11,.6)}
+
+.moment{position:absolute;width:350px;border-radius:20px;background:#15161a;border:1px solid rgba(255,255,255,.08);padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.6)}
+.moment .hd{display:flex;align-items:center;gap:14px}
+.moment .av{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#ff8a6a,#c43d33)}
+.moment .nm{font-size:26px;font-weight:700;color:#7fa6d8}
+.moment .txt{font-size:28px;margin:14px 0}
+.moment .pic{height:160px;border-radius:12px;background:linear-gradient(135deg,#3a1e1c,#7a2e28 60%,#e0644f);position:relative;overflow:hidden}
+.moment .lk{margin-top:14px;font-size:22px;color:#7fa6d8;display:flex;align-items:center;gap:10px}
+
+.bubble{position:absolute;padding:16px 26px;border-radius:22px 22px 22px 6px;background:#2a2b30;font-size:30px;font-weight:500;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.bubble .who{font-size:20px;color:var(--mute);margin-bottom:4px}
+
+.meter{position:absolute;width:760px}
+.meter .lb{font-size:24px;color:var(--mute);letter-spacing:.2em;margin-bottom:12px;display:flex;justify-content:space-between}
+.meter .tr{height:22px;border-radius:11px;background:rgba(255,255,255,.07);overflow:hidden}
+.meter .fi{height:100%;width:0;border-radius:11px}
+
+/* chart */
+#chartWrap{position:absolute;inset:0}
+.big-num{font:900 120px var(--sans);font-variant-numeric:tabular-nums;line-height:1}
+
+/* battery */
+.batt{position:absolute;width:420px;height:200px}
+.batt .shell{position:absolute;inset:0;border:8px solid rgba(255,255,255,.75);border-radius:30px}
+.batt .cap{position:absolute;right:-30px;top:62px;width:22px;height:76px;border-radius:0 10px 10px 0;background:rgba(255,255,255,.75)}
+.batt .lvl{position:absolute;left:18px;top:18px;bottom:18px;border-radius:14px;width:0}
+
+/* cards */
+.card{position:absolute;width:500px;height:590px;border-radius:28px;padding:40px 40px;background:linear-gradient(180deg,rgba(242,192,99,.10),rgba(242,192,99,.02));border:1px solid rgba(242,192,99,.35);box-shadow:0 30px 80px rgba(0,0,0,.55)}
+.card .no{font:900 84px var(--sans);line-height:1}
+.card .ti{font:900 54px var(--sans);margin-top:18px;letter-spacing:.04em}
+.card .sb{font-size:28px;color:#cfc6b6;margin-top:14px;line-height:1.5}
+.card .an{position:absolute;left:30px;right:30px;bottom:34px;height:230px}
+
+.choice{display:inline-block;padding:22px 64px;border-radius:60px;font:900 50px var(--sans);margin:0 24px;letter-spacing:.1em}
+
+#play{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:99;cursor:pointer;color:#fff;font:500 24px var(--sans);letter-spacing:.4em;background:rgba(0,0,0,.45)}
+body.render #play{display:none}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+<div id="world">
+  <canvas class="layer" id="bgc" width="1920" height="1080"></canvas>
+
+  <!-- ===== 1 冷开场：45岁被裁员 ===== -->
+  <section class="scene" id="sOpen" data-s="0" data-e="r1-1.15">
+    <div class="a ctr tag" data-in="0.25" data-out="o5" style="top:72px">45 岁 · 一个普通的周一 · 上午 9:30</div>
+    <div id="openBoth" class="abs" style="inset:0">
+      <div class="abs" id="openL" style="left:0;top:0;width:960px;height:1080px">
+        <div class="a person" data-in="o1" data-fx="up" data-person="#ff5a4e" style="left:150px;top:520px"></div>
+        <div class="a name red" data-in="o1+0.2" style="left:130px;top:910px">阿杰 · 45岁</div>
+        <div class="a note glitch" data-in="o1@0.72" data-fx="drop" style="left:470px;top:150px"><div class="ic" style="background:#d4372c">HR</div><div class="tx"><div class="tt"><span>人事通知</span><span>刚刚</span></div><div class="bd">您的岗位已被<em>优化</em>，请于今日 17:00 前完成交接。</div></div></div>
+        <div class="a note" data-in="o2@0.12" data-fx="drop" style="left:470px;top:330px"><div class="ic" style="background:#3a6fd8">房</div><div class="tx"><div class="tt"><span>房贷</span><span>3天后扣款</span></div><div class="bd">本月应还 <em>¥8,200</em></div></div></div>
+        <div class="a note" data-in="o2@0.3" data-fx="drop" style="left:470px;top:460px"><div class="ic" style="background:#2b9b6b">车</div><div class="tx"><div class="tt"><span>车贷</span><span>5天后扣款</span></div><div class="bd">本月应还 <em>¥3,800</em></div></div></div>
+        <div class="a note" data-in="o2@0.47" data-fx="drop" style="left:470px;top:590px"><div class="ic" style="background:#c9892b">卡</div><div class="tx"><div class="tt"><span>信用卡</span><span>账单日</span></div><div class="bd">本期账单 <em>¥12,460</em></div></div></div>
+        <div class="a note" data-in="o2@0.62" data-fx="drop" style="left:470px;top:720px"><div class="ic" style="background:#8a4fd8">贷</div><div class="tx"><div class="tt"><span>消费贷</span><span>待还款</span></div><div class="bd">本月待还 <em>¥2,980</em></div></div></div>
+        <div class="a abs" data-in="o2@0.82" data-fx="slam" data-shake="10" style="left:470px;top:860px;width:440px;text-align:center">
+          <span style="font-size:24px;color:#ff8a80;letter-spacing:.2em">账户余额</span><span class="k900 red" style="font-size:56px;margin-left:16px">¥3,216</span></div>
+      </div>
+      <div class="abs" id="openR" style="left:960px;top:0;width:960px;height:1080px">
+        <div class="a person" data-in="o1+0.15" data-fx="up" data-person="#f2c063" data-smile="o4" style="left:550px;top:520px"></div>
+        <div class="a name gold" data-in="o1+0.35" style="left:530px;top:910px">小林 · 45岁</div>
+        <div class="a note glitch" data-in="o1@0.76" data-fx="drop" style="left:60px;top:150px"><div class="ic" style="background:#d4372c">HR</div><div class="tx"><div class="tt"><span>人事通知</span><span>刚刚</span></div><div class="bd">您的岗位已被<em>优化</em>，请于今日 17:00 前完成交接。</div></div></div>
+        <div class="a abs" data-in="o3+0.2" data-fx="up" style="left:60px;top:400px;width:440px;height:330px;border-radius:30px;background:linear-gradient(160deg,#2a2418,#14120c);border:1px solid rgba(242,192,99,.35);padding:34px;box-shadow:0 20px 60px rgba(0,0,0,.6)">
+          <div style="font-size:24px;color:#c9b48a;letter-spacing:.2em">我的账户 · 总资产</div>
+          <div class="k900 gg" id="maskNum" style="font-size:76px;margin-top:40px;letter-spacing:.08em">¥ ● ● ● ● ●</div>
+          <div style="font-size:22px;color:#8e7f62;margin-top:46px">指数基金 · 已持有 20 年</div>
+        </div>
+      </div>
+    </div>
+    <!-- 中心钩子 -->
+    <div class="a ctr k700" data-in="o5" data-fx="up" style="top:250px;font-size:56px;letter-spacing:.1em">同样月薪 <span class="gold">¥10,000</span> · 同一座城市</div>
+    <div class="a ctr k700" data-in="o5@0.52" data-fx="up" style="top:360px;font-size:56px;letter-spacing:.1em">20 年后，他们差了</div>
+    <div class="a ctr k900 gg" data-in="o5@0.79" data-fx="slam" data-shake="34" style="top:450px;font-size:230px;line-height:1.1;letter-spacing:.02em">139 万</div>
+  </section>
+
+  <!-- ===== 2 倒带 ===== -->
+  <section class="scene" id="sRewind" data-s="r1-1.15" data-e="f1-0.35">
+    <div class="ctr" id="ageBox" style="top:300px">
+      <div class="k900" style="font-size:300px;line-height:1;font-variant-numeric:tabular-nums"><span id="age">45</span><span style="font-size:90px;margin-left:10px">岁</span></div>
+      <div class="tag" id="ageSub" style="margin-top:20px;font-size:32px">20 年前</div>
+    </div>
+    <div class="abs" style="left:0;right:0;top:902px;height:3px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent)" id="startLine"></div>
+    <div class="a person" data-in="r2-0.1" data-fx="up" data-person="#ff5a4e" style="left:540px;top:520px"></div>
+    <div class="a person" data-in="r2" data-fx="up" data-person="#f2c063" style="left:1120px;top:520px"></div>
+    <div class="a name red" data-in="r2+0.1" style="left:520px;top:440px">阿杰 · 25岁</div>
+    <div class="a name gold" data-in="r2+0.2" style="left:1100px;top:440px">小林 · 25岁</div>
+    <div class="a ctr k900" data-in="r2@0.5" data-fx="pop" style="top:620px;font-size:110px;color:#fff">=</div>
+    <div class="a ctr tag" data-in="r2@0.3" style="top:150px;font-size:34px;color:#fff">入职第一天 · 月薪都是 <span class="gold k900">¥10,000</span></div>
+  </section>
+
+  <!-- ===== 3 分岔 ===== -->
+  <section class="scene" id="sFork" data-s="f1-0.35" data-e="b1-0.7">
+    <div class="abs" id="divider" style="left:958px;top:0;width:4px;height:1080px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.55),transparent)"></div>
+    <div class="a abs k900" data-in="f1-0.2" style="left:0;width:960px;top:56px;text-align:center;font-size:44px;letter-spacing:.3em"><span class="red">阿杰</span><span class="mute" style="font-size:26px;letter-spacing:.2em;margin-left:20px">花了再说</span></div>
+    <div class="a abs k900" data-in="f1" style="left:960px;width:960px;top:56px;text-align:center;font-size:44px;letter-spacing:.3em"><span class="gold">小林</span><span class="mute" style="font-size:26px;letter-spacing:.2em;margin-left:20px">先存再花</span></div>
+    <div class="a note" data-in="f1-0.1" data-fx="drop" data-out="f2" style="left:260px;top:300px"><div class="ic" style="background:#2b9b6b">¥</div><div class="tx"><div class="tt"><span>工资到账</span><span>刚刚</span></div><div class="bd" style="color:#fff">+ <b class="k900" style="color:#7ee2b8">¥10,000.00</b></div></div></div>
+    <div class="a note" data-in="f1" data-fx="drop" data-out="f4-0.2" style="left:1220px;top:170px"><div class="ic" style="background:#2b9b6b">¥</div><div class="tx"><div class="tt"><span>工资到账</span><span>刚刚</span></div><div class="bd" style="color:#fff">+ <b class="k900" style="color:#7ee2b8">¥10,000.00</b></div></div></div>
+    <div class="a person" data-in="f1+0.2" data-fx="up" data-out="f4-0.2" data-person="#f2c063" style="left:1310px;top:420px"></div>
+    <div class="a abs k700" data-in="f2" data-fx="up" data-out="f4-0.2" style="left:960px;width:960px;top:830px;text-align:center;font-size:34px;color:#c9b48a">小林在想：这笔钱，先给谁？</div>
+    <!-- 左：阿杰 -->
+    <div class="a abs k900 rg" data-in="f1@0.3" data-fx="slam" data-shake="6" data-out="f3" style="left:0;width:960px;top:150px;text-align:center;font-size:76px">钱，赚来就是花的</div>
+    <div class="a item" data-in="f2@0.08" data-fx="left" style="left:50px;top:280px"><span data-icon="phone" style="color:#ff8a80"></span><div><div class="l1">第 1 年</div><div class="l2">新手机<span class="pr">-¥8,999</span></div></div></div>
+    <div class="a item" data-in="f2@0.4" data-fx="left" style="left:50px;top:430px"><span data-icon="car" style="color:#ff8a80"></span><div><div class="l1">第 2 年 · 贷款</div><div class="l2">买车<span class="pr">-¥200,000</span></div></div></div>
+    <div class="a stamp" data-base="rotate(-9deg)" data-in="f2@0.76" data-fx="slam" data-shake="12" style="left:70px;top:610px">月供 ¥3,800 × 60 期</div>
+    <div class="a moment" data-in="f3" data-fx="up" style="left:585px;top:270px">
+      <div class="hd"><div class="av"></div><div class="nm">阿杰</div></div>
+      <div class="txt">生活，需要仪式感。</div>
+      <div class="pic"><svg viewBox="0 0 360 190" style="position:absolute;inset:0;width:100%;height:100%"><circle cx="300" cy="50" r="30" fill="rgba(255,230,200,.6)"/><path d="M40 150 L80 112 Q100 96 140 96 L220 96 Q250 96 270 116 L310 130 Q330 136 330 150 Z" fill="rgba(0,0,0,.55)"/><circle cx="105" cy="152" r="18" fill="#111"/><circle cx="270" cy="152" r="18" fill="#111"/></svg></div>
+      <div class="lk"><span data-icon="heart" style="color:#ff6a6a;width:26px;height:26px"></span><span id="likes">0</span> 人觉得很赞</div>
+    </div>
+    <!-- 右：小林 -->
+    <div class="a abs k900 gg" data-in="f4" data-fx="slam" data-shake="6" data-out="f6" style="left:960px;width:960px;top:150px;text-align:center;font-size:70px">工资到账，先存 ¥3,000</div>
+    <div class="a abs" data-in="f4@0.15" data-fx="fade" data-out="f6" style="left:1040px;top:300px;width:800px;height:300px" id="splitBox">
+      <div class="abs" style="left:0;top:40px;width:560px;height:70px;border-radius:14px;background:rgba(255,255,255,.08)"></div>
+      <div class="abs" id="sp70" style="left:0;top:40px;width:392px;height:70px;border-radius:14px 0 0 14px;background:linear-gradient(90deg,#5d6f8a,#8aa0c2);display:flex;align-items:center;padding-left:20px;font:900 30px var(--sans)">¥7,000 生活费</div>
+      <div class="abs" id="sp30" style="left:392px;top:40px;width:168px;height:70px;border-radius:0 14px 14px 0;background:linear-gradient(90deg,#d9a441,#f7d27c);display:flex;align-items:center;justify-content:center;font:900 30px var(--sans);color:#2a1d05">¥3,000</div>
+      <div class="abs" id="vault" style="left:610px;top:120px;width:170px;text-align:center"><span data-icon="vault" style="color:var(--gold);width:150px;height:150px;display:inline-block"></span><div class="k700 gold" style="font-size:28px">指数基金</div></div>
+    </div>
+    <div class="a abs row" data-in="f5" data-fx="pop" data-out="f6" style="left:1060px;top:660px;gap:20px"><span data-icon="coffee" style="color:#e9d7b5;width:100px;height:100px"></span><div><div class="k900" style="font-size:44px">咖啡照喝</div><div class="row" style="gap:8px;color:var(--green);font-size:28px"><span data-icon="check" style="width:32px;height:32px"></span>可以</div></div></div>
+    <div class="a abs row" data-in="f5@0.55" data-fx="pop" data-out="f6" style="left:1450px;top:660px;gap:20px"><span data-icon="car" style="color:#666;width:110px;height:110px;position:relative"></span><div><div class="k900" style="font-size:44px;color:#999">车</div><div class="row" style="gap:8px;color:var(--red);font-size:28px"><span data-icon="cross" style="width:32px;height:32px"></span>不买</div></div></div>
+    <!-- 嘲讽 -->
+    <div class="a bubble" data-in="f6@0.3" data-fx="pop" style="left:1060px;top:260px"><div class="who">同事 A</div>你也太抠了吧哈哈哈</div>
+    <div class="a bubble" data-in="f6@0.5" data-fx="pop" style="left:1260px;top:400px"><div class="who">大学室友</div>人生苦短，及时行乐啊</div>
+    <div class="a bubble" data-in="f6@0.7" data-fx="pop" style="left:1100px;top:540px"><div class="who">亲戚</div>存那点钱能干嘛？</div>
+    <!-- 看起来 -->
+    <div class="a meter" data-in="f6" data-fx="up" style="left:100px;top:850px"><div class="lb"><span>看起来很有钱</span><span class="red k900" style="letter-spacing:0">95%</span></div><div class="tr"><div class="fi" id="mL" style="background:linear-gradient(90deg,#b8322a,#ff6a5c)"></div></div></div>
+    <div class="a meter" data-in="f6+0.15" data-fx="up" style="left:1060px;top:850px"><div class="lb"><span>看起来很有钱</span><span class="gold k900" style="letter-spacing:0">15%</span></div><div class="tr"><div class="fi" id="mR" style="background:linear-gradient(90deg,#b8862d,#f2c063)"></div></div></div>
+  </section>
+
+  <!-- ===== 4+5 煎熬 → 火箭 ===== -->
+  <section class="scene" id="sChart" data-s="b1-0.7" data-e="c1-0.7">
+    <div id="chartWrap">
+      <svg class="a" data-in="b1-0.5" data-fx="fade" width="1920" height="1080" viewBox="0 0 1920 1080" style="position:absolute;inset:0;overflow:visible">
+        <defs>
+          <linearGradient id="cfill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2c063" stop-opacity=".35"/><stop offset="1" stop-color="#f2c063" stop-opacity="0"/></linearGradient>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <g id="cgrid"></g>
+        <path id="cArea" fill="url(#cfill)"/>
+        <path id="cLine" fill="none" stroke="#f2c063" stroke-width="7" stroke-linecap="round" filter="url(#glow)"/>
+        <g id="cMarks"></g>
+        <g id="snail"></g>
+        <g id="rocket"></g>
+      </svg>
+    </div>
+    <div id="chartHud">
+      <div class="a abs" data-in="b1" style="left:220px;top:70px"><div class="tag" style="color:#c9b48a">小林的账户 · 每月定投 ¥3,000</div></div>
+      <div class="a abs" data-in="b1" style="right:160px;top:56px;text-align:right"><span class="big-num gg" id="cNum">0</span><span class="k900 gold" style="font-size:50px"> 万</span><div class="tag" id="cYear" style="margin-top:6px">第 0 年</div></div>
+      <div class="a ctr k900" data-in="b3" data-fx="up" data-out="k1" style="top:330px;font-size:78px;color:#d8d2c8">这么省，到底值不值<span id="qm" style="display:inline-block;color:var(--gold)">？</span></div>
+      <div class="a abs k900" data-in="k1@0.25" data-fx="slam" data-shake="14" data-out="k3" style="left:300px;top:250px;font-size:96px"><span class="gg">复利</span>，是一头怪兽</div>
+      <div class="a abs k700" data-in="k2" data-fx="up" data-out="k3" style="left:300px;top:390px;font-size:56px;color:#bdb6aa">前 10 年：蜗牛</div>
+      <div class="a abs k700" data-in="k2@0.62" data-fx="up" data-out="k3" style="left:300px;top:470px;font-size:56px;color:#fff">后 10 年：<span class="gold">？</span></div>
+      <div class="a abs k900 gg" data-in="k3" data-fx="slam" data-shake="40" data-out="k5" style="left:250px;top:200px;font-size:210px;line-height:1">火箭！</div>
+      <!-- 本金 vs 收益 -->
+      <div class="a abs" data-in="k5" data-fx="up" style="left:260px;top:420px;width:1400px">
+        <div class="row" style="justify-content:space-between;font-size:30px;margin-bottom:16px"><span>投入本金 <b class="k900" style="font-size:44px">72 万</b></span><span class="gold">钱自己生的钱 <b class="k900 gg" style="font-size:64px">67 万</b></span></div>
+        <div style="position:relative;height:90px;border-radius:16px;overflow:hidden;background:rgba(255,255,255,.06)">
+          <div id="bkP" style="position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#4b4f5a,#7d838f)"></div>
+          <div id="bkG" style="position:absolute;top:0;bottom:0;width:0;background:linear-gradient(90deg,#c48a2c,#ffe08f);box-shadow:0 0 40px rgba(242,192,99,.7)"></div>
+        </div>
+        <div class="ctr k700" style="position:relative;margin-top:40px;font-size:40px">将近 <span class="gold k900">一半</span> 的钱，不是存出来的</div>
+      </div>
+  </section>
+
+  <!-- ===== 6 高潮：能撑多久 → 底气 ===== -->
+  <section class="scene" id="sClimax" data-s="c1-0.7" data-e="t1-1.2">
+    <div class="a ctr tag" data-in="c1-0.4" data-out="c4" style="top:70px;color:#fff;font-size:30px">45 岁 · 被裁员的那一天</div>
+    <div class="a ctr k900" data-in="c1@0.35" data-fx="up" data-out="c4" style="top:130px;font-size:54px">如果明天起没有工资，能撑多久？</div>
+    <div class="a abs" data-in="c2-0.3" data-fx="fade" data-out="c4" style="left:958px;top:280px;width:4px;height:640px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.4),transparent)"></div>
+    <div class="a abs" data-in="c2-0.3" data-out="c4" style="left:0;top:0;width:960px;height:1080px">
+      <div class="abs k900 red" style="left:0;right:0;top:320px;text-align:center;font-size:44px;letter-spacing:.3em">阿杰</div>
+      <div class="batt" style="left:255px;top:420px"><div class="shell"></div><div class="cap"></div><div class="lvl" id="bL" style="background:linear-gradient(90deg,#b8322a,#ff5a4e)"></div></div>
+      <div class="abs" style="left:0;right:0;top:660px;text-align:center;font-size:26px;color:#c9a8a3">存款 ¥3,216 · 每月固定支出 ¥15,000</div>
+      <div class="a abs k900 rg" data-in="c2@0.3" data-fx="slam" data-shake="16" style="left:0;right:0;top:730px;text-align:center;font-size:96px">撑不过 1 个月</div>
+    </div>
+    <div class="a abs" data-in="c3-0.2" data-out="c4" style="left:960px;top:0;width:960px;height:1080px">
+      <div class="abs k900 gold" style="left:0;right:0;top:320px;text-align:center;font-size:44px;letter-spacing:.3em">小林</div>
+      <div class="batt" style="left:255px;top:420px"><div class="shell"></div><div class="cap"></div><div class="lvl" id="bR" style="background:linear-gradient(90deg,#c48a2c,#ffe08f);box-shadow:0 0 30px rgba(242,192,99,.6)"></div></div>
+      <div class="abs" style="left:0;right:0;top:660px;text-align:center;font-size:26px;color:#c9b48a">资产 ¥139 万 · 每月开支 ¥6,000</div>
+      <div class="a abs k900" data-in="c3@0.55" data-fx="slam" data-shake="16" style="left:0;right:0;top:730px;text-align:center;font-size:96px"><span class="gg">能生活 <span id="yrs">0</span> 年</span></div>
+    </div>
+    <div class="a ctr k700" data-in="c4" data-fx="type" data-d="1.9" data-out="c5" style="top:420px;font-size:72px;letter-spacing:.06em">小林存下的，不是钱——</div>
+    <div class="a ctr serif gg" data-in="c5" data-fx="slam" data-shake="50" style="top:250px;font-size:330px;font-weight:900;line-height:1.2">底气</div>
+    <div class="a ctr" data-in="c6" data-fx="blur" style="top:720px;font-size:50px;letter-spacing:.08em;color:#efe6d6">是可以对不喜欢的生活，说<span class="gold k900">「不」</span>的权利</div>
+  </section>
+
+  <!-- ===== 7 反转：只差两样东西 ===== -->
+  <section class="scene" id="sTwist" data-s="t1-1.2" data-e="p0-1.0">
+    <div class="a ctr k900" data-in="t1" data-fx="up" data-out="t3" style="top:170px;font-size:72px">他们之间，只差了 <span class="gg">两样东西</span></div>
+    <div class="a abs" data-in="t2" data-fx="pop" data-out="t3" style="left:330px;top:340px;width:580px;height:420px;border-radius:30px;border:1px solid rgba(242,192,99,.4);background:rgba(242,192,99,.06);text-align:center;padding-top:40px">
+      <div class="k900 gold" style="font-size:44px">①</div><span data-icon="vault" style="color:var(--gold);width:150px;height:150px;display:inline-block;margin:10px 0"></span>
+      <div class="k900" style="font-size:46px">每月先存的 <span class="gold">¥3,000</span></div></div>
+    <div class="a abs" id="carCard" data-in="t2@0.5" data-fx="pop" data-out="t3" style="left:1010px;top:340px;width:580px;height:420px;border-radius:30px;border:1px solid rgba(255,90,78,.4);background:rgba(255,90,78,.06);text-align:center;padding-top:40px">
+      <div class="k900 red" style="font-size:44px">②</div><span data-icon="car" style="color:#ff8a80;width:170px;height:150px;display:inline-block;margin:10px 0"></span>
+      <div class="k900" style="font-size:46px">一辆「有面子」的车</div></div>
+    <div class="a ctr" data-in="t3+0.3" data-fx="blur" style="top:250px">
+      <div class="serif gold" style="font-size:200px;line-height:.6;opacity:.6">“</div>
+      <div class="serif k900" style="font-size:66px;line-height:1.5;margin-top:10px">花钱向别人证明你有钱，<br>是让你<span class="rg">变穷</span>最快的方式。</div>
+      <div class="tag" style="margin-top:40px;font-size:28px">—— 摩根·豪泽尔《金钱心理学》</div>
+    </div>
+  </section>
+
+  <!-- ===== 8 三句话 ===== -->
+  <section class="scene" id="sRules" data-s="p0-1.0" data-e="e1-1.2">
+    <div class="a ctr k900" data-in="p0" data-fx="up" style="top:90px;font-size:64px">普通人变富，记住 <span class="gg" style="font-size:96px">3</span> 句话</div>
+    <div class="a card" data-in="p1" data-fx="slam" data-shake="22" style="left:170px;top:270px">
+      <div class="no gg">01</div><div class="ti">先存后花</div><div class="sb">工资到账那天，<br>自动转走 <b class="gold">20%</b></div>
+      <svg class="an" viewBox="0 0 440 230" id="r1svg">
+        <rect x="0" y="40" width="400" height="56" rx="12" fill="rgba(255,255,255,.08)"/>
+        <rect x="0" y="40" width="320" height="56" rx="12" fill="#6b7d99"/>
+        <text x="20" y="78" font-size="26" font-weight="900" fill="#fff">80% 随便花</text>
+        <g id="r1chunk"><rect x="320" y="40" width="80" height="56" rx="12" fill="#f2c063"/><text x="338" y="78" font-size="26" font-weight="900" fill="#2a1d05">20%</text></g>
+        <g transform="translate(300 120)" style="color:#f2c063" id="r1vault"></g>
+      </svg>
+    </div>
+    <div class="a card" data-in="p2" data-fx="slam" data-shake="22" style="left:710px;top:270px">
+      <div class="no gg">02</div><div class="ti">大钱多想三天</div><div class="sb">一辆车连买带养<br>≈ <b class="gold" id="cupN">0</b> 杯咖啡</div>
+      <canvas class="an" id="cupGrid" width="880" height="460"></canvas>
+    </div>
+    <div class="a card" data-in="p3" data-fx="slam" data-shake="22" style="left:1250px;top:270px">
+      <div class="no gg">03</div><div class="ti">买指数，别瞎炒</div><div class="sb">看不懂的，一律不碰<br><span class="mute" style="font-size:24px">长期持有，赚经济增长的钱</span></div>
+      <svg class="an" viewBox="0 0 440 230">
+        <path id="r3bad" d="M10 120 L40 60 L65 150 L95 40 L120 170 L150 80 L175 190 L205 70 L230 160" fill="none" stroke="#ff5a4e" stroke-width="5" stroke-linejoin="round" opacity=".8"/>
+        <path id="r3x" d="M20 50 L220 190 M220 50 L20 190" stroke="#ff5a4e" stroke-width="9" stroke-linecap="round" fill="none"/>
+        <path id="r3good" d="M250 200 C300 190 320 170 350 140 S410 70 430 40" fill="none" stroke="#f2c063" stroke-width="7" stroke-linecap="round" filter="url(#glow)"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ===== 9 路口 / 种树 / 互动 ===== -->
+  <section class="scene" id="sEnd" data-s="e1-1.2" data-e="end">
+    <svg class="a" data-in="e1-1.0" data-fx="fade" data-out="e3" width="1920" height="1080" viewBox="0 0 1920 1080" style="position:absolute;inset:0" id="roads">
+      <defs>
+        <linearGradient id="roadL" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff5a4e" stop-opacity=".45"/><stop offset="1" stop-color="#ff5a4e" stop-opacity="0"/></linearGradient>
+        <linearGradient id="roadR" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#f2c063" stop-opacity=".7"/><stop offset="1" stop-color="#f2c063" stop-opacity=".05"/></linearGradient>
+      </defs>
+      <polygon points="760,1080 1160,1080 1010,760 910,760" fill="rgba(255,255,255,.08)"/>
+      <polygon points="910,760 960,760 640,430 610,430" fill="url(#roadL)"/>
+      <polygon points="960,760 1010,760 1310,430 1280,430" fill="url(#roadR)"/>
+      <text x="560" y="410" font-size="34" font-weight="900" fill="#ff8a80">看起来有钱</text>
+      <text x="1250" y="410" font-size="34" font-weight="900" fill="#f2c063">真的有底气</text>
+    </svg>
+    <div class="a abs" data-in="e1" data-fx="up" data-out="e2+0.2" style="left:820px;top:560px;width:280px;height:400px">
+      <div class="person" data-person="#ff5a4e" style="left:-40px;top:0;transform:scale(.42);transform-origin:50% 100%"></div>
+      <div class="person" data-person="#f2c063" style="left:60px;top:0;transform:scale(.42);transform-origin:50% 100%"></div>
+    </div>
+    <div class="a ctr k900" data-in="e2" data-fx="slam" data-shake="14" data-out="e3" style="top:150px;font-size:96px">你，站在哪条路上？</div>
+    <div class="a abs" data-in="e2+0.4" data-fx="up" data-out="e3" style="left:830px;top:560px;width:260px;height:380px">
+      <div class="person" data-person="#ffffff" style="left:0;top:0;transform:scale(.58);transform-origin:50% 100%"></div>
+    </div>
+    <svg class="a" data-in="e3" data-fx="fade" width="1920" height="1080" viewBox="0 0 1920 1080" style="position:absolute;inset:0"><g id="tree"></g></svg>
+    <div class="a ctr serif" data-in="e3" data-fx="blur" data-out="e4" style="top:130px;font-size:62px;line-height:1.6;font-weight:700">种一棵树最好的时间是十年前，<br>其次，<span class="gg" style="font-weight:900">是现在。</span></div>
+    <div class="a ctr k900" data-in="e4" data-fx="up" style="top:120px;font-size:60px">评论区告诉我：你是 ——</div>
+    <div class="a ctr" data-in="e4@0.45" data-fx="pop" style="top:240px">
+      <span class="choice" style="border:4px solid var(--red);color:var(--red)">阿杰</span>
+      <span class="choice" style="background:linear-gradient(180deg,#ffe08f,#c48a2c);color:#2a1d05">小林</span>
+    </div>
+    <div class="a ctr" data-in="e4.e+0.6" data-fx="fade" style="bottom:34px;top:auto;font-size:20px;color:#77736c;line-height:1.7">*人物为虚构案例：按每月定投 ¥3,000、年化 6% 测算，未计通胀与涨薪 · 仅为知识科普，不构成投资建议，投资有风险</div>
+  </section>
+
+  <canvas class="layer" id="fxc" width="1920" height="1080"></canvas>
+</div>
+<div class="vignette"></div>
+<div id="scan"></div>
+<div id="osd">◀◀ REWIND</div>
+<div id="sub"></div>
+<div id="flash"></div>
+</div></div>
+<div id="play">点击播放 · CLICK TO PLAY</div>
+<script src="engine.js"></script>
+</body>
+</html>
