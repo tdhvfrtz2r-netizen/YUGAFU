@@ -1,6 +1,11 @@
 # 用离线 Kokoro 中文男声生成每句配音，并写出时间轴 timeline.js 与 vo.wav
-import sherpa_onnx, numpy as np, soundfile as sf, json, os, hashlib, sys
-from script import LINES, TAIL
+# 用法：python3 tts.py [目录]   目录里放 script.py，默认当前目录；时间轴写到该目录的 timeline.js
+import sherpa_onnx, numpy as np, soundfile as sf, json, os, hashlib, sys, importlib.util
+DIR = sys.argv[1] if len(sys.argv) > 1 else '.'
+_spec = importlib.util.spec_from_file_location('script', os.path.join(DIR, 'script.py'))
+_mod = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(_mod)
+LINES, TAIL = _mod.LINES, _mod.TAIL
+VO_OUT = os.environ.get('VO', '/tmp/claude-0/vo.wav')
 M = os.environ.get('KOKORO', '/tmp/claude-0/tts/kokoro-multi-lang-v1_1') + '/'
 SID = int(os.environ.get('SID', 60))
 CACHE = os.environ.get('TTS_CACHE', '/tmp/claude-0/tts/cache'); os.makedirs(CACHE, exist_ok=True)
@@ -38,8 +43,8 @@ vo = np.zeros(int(total*SR)+SR, np.float32)
 for s, x in clips:
     i = int(s*SR); vo[i:i+len(x)] += x
 vo /= np.abs(vo).max() + 1e-9
-sf.write('/tmp/claude-0/vo.wav', vo * 0.9, SR)
-with open('timeline.js', 'w', encoding='utf-8') as f:
+sf.write(VO_OUT, vo * 0.9, SR)
+with open(os.path.join(DIR, 'timeline.js'), 'w', encoding='utf-8') as f:
     f.write('window.TL = ' + json.dumps({'total': round(total, 3), 'order': order, 'lines': lines}, ensure_ascii=False) + ';\n')
 for lid in order: print(lid, lines[lid]['s'], lines[lid]['e'])
 print('TOTAL', round(total, 2))

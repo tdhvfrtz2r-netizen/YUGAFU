@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>月薪一万的两个人 · 60秒</title>
+<link rel="stylesheet" href="../node_modules/@fontsource/noto-sans-sc/400.css">
+<link rel="stylesheet" href="../node_modules/@fontsource/noto-sans-sc/500.css">
+<link rel="stylesheet" href="../node_modules/@fontsource/noto-sans-sc/700.css">
+<link rel="stylesheet" href="../node_modules/@fontsource/noto-sans-sc/900.css">
+<link rel="stylesheet" href="../node_modules/@fontsource/noto-serif-sc/700.css">
+<link rel="stylesheet" href="../node_modules/@fontsource/noto-serif-sc/900.css">
+<script src="timeline.js"></script>
+<style>
+:root{
+  --bg:#07080b; --ink:#f3efe8; --mute:#8e8a83; --line:rgba(243,239,232,.14);
+  --red:#ff5a4e; --gold:#f2c063; --green:#4fd1a5;
+  --sans:'Noto Sans SC',sans-serif; --serif:'Noto Serif SC',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#000;height:100%;overflow:hidden}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{position:relative;flex:none;width:1080px;height:1920px;background:var(--bg);overflow:hidden;color:var(--ink);font-family:var(--sans);font-weight:400}
+#world{position:absolute;inset:0;transform-origin:50% 50%}
+canvas.layer{position:absolute;inset:0;width:1080px;height:1920px}
+#bgc{z-index:0} #fxc{z-index:30;pointer-events:none}
+.scene{position:absolute;inset:0;z-index:10}
+.a{opacity:0}
+.abs{position:absolute}
+.row{display:flex;align-items:center}
+.ctr{position:absolute;left:0;right:0;text-align:center}
+.gold{color:var(--gold)} .red{color:var(--red)} .mute{color:var(--mute)}
+.gg{background:linear-gradient(180deg,#fff6d6 0%,#f7cf74 40%,#c48a2c 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.rg{background:linear-gradient(180deg,#ffd0c9 0%,#ff6a5c 45%,#b8322a 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.k900{font-weight:900} .k700{font-weight:700}
+.serif{font-family:var(--serif)}
+.tag{font-size:30px;letter-spacing:.3em;color:var(--mute)}
+.hd{position:absolute;left:60px;font-size:40px;font-weight:900;letter-spacing:.25em}
+.hd small{font-size:26px;letter-spacing:.15em;color:var(--mute);font-weight:500;margin-left:16px}
+
+#banner{position:absolute;left:0;right:0;top:200px;text-align:center;z-index:55;opacity:0}
+#banner .l1{font:900 46px var(--sans);letter-spacing:.12em}
+#banner .l2{font:900 76px var(--sans);letter-spacing:.04em;line-height:1.15}
+#sub{position:absolute;left:40px;right:40px;bottom:390px;text-align:center;z-index:60;font-size:58px;font-weight:900;letter-spacing:.03em;line-height:1.3;
+  color:#fff;text-shadow:0 0 3px #000,0 3px 8px rgba(0,0,0,.95),0 0 22px rgba(0,0,0,.85)}
+#sub b{color:var(--gold);font-weight:900}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:70;pointer-events:none;mix-blend-mode:screen}
+.vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 55%,rgba(0,0,0,.65) 100%);pointer-events:none;z-index:50}
+#scan{position:absolute;inset:0;z-index:52;opacity:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 2px,rgba(0,0,0,.25) 2px 4px)}
+#osd{position:absolute;left:60px;top:420px;z-index:53;font:900 60px var(--sans);letter-spacing:.12em;color:#fff;opacity:0;text-shadow:3px 0 rgba(255,0,90,.7),-3px 0 rgba(0,240,255,.7)}
+
+.person{position:absolute;width:260px;height:380px;transform-origin:0 0}
+.person svg{width:100%;height:100%;overflow:visible}
+.name{position:absolute;font-size:30px;font-weight:700;letter-spacing:.15em;text-align:center;width:220px}
+
+.note{position:absolute;width:620px;padding:16px 22px;border-radius:22px;background:rgba(40,40,46,.85);border:1px solid rgba(255,255,255,.08);box-shadow:0 14px 34px rgba(0,0,0,.5);display:flex;gap:16px;align-items:center}
+.note .ic{flex:none;width:52px;height:52px;border-radius:13px;display:flex;align-items:center;justify-content:center;font:900 22px var(--sans);color:#fff}
+.note .tx{flex:1}
+.note .tt{font-size:22px;color:#aaa;display:flex;justify-content:space-between}
+.note .bd{font-size:28px;font-weight:500;color:#fff;margin-top:2px}
+.note .bd em{font-style:normal;color:#ff8a80;font-weight:900}
+.bill{position:absolute;width:620px;height:74px;padding:0 24px;border-radius:18px;background:rgba(40,40,46,.85);border:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:16px;font-size:28px}
+.bill .ic{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font:900 20px var(--sans)}
+.bill .am{margin-left:auto;font-weight:900;color:#ff8a80;font-size:34px}
+.bill .mt{color:#9a958d;font-size:22px}
+
+.item{position:absolute;display:flex;align-items:center;gap:22px;padding:18px 26px;border-radius:20px;background:rgba(255,90,78,.08);border:1px solid rgba(255,90,78,.35)}
+.item svg{width:76px;height:76px}
+.item .l1{font-size:24px;color:#d9a8a3}
+.item .l2{font-size:38px;font-weight:900;color:#fff}
+.item .pr{font-size:40px;font-weight:900;color:var(--red);margin-left:10px}
+.stamp{position:absolute;padding:10px 24px;border:5px solid var(--red);color:var(--red);font:900 40px var(--sans);border-radius:10px;letter-spacing:.04em;background:rgba(7,8,11,.6)}
+.moment{position:absolute;width:330px;border-radius:20px;background:#15161a;border:1px solid rgba(255,255,255,.08);padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.6)}
+.moment .mh{display:flex;align-items:center;gap:12px}
+.moment .av{width:50px;height:50px;border-radius:12px;background:linear-gradient(135deg,#ff8a6a,#c43d33)}
+.moment .nm{font-size:24px;font-weight:700;color:#7fa6d8}
+.moment .txt{font-size:26px;margin:12px 0}
+.moment .pic{height:140px;border-radius:12px;background:linear-gradient(135deg,#3a1e1c,#7a2e28 60%,#e0644f);position:relative;overflow:hidden}
+.moment .lk{margin-top:12px;font-size:22px;color:#7fa6d8;display:flex;align-items:center;gap:10px}
+
+.big-num{font:900 130px var(--sans);font-variant-numeric:tabular-nums;line-height:1}
+.batt{position:absolute;width:420px;height:190px}
+.batt .shell{position:absolute;inset:0;border:8px solid rgba(255,255,255,.75);border-radius:30px}
+.batt .cap{position:absolute;right:-30px;top:58px;width:22px;height:74px;border-radius:0 10px 10px 0;background:rgba(255,255,255,.75)}
+.batt .lvl{position:absolute;left:18px;top:18px;bottom:18px;border-radius:14px;width:0}
+.choice{display:block;width:620px;margin:0 auto 34px;padding:26px 0;border-radius:70px;font:900 66px var(--sans);letter-spacing:.2em;text-align:center}
+
+#play{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:99;cursor:pointer;color:#fff;font:500 24px var(--sans);letter-spacing:.4em;background:rgba(0,0,0,.45)}
+body.render #play{display:none}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+<div id="world">
+  <canvas class="layer" id="bgc" width="1080" height="1920"></canvas>
+
+  <!-- ===== 冷开场 ===== -->
+  <section class="scene" id="sOpen" data-s="0" data-e="f2-1.35">
+    <div class="a ctr tag" data-in="0.15" data-out="o5" style="top:260px">45 岁 · 一个普通的周一</div>
+    <div id="openBoth" class="abs" style="inset:0">
+      <div class="abs" id="openL" style="left:0;top:0;width:1080px;height:910px">
+        <div class="a person" data-in="o1" data-fx="up" data-person="#ff5a4e" data-base="scale(.8)" style="left:50px;top:520px"></div>
+        <div class="a name red" data-in="o1+0.2" style="left:50px;top:840px">阿杰 · 45岁</div>
+        <div class="a note glitch" data-in="o1@0.72" data-fx="drop" style="left:400px;top:360px;width:640px"><div class="ic" style="background:#d4372c">HR</div><div class="tx"><div class="tt"><span>人事通知</span><span>刚刚</span></div><div class="bd">您的岗位已被<em>优化</em></div></div></div>
+        <div class="a bill" data-in="o2@0.12" data-fx="drop" style="left:420px;top:480px"><div class="ic" style="background:#3a6fd8">房</div>房贷 <span class="mt">3天后扣款</span><span class="am">¥8,200</span></div>
+        <div class="a bill" data-in="o2@0.3" data-fx="drop" style="left:420px;top:568px"><div class="ic" style="background:#2b9b6b">车</div>车贷 <span class="mt">5天后扣款</span><span class="am">¥3,800</span></div>
+        <div class="a bill" data-in="o2@0.47" data-fx="drop" style="left:420px;top:656px"><div class="ic" style="background:#c9892b">卡</div>信用卡 <span class="mt">本期账单</span><span class="am">¥12,460</span></div>
+        <div class="a bill" data-in="o2@0.62" data-fx="drop" style="left:420px;top:744px"><div class="ic" style="background:#8a4fd8">贷</div>消费贷 <span class="mt">本月待还</span><span class="am">¥2,980</span></div>
+        <div class="a abs" data-in="o2@0.82" data-fx="slam" data-shake="10" style="left:420px;top:832px;width:620px;text-align:center"><span style="font-size:26px;color:#ff8a80;letter-spacing:.2em">账户余额</span><span class="k900 red" style="font-size:58px;margin-left:16px">¥3,216</span></div>
+      </div>
+      <div class="a abs" data-in="o1" data-fx="fade" style="left:60px;right:60px;top:930px;height:3px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent)"></div>
+      <div class="abs" id="openR" style="left:0;top:950px;width:1080px;height:520px">
+        <div class="a person" data-in="o1+0.15" data-fx="up" data-person="#f2c063" data-smile="o4" data-base="scale(.8)" style="left:50px;top:150px"></div>
+        <div class="a name gold" data-in="o1+0.35" style="left:50px;top:470px">小林 · 45岁</div>
+        <div class="a note glitch" data-in="o1@0.76" data-fx="drop" style="left:400px;top:20px;width:640px"><div class="ic" style="background:#d4372c">HR</div><div class="tx"><div class="tt"><span>人事通知</span><span>刚刚</span></div><div class="bd">您的岗位已被<em>优化</em></div></div></div>
+        <div class="a abs" data-in="o3+0.2" data-fx="up" style="left:420px;top:150px;width:620px;height:300px;border-radius:30px;background:linear-gradient(160deg,#2a2418,#14120c);border:1px solid rgba(242,192,99,.35);padding:34px;box-shadow:0 20px 60px rgba(0,0,0,.6)">
+          <div style="font-size:26px;color:#c9b48a;letter-spacing:.2em">我的账户 · 总资产</div>
+          <div class="k900 gg" style="font-size:84px;margin-top:30px;letter-spacing:.08em">¥ ● ● ● ● ●</div>
+          <div style="font-size:24px;color:#8e7f62;margin-top:30px">指数基金 · 已持有 20 年</div>
+        </div>
+      </div>
+    </div>
+    <div class="a ctr k900" data-in="o5" data-fx="up" style="top:560px;font-size:64px;letter-spacing:.06em">同样月薪 <span class="gold">¥10,000</span></div>
+    <div class="a ctr k900" data-in="o5@0.4" data-fx="up" style="top:680px;font-size:64px;letter-spacing:.06em">20 年后，差了</div>
+    <div class="a ctr k900 gg" data-in="o5@0.62" data-fx="slam" data-shake="34" style="top:790px;font-size:250px;line-height:1.1">139 万</div>
+  </section>
+
+  <!-- ===== 倒带 ===== -->
+  <section class="scene" id="sRewind" data-s="f2-1.35" data-e="f2+0.15">
+    <div class="ctr" style="top:720px">
+      <div class="k900" style="font-size:320px;line-height:1;font-variant-numeric:tabular-nums"><span id="age">45</span><span style="font-size:96px;margin-left:10px">岁</span></div>
+      <div class="tag" style="margin-top:24px;font-size:40px;color:#fff">回到 20 年前</div>
+    </div>
+  </section>
+
+  <!-- ===== 分岔 ===== -->
+  <section class="scene" id="sFork" data-s="f2-0.1" data-e="k2-0.45">
+    <div class="a hd red" data-in="f2-0.1" style="top:420px">阿杰<small>花了再说</small></div>
+    <div class="a item" data-in="f2@0.18" data-fx="left" style="left:50px;top:500px"><span data-icon="phone" style="color:#ff8a80"></span><div><div class="l1">第 1 年</div><div class="l2">新手机<span class="pr">-¥8,999</span></div></div></div>
+    <div class="a item" data-in="f2@0.35" data-fx="left" style="left:50px;top:640px"><span data-icon="car" style="color:#ff8a80"></span><div><div class="l1">第 2 年 · 贷款</div><div class="l2">买车<span class="pr">-¥20万</span></div></div></div>
+    <div class="a stamp" data-base="rotate(-8deg)" data-in="f2@0.52" data-fx="slam" data-shake="12" style="left:70px;top:800px">月供 ¥3,800 × 60 期</div>
+    <div class="a moment" data-in="f2@0.68" data-fx="up" style="left:700px;top:470px">
+      <div class="mh"><div class="av"></div><div class="nm">阿杰</div></div>
+      <div class="txt">生活，需要仪式感。</div>
+      <div class="pic"><svg viewBox="0 0 290 140" style="position:absolute;inset:0;width:100%;height:100%"><circle cx="240" cy="38" r="24" fill="rgba(255,230,200,.6)"/><path d="M30 112 L62 84 Q78 72 110 72 L176 72 Q200 72 216 87 L248 97 Q264 102 264 112 Z" fill="rgba(0,0,0,.55)"/><circle cx="84" cy="114" r="14" fill="#111"/><circle cx="216" cy="114" r="14" fill="#111"/></svg></div>
+      <div class="lk"><span data-icon="heart" style="color:#ff6a6a;width:24px;height:24px"></span><span id="likes">0</span> 人觉得很赞</div>
+    </div>
+    <div class="a abs" data-in="f2-0.1" data-fx="fade" style="left:60px;right:60px;top:930px;height:3px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent)"></div>
+    <div class="a hd gold" data-in="f2" style="top:960px">小林<small>先存再花</small></div>
+    <div class="a abs k900 gg" data-in="f4@0.3" data-fx="slam" data-shake="6" style="left:60px;top:1030px;font-size:66px">工资到账，先存 ¥3,000</div>
+    <div class="a abs" data-in="f4@0.45" data-fx="fade" style="left:60px;top:1130px;width:960px;height:260px">
+      <div class="abs" style="left:0;top:20px;width:620px;height:76px;border-radius:14px;background:rgba(255,255,255,.08)"></div>
+      <div class="abs" style="left:0;top:20px;width:434px;height:76px;border-radius:14px 0 0 14px;background:linear-gradient(90deg,#5d6f8a,#8aa0c2);display:flex;align-items:center;padding-left:20px;font:900 32px var(--sans)">¥7,000 生活费</div>
+      <div class="abs" id="sp30" style="left:434px;top:20px;width:186px;height:76px;border-radius:0 14px 14px 0;background:linear-gradient(90deg,#d9a441,#f7d27c);display:flex;align-items:center;justify-content:center;font:900 32px var(--sans);color:#2a1d05">¥3,000</div>
+      <div class="abs" id="vault" style="left:730px;top:0;width:180px;text-align:center"><span data-icon="vault" style="color:var(--gold);width:150px;height:150px;display:inline-block"></span><div class="k700 gold" style="font-size:30px">指数基金</div></div>
+      <div class="a abs row" data-in="f4@0.8" data-fx="pop" style="left:0;top:140px;gap:16px"><span data-icon="coffee" style="color:#e9d7b5;width:70px;height:70px"></span><span class="k900" style="font-size:36px">咖啡照喝</span><span data-icon="check" style="color:var(--green);width:36px;height:36px"></span>
+        <span data-icon="car" style="color:#666;width:80px;height:70px;margin-left:40px"></span><span class="k900" style="font-size:36px;color:#999">车不买</span><span data-icon="cross" style="color:var(--red);width:36px;height:36px"></span></div>
+    </div>
+  </section>
+
+  <!-- ===== 蜗牛 → 火箭 ===== -->
+  <section class="scene" id="sChart" data-s="k2-0.45" data-e="c2-0.55">
+    <div id="chartWrap" class="abs" style="inset:0">
+      <svg width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;inset:0;overflow:visible">
+        <defs>
+          <linearGradient id="cfill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2c063" stop-opacity=".35"/><stop offset="1" stop-color="#f2c063" stop-opacity="0"/></linearGradient>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <g id="cgrid"></g>
+        <path id="cArea" fill="url(#cfill)"/>
+        <path id="cLine" fill="none" stroke="#f2c063" stroke-width="8" stroke-linecap="round" filter="url(#glow)"/>
+        <g id="cMarks"></g><g id="snail"></g><g id="rocket"></g>
+      </svg>
+    </div>
+    <div class="abs" style="left:60px;top:420px"><div class="tag" style="color:#c9b48a;font-size:28px;letter-spacing:.15em">小林的账户 · 每月定投 ¥3,000</div></div>
+    <div class="abs" style="right:70px;top:470px;text-align:right"><span class="big-num gg" id="cNum">0</span><span class="k900 gold" style="font-size:54px"> 万</span><div class="tag" id="cYear" style="margin-top:6px">第 0 年</div></div>
+    <div class="a abs k700" data-in="k2" data-fx="up" data-out="k3" style="left:60px;top:500px;font-size:56px;color:#bdb6aa">前 10 年：蜗牛</div>
+    <div class="a abs k700" data-in="k2@0.6" data-fx="up" data-out="k3" style="left:60px;top:580px;font-size:56px;color:#fff">后 10 年：<span class="gold">？</span></div>
+    <div class="a abs k900 gg" data-in="k3" data-fx="slam" data-shake="40" data-out="k4@0.75" style="left:60px;top:540px;font-size:190px;line-height:1">火箭！</div>
+    <div class="a abs" data-in="k4@0.78" data-fx="pop" style="left:60px;top:600px;padding:22px 34px;border-radius:24px;background:rgba(242,192,99,.12);border:2px solid rgba(242,192,99,.6);box-shadow:0 0 50px rgba(242,192,99,.35)">
+      <div style="font-size:30px;color:#e7d6b0">本金 72 万，另外</div><div class="k900" style="font-size:64px"><span class="gg">67 万</span> 是钱生的钱</div></div>
+  </section>
+
+  <!-- ===== 能撑多久 ===== -->
+  <section class="scene" id="sBatt" data-s="c2-0.55" data-e="c4">
+    <div class="a ctr k900" data-in="c2-0.4" data-fx="up" style="top:420px;font-size:58px">被裁那天，能撑多久？</div>
+    <div class="a abs" data-in="c2-0.2" data-fx="fade" style="left:0;top:0;width:1080px">
+      <div class="ctr k900 red" style="top:540px;font-size:42px;letter-spacing:.3em">阿杰</div>
+      <div class="batt" style="left:315px;top:610px"><div class="shell"></div><div class="cap"></div><div class="lvl" id="bL" style="background:linear-gradient(90deg,#b8322a,#ff5a4e)"></div></div>
+      <div class="ctr" style="top:815px;font-size:26px;color:#c9a8a3">存款 ¥3,216 · 每月固定支出 ¥15,000</div>
+    </div>
+    <div class="a ctr k900 rg" data-in="c2@0.62" data-fx="slam" data-shake="16" style="top:860px;font-size:92px">撑不过 1 个月</div>
+    <div class="a abs" data-in="c3-0.2" data-fx="fade" style="left:0;top:0;width:1080px">
+      <div class="ctr k900 gold" style="top:1010px;font-size:42px;letter-spacing:.3em">小林</div>
+      <div class="batt" style="left:315px;top:1080px"><div class="shell"></div><div class="cap"></div><div class="lvl" id="bR" style="background:linear-gradient(90deg,#c48a2c,#ffe08f);box-shadow:0 0 30px rgba(242,192,99,.6)"></div></div>
+      <div class="ctr" style="top:1285px;font-size:26px;color:#c9b48a">资产 ¥139 万 · 每月开支 ¥6,000</div>
+    </div>
+    <div class="a ctr k900" data-in="c3@0.62" data-fx="slam" data-shake="16" style="top:1330px;font-size:92px"><span class="gg">能生活 <span id="yrs">0</span> 年</span></div>
+  </section>
+
+  <!-- ===== 底气 ===== -->
+  <section class="scene" id="sCore" data-s="c4-0.1" data-e="e4-0.6">
+    <div class="a ctr k700" data-in="c4" data-fx="type" data-d="2.0" data-out="c5" style="top:820px;font-size:70px">小林存下的，不是钱——</div>
+    <div class="a ctr serif gg" data-in="c5" data-fx="slam" data-shake="50" style="top:700px;font-size:340px;font-weight:900;line-height:1.2">底气</div>
+    <div class="a ctr" data-in="c5.e+0.1" data-fx="blur" style="top:1160px;font-size:44px;letter-spacing:.06em;color:#efe6d6;line-height:1.6">是对不喜欢的生活<br>说<span class="gold k900">「不」</span>的权利</div>
+  </section>
+
+  <!-- ===== 互动 ===== -->
+  <section class="scene" id="sEnd" data-s="e4-0.6" data-e="end">
+    <div class="a ctr k900" data-in="e4-0.4" data-fx="up" style="top:520px;font-size:72px">你是 ——</div>
+    <div class="a ctr" data-in="e4@0.12" data-fx="pop" style="top:680px"><span class="choice" style="border:5px solid var(--red);color:var(--red)">阿杰</span></div>
+    <div class="a ctr" data-in="e4@0.3" data-fx="pop" style="top:860px"><span class="choice" style="background:linear-gradient(180deg,#ffe08f,#c48a2c);color:#2a1d05">小林</span></div>
+    <div class="a ctr k700" data-in="e4@0.55" data-fx="up" style="top:1070px;font-size:46px">评论区告诉我 <span class="gold">↓</span></div>
+    <div class="a ctr" data-in="e4@0.7" data-fx="fade" style="top:1170px;font-size:34px;color:#c9b48a;letter-spacing:.1em">完整版 3 分钟 · 主页可看</div>
+    <div class="a ctr" data-in="e4.e" data-fx="fade" style="top:1290px;font-size:22px;color:#77736c;line-height:1.7">*人物为虚构案例：每月定投 ¥3,000、年化 6% 测算，未计通胀与涨薪<br>仅为知识科普，不构成投资建议，投资有风险</div>
+  </section>
+
+  <canvas class="layer" id="fxc" width="1080" height="1920"></canvas>
+</div>
+<div id="banner"><div class="l1">同样月薪 1 万</div><div class="l2"><span class="gg">20 年后差了 139 万</span></div></div>
+<div class="vignette"></div>
+<div id="scan"></div>
+<div id="osd">◀◀ REWIND</div>
+<div id="sub"></div>
+<div id="flash"></div>
+</div></div>
+<div id="play">点击播放 · CLICK TO PLAY</div>
+<script src="../core.js"></script>
+<script src="engine.js"></script>
+</body>
+</html>

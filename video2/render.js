@@ -3,9 +3,12 @@
 // node render.js frames [fps] [workers]
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
-const url = 'file://' + path.join(__dirname, 'index.html') + '?render';
+// PAGE=short/index.html SIZE=1080x1920 渲染竖版
+const PAGE = process.env.PAGE || 'index.html';
+const url = 'file://' + path.join(__dirname, PAGE) + '?render';
+const [VW, VH] = (process.env.SIZE || '1920x1080').split('x').map(Number);
 async function open(browser) {
-  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
+  const page = await browser.newPage({ viewport: { width: VW, height: VH } });
   page.on('pageerror', e => console.error('PAGE ERROR', e.message));
   page.on('console', m => { if (m.type() === 'error') console.error('CONSOLE', m.text()); });
   await page.goto(url);
@@ -16,19 +19,19 @@ async function open(browser) {
   const browser = await chromium.launch();
   const mode = process.argv[2];
   if (mode === 'shots') {
-    const page = await open(browser); fs.mkdirSync('shots', { recursive: true });
+    const page = await open(browser); const SH = process.env.SHOTS || 'shots'; fs.mkdirSync(SH, { recursive: true });
     for (const t of process.argv.slice(3)) {
       const tt = await page.evaluate(r => { const t = isNaN(+r) ? T(r) : +r; seek(t); return t; }, t);
-      await page.screenshot({ path: `shots/${t}.jpg`, quality: 80, type: 'jpeg' });
+      await page.screenshot({ path: `${SH}/${t}.jpg`, quality: 80, type: 'jpeg' });
       console.log(t, tt.toFixed(2));
     }
   } else if (mode === 'events') {
     const page = await open(browser);
-    fs.writeFileSync('events.json', JSON.stringify(await page.evaluate(() => EVENTS), null, 1));
+    fs.writeFileSync(path.join(path.dirname(PAGE), 'events.json'), JSON.stringify(await page.evaluate(() => EVENTS), null, 1));
   } else {
     const fps = +(process.argv[3] || 30), W = +(process.argv[4] || 4);
     const total = await (await open(browser)).evaluate(() => TOTAL);
-    const N = Math.ceil(total * fps); const dir = process.env.FRAMES || 'frames';
+    const N = Math.ceil((+process.env.END || total) * fps); const dir = process.env.FRAMES || 'frames';
     fs.mkdirSync(dir, { recursive: true }); let done = 0;
     await Promise.all([...Array(W)].map(async (_, w) => {
       const page = await open(browser);

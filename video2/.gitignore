@@ -3,3 +3,4 @@ shots/
 s[0-9]*.jpg
 frames/
 __pycache__/
+v[0-9]*.jpg
