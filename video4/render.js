@@ -4,7 +4,10 @@
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
 const url = 'file://' + path.join(__dirname, 'index.html') + '?render';
-const ARGS = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--allow-file-access-from-files'];
+// 默认用软件渲染（云端没有显卡）；本地有显卡时设 GPU=1（必要时再加 HEADED=1 弹出浏览器窗口，确保走显卡）
+const ARGS = process.env.GPU
+  ? ['--ignore-gpu-blocklist', '--enable-gpu-rasterization', '--allow-file-access-from-files']
+  : ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--allow-file-access-from-files'];
 const tv = s => s[0] === 'b' ? +s.slice(1) * 2.4 : +s;
 async function open(browser) {
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
@@ -16,7 +19,7 @@ async function open(browser) {
   return page;
 }
 (async () => {
-  const browser = await chromium.launch({ args: ARGS });
+  const browser = await chromium.launch({ args: ARGS, headless: !process.env.HEADED });
   const mode = process.argv[2];
   if (mode === 'shots') {
     const page = await open(browser); const SH = process.env.SHOTS || path.join(__dirname, 'shots'); fs.mkdirSync(SH, { recursive: true });

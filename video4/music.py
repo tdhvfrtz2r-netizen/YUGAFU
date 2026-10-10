@@ -8,7 +8,7 @@ from synth import *
 
 D = json.load(open('events.json'))
 TOTAL, EVENTS = D['total'], D['events']
-OUT = os.environ.get('OUT', '/tmp/claude-0/mix4.wav')
+OUT = os.environ.get('OUT', 'mix.wav')
 MUS, MREV, SFX, SREV = buffers(TOTAL)
 b = lambda x: x * BAR
 E8 = BAR / 8

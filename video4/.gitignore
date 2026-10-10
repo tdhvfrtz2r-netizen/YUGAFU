@@ -2,3 +2,6 @@ node_modules/
 shots/
 *.jpg
 __pycache__/
+frames/
+mix.wav
+*.mp4

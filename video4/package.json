@@ -1,10 +1,11 @@
 {
   "name": "video4",
   "version": "1.0.0",
-  "description": "",
+  "description": "定投宽基（纯音乐 3D 科普）",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "setup": "npm install && npm install --prefix ../video2 && npx playwright install chromium",
+    "frames": "node render.js frames 30 2"
   },
   "keywords": [],
   "author": "",
@@ -12,5 +13,8 @@
   "dependencies": {
     "@fontsource/inter": "^5.1.0",
     "three": "^0.169.0"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
   }
 }
