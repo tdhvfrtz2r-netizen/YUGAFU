@@ -21,7 +21,7 @@ function makeT(TL) {
     ref = String(ref).trim();
     if (ref === 'end') return TL.total;
     if (/^-?[\d.]+$/.test(ref)) return +ref;
-    const m = ref.match(/^([a-z]\d)(\.e)?(?:@([\d.]+))?([+-][\d.]+)?$/);
+    const m = ref.match(/^([a-z]\d+)(\.e)?(?:@([\d.]+))?([+-][\d.]+)?$/);
     if (!m || !LN[m[1]]) throw new Error('bad ref ' + ref);
     const L = LN[m[1]];
     let t = m[2] ? L.e : L.s;
@@ -244,12 +244,12 @@ function drawRewindBands(fxc, t, k, W, H) {
 }
 
 /* ---------------- 字体预加载与播放 ---------------- */
-function boot({ TL, W, H, seek, setupFX, EVENTS }) {
+function boot({ TL, W, H, seek, setupFX, EVENTS, extraText = '' }) {
   const render = location.search.includes('render');
   if (render) document.body.classList.add('render');
   const fit = () => { const k = Math.min(innerWidth / W, innerHeight / H); $('stage').style.transform = `scale(${k})`; };
   if (!render) { fit(); addEventListener('resize', fit); }
-  const ALLTXT = document.body.innerText + TL.order.map(id => TL.lines[id].text).join('') + '0123456789,.¥万年第岁';
+  const ALLTXT = document.body.innerText + extraText + TL.order.map(id => TL.lines[id].text).join('') + '0123456789,.¥万年第岁';
   const FACES = ['400 20px "Noto Sans SC"', '500 20px "Noto Sans SC"', '700 20px "Noto Sans SC"', '900 20px "Noto Sans SC"', '700 20px "Noto Serif SC"', '900 20px "Noto Serif SC"'];
   window.ready = Promise.all(FACES.map(f => document.fonts.load(f, ALLTXT))).then(() => document.fonts.ready).then(() => new Promise(r => setTimeout(r, 300))).then(() => { setupFX(); EVENTS.sort((a, b) => a.t - b.t); seek(0); return true; });
   let playing = false, t0 = 0, off = 0; const audio = new Audio('mix.m4a');

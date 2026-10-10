@@ -1,0 +1,46 @@
+/* 第一期 · 共用样式与设计规范（场景文件只写自己的样式，类名用场景前缀，如 .w-bar） */
+:root{
+  --bg:#07080b; --ink:#f3efe8; --mute:#8e8a83; --dim:#4a4741; --line:rgba(243,239,232,.14);
+  --red:#ff5a4e; --red2:#b8322a; --gold:#f2c063; --gold2:#b8862d; --green:#4fd1a5; --blue:#6b8fd6;
+  --sans:'Noto Sans SC',sans-serif; --serif:'Noto Serif SC',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#000;height:100%;overflow:hidden}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{position:relative;flex:none;width:1920px;height:1080px;background:var(--bg);overflow:hidden;color:var(--ink);font-family:var(--sans);font-weight:400}
+#world{position:absolute;inset:0;transform-origin:50% 50%}
+canvas.layer{position:absolute;inset:0;width:1920px;height:1080px}
+#bgc{z-index:0} #fxc{z-index:30;pointer-events:none}
+#scenes{position:absolute;inset:0;z-index:10}
+.scene{position:absolute;inset:0}
+.a{opacity:0}
+.abs{position:absolute}
+.row{display:flex;align-items:center}
+.ctr{position:absolute;left:0;right:0;text-align:center}
+.gold{color:var(--gold)} .red{color:var(--red)} .mute{color:var(--mute)} .green{color:var(--green)}
+.gg{background:linear-gradient(180deg,#fff6d6 0%,#f7cf74 40%,#c48a2c 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.rg{background:linear-gradient(180deg,#ffd0c9 0%,#ff6a5c 45%,#b8322a 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.k500{font-weight:500} .k700{font-weight:700} .k900{font-weight:900}
+.serif{font-family:var(--serif)}
+.num{font-variant-numeric:tabular-nums}
+.tag{font-size:26px;letter-spacing:.35em;color:var(--mute)}
+.title{font-size:64px;font-weight:900;letter-spacing:.04em}
+.card{position:absolute;border-radius:24px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.note{position:absolute;width:440px;padding:18px 22px;border-radius:24px;background:rgba(40,40,46,.85);border:1px solid rgba(255,255,255,.08);box-shadow:0 18px 40px rgba(0,0,0,.5);display:flex;gap:16px;align-items:center}
+.note .ic{flex:none;width:52px;height:52px;border-radius:13px;display:flex;align-items:center;justify-content:center;font:900 20px var(--sans);color:#fff}
+.note .tx{flex:1} .note .tt{font-size:22px;color:#aaa;display:flex;justify-content:space-between}
+.note .bd{font-size:28px;font-weight:500;color:#fff;margin-top:2px} .note .bd em{font-style:normal;color:#ff8a80;font-weight:900}
+.person{position:absolute;width:260px;height:380px;transform-origin:50% 100%}
+.person svg{width:100%;height:100%;overflow:visible}
+.name{position:absolute;font-size:30px;font-weight:700;letter-spacing:.2em;text-align:center;width:300px}
+.badge{display:inline-block;padding:8px 20px;border-radius:40px;font-size:24px;font-weight:700;letter-spacing:.1em}
+svg text{font-family:var(--sans)}
+
+#sub{position:absolute;left:0;right:0;bottom:44px;text-align:center;z-index:60;font-size:46px;font-weight:700;letter-spacing:.04em;
+  color:#fff;text-shadow:0 0 2px #000,0 2px 6px rgba(0,0,0,.95),0 0 18px rgba(0,0,0,.8)}
+#sub b{color:var(--gold);font-weight:900}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:70;pointer-events:none;mix-blend-mode:screen}
+.vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 52%,rgba(0,0,0,.7) 100%);pointer-events:none;z-index:50}
+#scan{position:absolute;inset:0;z-index:52;opacity:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 2px,rgba(0,0,0,.25) 2px 4px)}
+#play{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:99;cursor:pointer;color:#fff;font:500 24px var(--sans);letter-spacing:.4em;background:rgba(0,0,0,.45)}
+body.render #play{display:none}

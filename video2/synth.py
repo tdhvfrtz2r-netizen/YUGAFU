@@ -14,7 +14,7 @@ def load_timeline(path):
     def T(ref):
         if isinstance(ref, (int, float)): return float(ref)
         if ref == 'end': return total
-        m = re.match(r'^([a-z]\d)(\.e)?(?:@([\d.]+))?([+-][\d.]+)?$', ref)
+        m = re.match(r'^([a-z]\d+)(\.e)?(?:@([\d.]+))?([+-][\d.]+)?$', ref)
         L = ln[m.group(1)]
         t = L['e'] if m.group(2) else L['s']
         if m.group(3): t = L['s'] + (L['e'] - L['s']) * float(m.group(3))
@@ -220,6 +220,29 @@ def grow():
         b = bell(mtof(n), 2.0, 0.05); s = int(i * 0.28 * SR); y[s:s + len(b)] += b[:len(y) - s]
     return y + np.pad(whoosh(1.4, True) * 0.3, (0, len(y) - int(1.4 * SR)))
 
+def lock_fx():
+    """金属锁扣"""
+    t = tt(.35)
+    y = sum(np.sin(2 * np.pi * f * t) * np.exp(-t * d) for f, d in [(1180, 30), (2650, 45), (4100, 60)]) * .3
+    y += filt(rng.standard_normal(len(t)), 'bandpass', [1500, 6000]) * np.exp(-t * 120) * .5
+    return y + np.pad(kick(.5, .2), (0, len(t) - int(.2 * SR))) * .4
+
+def water_fx(d=2.0):
+    """排水声：带通噪声 + 随机气泡"""
+    t = tt(d); y = tv_filter(rng.standard_normal(len(t)), 600 - 300 * t / d, 'bandpass', .8) * .25 * np.minimum(1, t / .2) * np.minimum(1, (d - t) / .3)
+    for _ in range(int(d * 14)):
+        f = rng.uniform(300, 900); b = np.sin(2 * np.pi * np.cumsum(f * (1 + 2 * tt(.06) / .06)) / SR) * np.exp(-tt(.06) * 40) * .12
+        i = int(rng.uniform(0, d - .07) * SR); y[i:i + len(b)] += b
+    return y
+
+def alarm_fx(d=1.6):
+    """两音报警"""
+    y = np.zeros(int(d * SR)); k = 0
+    while k * .4 < d - .2:
+        b = (np.sign(np.sin(2 * np.pi * (880 if k % 2 == 0 else 660) * tt(.18))) * .12) * env(.18, .005, .03)
+        i = int(k * .4 * SR); y[i:i + len(b)] += b; k += 1
+    return filt(y, 'lowpass', 4000)
+
 def heartbeat():
     t = tt(0.5)
     b = lambda: np.sin(2 * np.pi * (45 + 30 * np.exp(-tt(.18) * 30)) * tt(.18)) * np.exp(-tt(.18) * 22)
@@ -313,6 +336,13 @@ def add_events(sfx, srev, events):
         elif k == 'type': place(sfx, t, typing(a), .6)  # a = 打字动画时长
         elif k == 'fill': place(sfx, t, fill_fx(3.0), .5, pan=0)
         elif k == 'grow': place(sfx, t, grow(), .7, send=srev, sendgain=.5)
+        elif k == 'whoosh': place(sfx, t - .15, whoosh(.45, True), .45 * a)
+        elif k == 'tick': place(sfx, t, tick(), .7 * a)
+        elif k == 'stamp': place(sfx, t, kick(.6, .25), .45 * a); place(sfx, t, filt(rng.standard_normal(int(.08 * SR)), 'bandpass', [300, 2500]) * np.exp(-tt(.08) * 50), .5 * a)
+        elif k == 'lock': place(sfx, t, lock_fx(), .6 * a, send=srev, sendgain=.2)
+        elif k == 'water': place(sfx, t, water_fx(a), .5)
+        elif k == 'alarm': place(sfx, t, alarm_fx(a), .35)
+        elif k == 'heartbeat': place(sfx, t, heartbeat(), .9 * a)
 
 
 def ir(d=2.6, decay=6.9, lp=6000):
