@@ -32,7 +32,8 @@ async function open(browser) {
     fs.mkdirSync(dir, { recursive: true }); let done = 0;
     await Promise.all([...Array(W)].map(async (_, w) => {
       const page = await open(browser);
-      for (let f = w; f < N; f += W) {
+      const F0 = Math.floor((+process.env.START || 0) * fps);
+      for (let f = F0 + w; f < N; f += W) {
         await page.evaluate(t => seek(t), f / fps);
         await page.screenshot({ path: `${dir}/${String(f).padStart(5, '0')}.jpg`, quality: 93, type: 'jpeg' });
         if (++done % 500 === 0) console.log(`${done}/${N}`);

@@ -314,7 +314,7 @@ function hookTree(t) {
   TREE.forEach((b, i) => {
     if (!b.el) b.el = $('tr' + i);
     if (b.leaf) { const k = back((lt - b.t0) / .4); b.el.setAttribute('opacity', clamp((lt - b.t0) / .2) * (t > T('e4') ? .55 : 1)); b.el.setAttribute('r', Math.max(0, b.s * k)); }
-    else b.el.setAttribute('stroke-dashoffset', b.len * (1 - clamp((lt - b.t0) / b.dur)));
+    else { const k = clamp((lt - b.t0) / b.dur); b.el.setAttribute('stroke-dashoffset', b.len * (1 - k)); b.el.setAttribute('opacity', k > 0 ? 1 : 0); }
   });
 }
 
