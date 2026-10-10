@@ -26,7 +26,7 @@ def riser_to(t_hit, d, level=.8, roll=True):
             t += BEAT / (1 if k < .4 else 2 if k < .7 else 4)
 
 # —— 一、冷开场 ——
-HIT = T('o4@0.66') + .2
+HIT = T('o4@0.78') + .2
 drone(0, HIT - .3)
 place(MUS, 0, pad([45, 52, 60, 71], HIT - .3, 700, 3.0, .3, .09), 1.0, send=MREV, sendgain=.5)
 t = T('o1')
@@ -42,33 +42,32 @@ t = T('w2')
 while t < W1 - .2:
     place(MUS, t, kick(.6), .3); place(MUS, t + BEAT, hat(), .2, pan=.3); place(MUS, t + 2 * BEAT, hat(), .25, pan=-.3)
     t += BAR
-place(MUS, T('w5@0.4'), sub_drop(1.6), .5)
-place(MUS, T('w5@0.4'), impact(.4) * .5, .6)
+place(MUS, T('w4@0.45'), sub_drop(1.6), .5)
 
 # —— 三、水池：律动 → 停水后只剩低频 ——
-J0, JOFF = T('j1') - .5, T('j5@0.25')
+J0, JOFF = T('j1') - .5, T('j4@0.25')
 section_groove(MUS, MREV, J0, JOFF - .05, ['Am', 'F', 'C', 'G'], .65)
 drone(JOFF, T('x1') - .4, 33, .9)
 place(MUS, JOFF, pad([45, 48, 52, 56], T('x1') - .4 - JOFF, 900, .4, .8, .08), 1.0, send=MREV, sendgain=.5)
 
 # —— 四、雪球：渐强 → 暴跌静音 → 熬 → 火箭 ——
-X0, CRASH = T('x1') - .4, T('x5@0.45')
+X0, CRASH = T('x1') - .4, T('x5@0.4')
 section_groove(MUS, MREV, X0, CRASH - .35, ['C', 'G', 'Am', 'F'], .75)
 place(MUS, CRASH - 1.4, rev_cymbal(1.2), .4)
 place(MUS, CRASH, sub_drop(2.2, 90, 25), .9)
-D0, D1 = CRASH + 1.6, T('x9')
+D0, D1 = CRASH + 1.6, T('x9@0.5')
 drone(CRASH + .3, D1, 33, .45)
 piano_bed(MUS, MREV, D0, D1, ['Am', 'F', 'Am', 'E'], 1, .4, pattern=(0, 2, 3, 2))
-ROCK = T('x10@0.4') + .2
-riser_to(ROCK, ROCK - T('x9'), .85)
-t = T('x9')
+ROCK = T('x10@0.72') + .2
+riser_to(ROCK, ROCK - T('x9@0.5'), .85)
+t = T('x9@0.5')
 while t < ROCK - .3: place(MUS, t, kick(.9), .45); t += BEAT
 section_drop(MUS, MREV, ROCK, T('a1') - .5, ['Am', 'F', 'C', 'G'], 1.0)
 
 # —— 五、A 股：稳步律动，标普处略抬升，结尾落定 ——
 A0, A1 = T('a1') - .5, T('s1') - .5
-section_groove(MUS, MREV, A0, T('a7') - .2, ['Am', 'F', 'C', 'G'], .6)
-section_groove(MUS, MREV, T('a7') - .2, T('a8'), ['F', 'G', 'C', 'Am'], .7)
+section_groove(MUS, MREV, A0, T('a5') - .2, ['Am', 'F', 'C', 'G'], .6)
+section_groove(MUS, MREV, T('a5') - .2, T('a8'), ['F', 'G', 'C', 'Am'], .7)
 place(MUS, T('a8'), pad(CH['Cadd9'][0], A1 - T('a8') + .6, 1400, .6, 1.0, .065), 1.0, send=MREV, sendgain=.6)
 place(MUS, T('a8'), bass(36, A1 - T('a8'), .35), 1.0)
 
@@ -78,7 +77,7 @@ piano_bed(MUS, MREV, S0, S1, ['Am', 'F', 'Dm', 'E'], 1, .75, pattern=(0, 2, 1, 3
 
 # —— 七、收尾：切断 → 蓄力 → 底气 → 问题 → 明亮收尾 ——
 E0 = T('e1') - .5
-DQ = T('e3@0.82')
+DQ = T('e3@0.86')
 drone(E0, DQ - .4, 33, .8)
 place(MUS, E0, pad([45, 52, 57, 60], DQ - E0 - .3, 1200, .8, .2, .09), 1.0, send=MREV, sendgain=.5)
 riser_to(DQ, DQ - T('e3') + .3, .8)

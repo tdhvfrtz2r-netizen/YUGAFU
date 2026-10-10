@@ -1,6 +1,6 @@
 /* 一、冷开场：45 岁同一天被裁，一个看账单，一个松了口气 → 差 139 万 → 倒带回 25 岁 */
 (() => {
-const RW = ['o5', 'w1-0.5'];   // 倒带区间
+const RW = ['o5.e', 'w1-0.4'];   // 倒带区间
 Kit.add({
   key: 'o',
   keywords: ['裁员', '一百三十九万', '二十年后'],
@@ -22,11 +22,11 @@ Kit.add({
         <div class="a person" data-in="o1" data-fx="up" data-person="#ff5a4e" style="left:150px;top:500px"></div>
         <div class="a name red" data-in="o1+0.2" style="left:130px;top:892px">阿杰 · 45岁</div>
         <div class="a note glitch" data-in="o1@0.78" data-fx="drop" style="left:470px;top:150px"><div class="ic" style="background:#d4372c">HR</div><div class="tx"><div class="tt"><span>人事通知</span><span>刚刚</span></div><div class="bd">您的岗位已被<em>优化</em></div></div></div>
-        <div class="a o-bill" data-in="o2@0.3" data-fx="drop" style="top:290px"><div class="ic" style="background:#3a6fd8">房</div>房贷 <span class="mt">3 天后扣款</span><span class="am">¥5,200</span></div>
-        <div class="a o-bill" data-in="o2@0.48" data-fx="drop" style="top:400px"><div class="ic" style="background:#2b9b6b">车</div>车贷 <span class="mt">5 天后扣款</span><span class="am">¥2,300</span></div>
-        <div class="a o-bill" data-in="o2@0.66" data-fx="drop" style="top:510px"><div class="ic" style="background:#8a4fd8">分</div>消费分期 <span class="mt">待还</span><span class="am">¥1,500</span></div>
+        <div class="a o-bill" data-in="o2@0.3" data-fx="drop" style="top:290px"><div class="ic" style="background:#3a6fd8">房</div>房贷 <span class="mt">3 天后扣款</span><span class="am">¥4,200</span></div>
+        <div class="a o-bill" data-in="o2@0.48" data-fx="drop" style="top:400px"><div class="ic" style="background:#2b9b6b">车</div>车贷 <span class="mt">5 天后扣款</span><span class="am">¥1,800</span></div>
+        <div class="a o-bill" data-in="o2@0.66" data-fx="drop" style="top:510px"><div class="ic" style="background:#8a4fd8">分</div>消费分期 <span class="mt">待还</span><span class="am">¥1,000</span></div>
         <div class="a abs" data-in="o2@0.86" data-fx="slam" data-shake="10" style="left:470px;top:630px;width:440px;text-align:center">
-          <span style="font-size:24px;color:#ff8a80;letter-spacing:.2em">每月必须付出</span><span class="k900 red num" style="font-size:60px;margin-left:16px">¥9,000</span></div>
+          <span style="font-size:24px;color:#ff8a80;letter-spacing:.2em">每月必须付出</span><span class="k900 red num" style="font-size:60px;margin-left:16px">¥7,000</span></div>
       </div>
       <div class="o-half" id="o-R" style="left:960px">
         <div class="a person" data-in="o1+0.15" data-fx="up" data-person="#f2c063" data-smile="o3@0.6" style="left:550px;top:500px"></div>
@@ -40,10 +40,12 @@ Kit.add({
       </div>
       <div class="a abs" data-in="o1" data-fx="fade" style="left:958px;top:80px;width:4px;height:900px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.45),transparent)"></div>
     </div>
-    <div class="a ctr k700" data-in="o4" data-fx="up" style="top:250px;font-size:56px;letter-spacing:.1em">同样月薪 <span class="gold num">¥10,000</span></div>
-    <div class="a ctr k700" data-in="o4@0.3" data-fx="up" style="top:350px;font-size:56px;letter-spacing:.1em">20 年后，差了</div>
-    <div class="a ctr k900 gg num" data-in="o4@0.66" data-fx="slam" data-shake="34" style="top:440px;font-size:230px;line-height:1.1">139 万</div>
-    <div class="a ctr k900" data-in="o5" data-fx="up" data-out="o5.e+0.2" style="top:740px;font-size:60px">差距，是怎么来的？</div>
+    <div class="a ctr k700" data-in="o4" data-fx="up" style="top:230px;font-size:56px;letter-spacing:.1em">同样每月到手 <span class="gold num">¥10,000</span></div>
+    <div class="a ctr k700" data-in="o4@0.3" data-fx="up" style="top:330px;font-size:56px;letter-spacing:.1em">20 年后，能动用的钱差了</div>
+    <div class="a ctr k900 gg num" data-in="o4@0.78" data-fx="slam" data-shake="34" style="top:420px;font-size:230px;line-height:1.1">139 万</div>
+    <div class="a ctr" data-in="o4@0.85" data-fx="fade" style="top:690px;font-size:24px;color:#a39e95">能随时动用的钱 · 测算：每月定投 3,000，假设年化 6%</div>
+    <div class="a ctr k700" data-in="o5" data-fx="up" data-out="o5.e+0.2" style="top:760px;font-size:40px;color:#e8c9c4">阿杰也不算乱花钱</div>
+    <div class="a ctr k900" data-in="o5@0.5" data-fx="up" data-out="o5.e+0.2" style="top:830px;font-size:60px">差距，从哪来？</div>
     <div class="ctr" id="o-ageBox" style="top:300px;opacity:0">
       <div class="k900 num" style="font-size:300px;line-height:1"><span id="o-age">45</span><span style="font-size:90px;margin-left:10px">岁</span></div>
       <div class="tag" style="margin-top:20px;font-size:34px;color:#fff">回到 20 年前</div>
@@ -52,7 +54,7 @@ Kit.add({
   </section>`,
   setup(ctx) { this.gl = [...document.querySelectorAll('#oScene .glitch')].map(el => ({ el, t0: ctx.T(el.dataset.in) })); },
   events(ctx) {
-    const { T, P, Core } = ctx, hit = T('o4@0.66') + .2;
+    const { T, P, Core } = ctx, hit = T('o4@0.78') + .2;
     P.burst({ t0: hit, x: 960, y: 560, n: 170, spd: [400, 1500], g: 500, life: [.9, 2], size: [2, 7], colors: Core.GOLD, seed: 11 });
     ctx.ring(hit, 960, 560, 900); ctx.flash(hit, .55, .25);
     ctx.ev(T('o3@0.6'), 'chime');
@@ -69,7 +71,7 @@ Kit.add({
     this.gl.forEach(g => { const k = t - g.t0; if (k > 0 && k < .55) { const r = rng(Math.floor(t * 30) + 3)(); g.el.style.transform = `translateX(${(r - .5) * 40}px) skewX(${(r - .5) * 12}deg)`; g.el.style.filter = `drop-shadow(${6 * r}px 0 rgba(255,0,80,.9)) drop-shadow(${-6 * r}px 0 rgba(0,240,255,.9))`; } });
     document.querySelectorAll('#oScene .smile').forEach(s => s.setAttribute('stroke-dashoffset', 80 * (1 - eo((t - T('o3@0.6')) / .6))));
     // 倒带：139 万淡出 → 年龄 45 → 25
-    const r0 = T(RW[0]) + .9, r1 = T(RW[1]);
+    const r0 = T(RW[0]) + .15, r1 = T(RW[1]);
     const rk = win(t, r0, r1 + .3, .2);
     $('o-ageBox').style.opacity = rk; $('o-osd').style.opacity = rk * (Math.floor(t * 3) % 2 ? 1 : .35);
     $('o-age').textContent = Math.round(45 - 20 * eio((t - r0) / (r1 - r0 - .2)));
@@ -81,14 +83,14 @@ Kit.add({
     const fL = 1 + win(t, T('o2'), T('o3')) * 1.2 - win(t, T('o3'), T('o4')) * .7, fR = 1 + win(t, T('o3'), T('o4')) * 1.2 - win(t, T('o2'), T('o3')) * .7;
     ctx.glow(420, 620, 820, 'rgba(255,70,55,A)', .16 * split * fL);
     ctx.glow(1500, 620, 820, 'rgba(242,180,80,A)', .16 * split * fR);
-    ctx.glow(960, 520, 900, 'rgba(242,175,70,A)', .2 * win(t, T('o4@0.66'), T('o5') + .8));
+    ctx.glow(960, 520, 900, 'rgba(242,175,70,A)', .2 * win(t, T('o4@0.78'), T('o5') + .8));
   },
   fx(t, ctx) {
-    const { T, Core } = ctx; const k = Core.win(t, T(RW[0]) + .8, T(RW[1]) + .3, .2);
+    const { T, Core } = ctx; const k = Core.win(t, T(RW[0]) + .1, T(RW[1]) + .3, .2);
     Core.drawRewindBands(ctx.fxc, t, k, 1920, 1080);
   },
   worldFilter(t, ctx) {
-    const { T, Core } = ctx; const k = Core.win(t, T(RW[0]) + .8, T(RW[1]) + .3, .2);
+    const { T, Core } = ctx; const k = Core.win(t, T(RW[0]) + .1, T(RW[1]) + .3, .2);
     return k ? `saturate(${1 - .6 * k}) contrast(${1 + .25 * k}) hue-rotate(${-20 * k}deg)` : '';
   },
 });
