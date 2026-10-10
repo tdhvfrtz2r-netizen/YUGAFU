@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一杯咖啡的真实价格</title>
+<link rel="stylesheet" href="node_modules/@fontsource/noto-serif-sc/500.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-serif-sc/700.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/300.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/400.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/500.css">
+<style>
+:root{
+  --bg:#0a0a0c; --ink:#ece7df; --mute:#8b867e; --dim:#4a4741;
+  --gold:#d4b483; --gold2:#a8895a; --line:rgba(236,231,223,.14);
+  --red:#c27a6a; --serif:'Noto Serif SC',serif; --sans:'Noto Sans SC',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#000;height:100%;overflow:hidden}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{position:relative;width:1920px;height:1080px;background:var(--bg);overflow:hidden;
+  color:var(--ink);font-family:var(--sans);font-weight:300;transform-origin:center}
+.glow{position:absolute;width:1400px;height:1400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(212,180,131,.10),rgba(212,180,131,0) 60%);pointer-events:none}
+.vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 45%,rgba(0,0,0,.65) 100%);pointer-events:none;z-index:50}
+.grain{position:absolute;inset:-200px;opacity:.07;z-index:51;pointer-events:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>")}
+
+/* HUD */
+.hud{position:absolute;z-index:40;font-size:20px;letter-spacing:.3em;color:var(--mute)}
+#hudL{left:96px;top:72px} #hudR{right:96px;top:72px;font-family:var(--serif)}
+#bar{position:absolute;left:96px;right:96px;bottom:64px;height:1px;background:var(--line);z-index:40}
+#barF{height:1px;background:var(--gold);width:0}
+
+.scene{position:absolute;inset:0;opacity:0}
+.a{opacity:0;will-change:transform,opacity,filter}
+.center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.serif{font-family:var(--serif)}
+.gold{color:var(--gold)} .mute{color:var(--mute)}
+.eyebrow{font-size:22px;letter-spacing:.6em;color:var(--gold);text-transform:uppercase}
+.h1{font-family:var(--serif);font-weight:700;font-size:120px;letter-spacing:.06em;line-height:1.25}
+.h2{font-family:var(--serif);font-weight:500;font-size:68px;line-height:1.4;letter-spacing:.04em}
+.h3{font-family:var(--serif);font-weight:500;font-size:46px;line-height:1.5}
+.p{font-size:34px;line-height:1.8;color:#cfc9bf}
+.small{font-size:24px;color:var(--mute);letter-spacing:.08em}
+.rule{width:120px;height:1px;background:var(--gold);margin:44px auto}
+.num{font-family:var(--serif);font-weight:700;font-variant-numeric:tabular-nums}
+
+/* chapter cards */
+.chap .idx{font-family:var(--serif);font-weight:700;font-size:300px;line-height:1;color:transparent;
+  -webkit-text-stroke:1.5px rgba(212,180,131,.55);letter-spacing:.02em}
+.chap .ct{font-family:var(--serif);font-weight:700;font-size:84px;letter-spacing:.12em;margin-top:24px}
+.chap .en{margin-top:28px;font-size:22px;letter-spacing:.7em;color:var(--mute)}
+
+/* layout helpers */
+.left{position:absolute;left:180px;top:0;bottom:0;width:640px;display:flex;flex-direction:column;justify-content:center}
+.right{position:absolute;left:880px;right:150px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center}
+.stat{display:flex;align-items:baseline;gap:24px;padding:26px 0;border-bottom:1px solid var(--line)}
+.stat .k{font-size:28px;color:var(--mute);width:250px}
+.stat .v{font-family:var(--serif);font-weight:700;font-size:64px}
+.stat .u{font-size:28px;color:var(--mute)}
+
+/* bars */
+.brow{margin:12px 0}
+.brow .lab{display:flex;justify-content:space-between;align-items:baseline;font-size:30px;margin-bottom:14px}
+.brow .lab b{font-family:var(--serif);font-weight:700;font-size:40px;color:var(--ink)}
+.brow .track{height:14px;background:rgba(255,255,255,.05);position:relative}
+.brow .fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--gold2),var(--gold));width:0}
+.brow .note{font-size:22px;color:var(--mute);margin-top:10px;letter-spacing:.06em}
+.brow.coffee .fill{background:linear-gradient(90deg,#5a5246,#8b7d68)}
+
+/* cards */
+.cards{display:flex;gap:48px;justify-content:center}
+.card{width:480px;padding:56px 48px;border:1px solid var(--line);background:rgba(255,255,255,.015);text-align:left}
+.card .no{font-family:var(--serif);font-size:30px;color:var(--gold);letter-spacing:.2em}
+.card .t{font-family:var(--serif);font-weight:700;font-size:50px;margin:26px 0 22px}
+.card .d{font-size:27px;line-height:1.75;color:#bdb7ad}
+.card .big{font-family:var(--serif);font-weight:700;font-size:56px;color:var(--gold);margin-top:22px}
+
+/* pyramid */
+.tier{position:absolute;display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(212,180,131,.4);background:rgba(212,180,131,.04)}
+.tier .tn{font-family:var(--serif);font-weight:700;font-size:40px;letter-spacing:.1em}
+.tdesc{position:absolute;font-size:26px;color:#bdb7ad;line-height:1.6;width:520px}
+.tdesc b{font-family:var(--serif);color:var(--gold);font-weight:500;font-size:30px;display:block}
+
+/* formula */
+.formula{font-family:var(--serif);font-weight:700;font-size:88px;letter-spacing:.04em;white-space:nowrap}
+.formula span{display:inline-block;position:relative;transition:none}
+.lever{position:absolute;bottom:-70px;left:50%;transform:translateX(-50%);font-family:var(--sans);font-weight:400;font-size:24px;color:var(--gold);white-space:nowrap;letter-spacing:.1em;font-style:normal}
+
+svg text{font-family:var(--sans)}
+#play{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:99;cursor:pointer;
+  color:#ece7df;font:400 22px var(--sans);letter-spacing:.4em;background:rgba(0,0,0,.35)}
+body.render #play{display:none}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+  <div class="glow" id="glow"></div>
+
+  <div class="hud" id="hudL">一杯咖啡的真实价格</div>
+  <div class="hud" id="hudR"></div>
+  <div id="bar"><div id="barF"></div></div>
+
+  <!-- 0 · Opening -->
+  <section class="scene" data-start="0" data-end="13" data-ch="">
+    <div class="center">
+      <div class="a eyebrow" data-t="0.6">A STORY ABOUT MONEY</div>
+      <div class="a num" data-t="1.4" data-fx="blur" style="font-size:220px;margin-top:40px;line-height:1">¥30</div>
+      <div class="a p" data-t="2.6" style="margin-top:24px">一杯咖啡。你每天都在买。</div>
+      <div class="a h2" data-t="5.0" data-fx="blur" style="margin-top:70px">但它真正的价格，<span class="gold">远不止 30 元</span>。</div>
+      <div class="a small" data-t="8.0" style="margin-top:48px">一个关于消费、投资与时间的故事</div>
+    </div>
+  </section>
+
+  <!-- 1 · Chapter 01 -->
+  <section class="scene chap" data-start="13" data-end="18" data-ch="01 / 05">
+    <div class="center">
+      <div class="a idx" data-t="0.2" data-fx="blur">01</div>
+      <div class="a ct" data-t="0.8">看不见的价格</div>
+      <div class="a en" data-t="1.4">THE HIDDEN PRICE</div>
+    </div>
+  </section>
+
+  <!-- 2 · Opportunity cost -->
+  <section class="scene" data-start="18" data-end="42" data-ch="01 / 05">
+    <div class="left">
+      <div class="a eyebrow" data-t="0.3">机会成本</div>
+      <div class="a h2" data-t="0.8" style="margin-top:30px;font-size:60px">你花掉的每一分钱，<br>都放弃了它<br><span class="gold">未来的样子</span>。</div>
+      <div class="a p" data-t="3.5" style="margin-top:40px">经济学家把这叫做“机会成本”——<br>选择一样东西的代价，<br>是你因此放弃的最好的另一样。</div>
+    </div>
+    <div class="right" style="padding-left:80px">
+      <div class="a stat" data-t="7.0"><span class="k">每天一杯</span><span class="v">30</span><span class="u">元</span></div>
+      <div class="a stat" data-t="9.0"><span class="k">一年</span><span class="v" id="c1">10,950</span><span class="u">元</span></div>
+      <div class="a stat" data-t="11.0"><span class="k">三十年 · 本金</span><span class="v" id="c2">32.4</span><span class="u">万元</span></div>
+      <div class="a p" data-t="14.5" style="margin-top:44px">这还只是<span class="gold">本金</span>。<br>如果这笔钱没有被花掉，而是被投资了呢？</div>
+    </div>
+  </section>
+
+  <!-- 3 · Compounding curve -->
+  <section class="scene" data-start="42" data-end="64" data-ch="01 / 05">
+    <div style="position:absolute;left:180px;top:170px">
+      <div class="a eyebrow" data-t="0.2">复利 · COMPOUND INTEREST</div>
+      <div class="a h3" data-t="0.6" style="margin-top:20px">每月 900 元，年化 6%，坚持 30 年</div>
+    </div>
+    <svg class="a" data-t="0.4" data-fx="fade" id="cv" width="1560" height="620" style="position:absolute;left:180px;top:320px" viewBox="0 0 1560 620">
+      <g id="grid"></g>
+      <path id="pInv" fill="none" stroke="#d4b483" stroke-width="4"/>
+      <path id="pInvA" fill="url(#ga)" stroke="none"/>
+      <path id="pPri" fill="none" stroke="#6d675e" stroke-width="3" stroke-dasharray="10 10"/>
+      <defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d4b483" stop-opacity=".22"/><stop offset="1" stop-color="#d4b483" stop-opacity="0"/></linearGradient></defs>
+      <circle id="dot" r="9" fill="#d4b483"/>
+      <text id="yr" x="0" y="0" font-size="24" fill="#8b867e"></text>
+    </svg>
+    <div style="position:absolute;right:170px;top:170px;text-align:right">
+      <div class="a small" data-t="1.0">投资后的价值</div>
+      <div class="a num gold" data-t="1.0" style="font-size:96px;line-height:1.2"><span id="cInv">0</span><span style="font-size:40px"> 万</span></div>
+      <div class="a small" data-t="1.0" style="margin-top:6px">其中本金 <span id="cPri">0</span> 万</div>
+    </div>
+    <div class="a" data-t="12.5" style="position:absolute;left:300px;top:400px;width:800px">
+      <div class="h3">利息再生利息。</div>
+      <div class="p" style="margin-top:14px">时间越长，曲线越陡。<br>后 10 年长出来的钱，比前 20 年加起来还多。</div>
+    </div>
+  </section>
+
+  <!-- 4 · Chapter 02 -->
+  <section class="scene chap" data-start="64" data-end="69" data-ch="02 / 05">
+    <div class="center">
+      <div class="a idx" data-t="0.2" data-fx="blur">02</div>
+      <div class="a ct" data-t="0.8">但，别急着戒掉咖啡</div>
+      <div class="a en" data-t="1.4">BIG DECISIONS, NOT SMALL SACRIFICES</div>
+    </div>
+  </section>
+
+  <!-- 5 · Small vs big -->
+  <section class="scene" data-start="69" data-end="95" data-ch="02 / 05">
+    <div style="position:absolute;left:180px;top:150px;right:180px">
+      <div class="a eyebrow" data-t="0.2">一万次忍耐 vs 一次决定</div>
+      <div class="a h3" data-t="0.6" style="margin-top:20px">同样是钱，它们来自完全不同的地方</div>
+    </div>
+    <div style="position:absolute;left:180px;right:180px;top:310px">
+      <div class="a brow coffee" data-t="2.0"><div class="lab"><span>30 年不喝咖啡（本金）</span><b>32.4 万</b></div><div class="track"><div class="fill" data-w="0.81"></div></div><div class="note">需要 10,950 次克制</div></div>
+      <div class="a brow" data-t="5.0"><div class="lab"><span>买车时，少加一档配置</span><b>15 万</b></div><div class="track"><div class="fill" data-w="0.375"></div></div><div class="note">1 次决定</div></div>
+      <div class="a brow" data-t="7.5"><div class="lab"><span>房贷利率低 0.5%（200 万 · 30 年）</span><b>≈ 20 万</b></div><div class="track"><div class="fill" data-w="0.5"></div></div><div class="note">1 次比较与谈判</div></div>
+      <div class="a brow" data-t="10.0"><div class="lab"><span>月薪 1 万，涨薪 10% 并保持 30 年</span><b>36 万+</b></div><div class="track"><div class="fill" data-w="0.9"></div></div><div class="note">1 次学习、跳槽或晋升</div></div>
+    </div>
+    <div class="a" data-t="14.5" data-fx="blur" style="position:absolute;left:0;right:0;bottom:96px;text-align:center">
+      <div class="h3">意志力是稀缺资源。<span class="gold">把它用在大钱上。</span></div>
+    </div>
+  </section>
+
+  <!-- 6 · Chapter 03 -->
+  <section class="scene chap" data-start="95" data-end="100" data-ch="03 / 05">
+    <div class="center">
+      <div class="a idx" data-t="0.2" data-fx="blur">03</div>
+      <div class="a ct" data-t="0.8">快乐为什么会过期</div>
+      <div class="a en" data-t="1.4">THE PSYCHOLOGY OF SPENDING</div>
+    </div>
+  </section>
+
+  <!-- 7 · Hedonic adaptation -->
+  <section class="scene" data-start="100" data-end="121" data-ch="03 / 05">
+    <div style="position:absolute;left:180px;top:150px">
+      <div class="a eyebrow" data-t="0.2">享乐适应 · HEDONIC ADAPTATION</div>
+      <div class="a h3" data-t="0.6" style="margin-top:20px">新手机的快乐，往往撑不过几个月</div>
+    </div>
+    <svg width="1560" height="520" viewBox="0 0 1560 520" style="position:absolute;left:180px;top:330px">
+      <line x1="0" y1="400" x2="1560" y2="400" stroke="rgba(236,231,223,.14)"/>
+      <text x="0" y="440" font-size="22" fill="#6d675e" class="a" data-t="1.0">快乐基准线</text>
+      <text x="1560" y="440" font-size="22" fill="#6d675e" text-anchor="end" class="a" data-t="1.0">时间 →</text>
+      <path id="hThing" fill="none" stroke="#8b867e" stroke-width="4"/>
+      <path id="hExp" fill="none" stroke="#d4b483" stroke-width="4"/>
+      <g class="a" data-t="4.5"><circle cx="1000" cy="397" r="7" fill="#8b867e"/><text x="1022" y="378" font-size="26" fill="#8b867e">物品：很快回到原点</text></g>
+      <g class="a" data-t="9.0"><circle cx="1000" cy="280" r="7" fill="#d4b483"/><text x="1022" y="262" font-size="26" fill="#d4b483">体验：在记忆里留下来</text></g>
+    </svg>
+    <div class="a p" data-t="12.5" style="position:absolute;left:180px;right:180px;bottom:110px;text-align:center">
+      所以，更值得花钱的通常是：<span class="gold">时间、体验、健康，和让你变强的能力</span>。
+    </div>
+  </section>
+
+  <!-- 8 · Price in hours -->
+  <section class="scene" data-start="121" data-end="141" data-ch="03 / 05">
+    <div class="left">
+      <div class="a eyebrow" data-t="0.2">一个小工具</div>
+      <div class="a h2" data-t="0.6" style="margin-top:30px">别用“元”看价格，<br>用<span class="gold">“小时”</span>。</div>
+      <div class="a p" data-t="3.0" style="margin-top:40px">月薪 1 万，每月约工作 174 小时，<br>你的一小时 ≈ <span class="gold">57 元</span>。</div>
+    </div>
+    <div class="right" style="padding-left:80px">
+      <div class="a stat" data-t="5.5"><span class="k">一杯咖啡 ¥30</span><span class="v">0.5</span><span class="u">小时</span></div>
+      <div class="a stat" data-t="7.0"><span class="k">一部手机 ¥8,000</span><span class="v">140</span><span class="u">小时</span></div>
+      <div class="a stat" data-t="8.5"><span class="k">换一辆车 ¥20 万</span><span class="v">3,500</span><span class="u">小时 ≈ 1.7 年</span></div>
+      <div class="a p" data-t="11.5" style="margin-top:44px">想买的东西，先放进购物车，<br>冷静 <span class="gold">72 小时</span>，再决定。</div>
+    </div>
+  </section>
+
+  <!-- 9 · Chapter 04 -->
+  <section class="scene chap" data-start="141" data-end="146" data-ch="04 / 05">
+    <div class="center">
+      <div class="a idx" data-t="0.2" data-fx="blur">04</div>
+      <div class="a ct" data-t="0.8">普通人怎么投资</div>
+      <div class="a en" data-t="1.4">ORDER BEFORE RETURNS</div>
+    </div>
+  </section>
+
+  <!-- 10 · Pyramid -->
+  <section class="scene" data-start="146" data-end="170" data-ch="04 / 05">
+    <div style="position:absolute;left:180px;top:150px">
+      <div class="a eyebrow" data-t="0.2">财富金字塔</div>
+      <div class="a h3" data-t="0.6" style="margin-top:20px">先守住，再增长。<span class="gold">顺序比收益更重要。</span></div>
+    </div>
+    <div style="position:absolute;left:0;right:0;top:330px;height:600px">
+      <div class="a tier" data-t="2.0" style="top:400px;left:250px;width:900px;height:150px"><span class="tn">① 应急金</span></div>
+      <div class="a tdesc" data-t="2.6" style="top:410px;left:1230px"><b>3–6 个月生活费</b>放在存款或货币基金里，<br>随取随用。</div>
+      <div class="a tier" data-t="6.0" style="top:220px;left:360px;width:680px;height:150px"><span class="tn">② 保障</span></div>
+      <div class="a tdesc" data-t="6.6" style="top:230px;left:1230px"><b>医疗 · 意外 · 重疾 · 定期寿险</b>用小钱，挡住会让家庭归零的大坑。</div>
+      <div class="a tier" data-t="10.0" style="top:40px;left:470px;width:460px;height:150px;background:rgba(212,180,131,.12)"><span class="tn gold">③ 长期投资</span></div>
+      <div class="a tdesc" data-t="10.6" style="top:50px;left:1230px"><b>宽基指数基金 · 定期定额</b>只用 5 年以上不用的闲钱。</div>
+    </div>
+  </section>
+
+  <!-- 11 · Three principles -->
+  <section class="scene" data-start="170" data-end="196" data-ch="04 / 05">
+    <div style="position:absolute;left:0;right:0;top:150px;text-align:center">
+      <div class="a eyebrow" data-t="0.2">长期投资的三条铁律</div>
+    </div>
+    <div class="center" style="top:60px">
+      <div class="cards">
+        <div class="a card" data-t="1.0"><div class="no">I</div><div class="t">时间 &gt; 择时</div><div class="d">据摩根大通统计，过去 20 年里，错过美股表现最好的 10 个交易日——</div><div class="big">收益约少一半</div></div>
+        <div class="a card" data-t="7.0"><div class="no">II</div><div class="t">分散</div><div class="d">没人能稳定猜中下一个赢家。买下整个市场，赚经济增长本身的钱。</div><div class="big">不押单一篮子</div></div>
+        <div class="a card" data-t="13.0"><div class="no">III</div><div class="t">低成本</div><div class="d">每年多 1% 的费用，看起来很小；30 年后，会吃掉你最终财富的——</div><div class="big">约四分之一</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 · Chapter 05 -->
+  <section class="scene chap" data-start="196" data-end="201" data-ch="05 / 05">
+    <div class="center">
+      <div class="a idx" data-t="0.2" data-fx="blur">05</div>
+      <div class="a ct" data-t="0.8">财富的本质</div>
+      <div class="a en" data-t="1.4">WHAT WEALTH REALLY IS</div>
+    </div>
+  </section>
+
+  <!-- 13 · Formula -->
+  <section class="scene" data-start="201" data-end="222" data-ch="05 / 05">
+    <div class="center" style="justify-content:flex-start;padding-top:230px">
+      <div class="a eyebrow" data-t="0.2">把这一切，写成一个公式</div>
+      <div class="a formula" data-t="1.0" data-fx="blur" style="margin-top:90px">
+        财富 ≈ (<span id="fI">收入<i class="lever">投资自己</i></span> − <span id="fE">支出<i class="lever">想清楚大钱</i></span>) × (1 + <span id="fR">回报<i class="lever">稳、分散、低成本</i></span>)<sup id="fT" style="font-size:.6em;position:relative">时间<i class="lever" style="bottom:-118px">越早越好</i></sup>
+      </div>
+      <div class="a p" data-t="12.0" style="margin-top:170px">四个杠杆里，<span class="gold">时间</span>是唯一买不回来的。</div>
+      <div class="a small" data-t="14.5" style="margin-top:36px;line-height:1.8">“财富，是你看不见的那部分——是没有被花掉的钱。”<br>—— 摩根·豪泽尔《金钱心理学》</div>
+    </div>
+  </section>
+
+  <!-- 14 · Ending -->
+  <section class="scene" data-start="222" data-end="236" data-ch="">
+    <div class="center">
+      <div class="a h2" data-t="0.6" data-fx="blur">所以，那杯咖啡——该喝就喝。</div>
+      <div class="a h2" data-t="3.5" data-fx="blur" style="margin-top:20px">只是从今天起，<span class="gold">你知道它真实的价格了。</span></div>
+      <div class="a rule" data-t="7.0"></div>
+      <div class="a serif" data-t="7.5" style="font-size:44px;letter-spacing:.3em">一杯咖啡的真实价格</div>
+      <div class="a small" data-t="9.0" style="margin-top:80px;font-size:20px">本视频仅为知识科普，不构成任何投资建议 · 投资有风险，入市需谨慎</div>
+    </div>
+  </section>
+
+  <div class="vignette"></div>
+  <div class="grain" id="grain"></div>
+</div></div>
+<div id="play">点击播放 · CLICK TO PLAY</div>
+
+<script>
+const TOTAL = 236;
+const stage = document.getElementById('stage');
+const scenes = [...document.querySelectorAll('.scene')].map(el => ({
+  el, s:+el.dataset.start, e:+el.dataset.end, ch:el.dataset.ch,
+  items:[...el.querySelectorAll('.a')].map(a => ({a, t:+a.dataset.t, d:+(a.dataset.d||1.1), fx:a.dataset.fx||'up'}))
+}));
+const clamp = (x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const eo = x => 1-Math.pow(1-clamp(x),3);
+const eio = x => { x=clamp(x); return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2; };
+const fmt = n => n.toLocaleString('en-US');
+
+/* ---------- compounding data ---------- */
+const CV = {w:1560,h:620,padL:90,padB:70,max:100};
+const inv=[], pri=[];
+for(let m=0;m<=360;m++){ inv.push(900*((Math.pow(1.005,m)-1)/0.005)/1e4); pri.push(900*m/1e4); }
+const cx = m => CV.padL + (CV.w-CV.padL-40)*m/360;
+const cy = v => (CV.h-CV.padB) - (CV.h-CV.padB-20)*v/CV.max;
+(function grid(){
+  let g='';
+  for(let v=0;v<=100;v+=25){ g+=`<line x1="${CV.padL}" x2="${CV.w-40}" y1="${cy(v)}" y2="${cy(v)}" stroke="rgba(236,231,223,.08)"/><text x="${CV.padL-18}" y="${cy(v)+8}" font-size="22" fill="#6d675e" text-anchor="end">${v}万</text>`; }
+  for(let y=0;y<=30;y+=5){ g+=`<text x="${cx(y*12)}" y="${CV.h-28}" font-size="22" fill="#6d675e" text-anchor="middle">${y}年</text>`; }
+  document.getElementById('grid').innerHTML=g;
+})();
+function linePath(arr,n){ let d=''; for(let m=0;m<=n;m++) d+=(m?'L':'M')+cx(m).toFixed(1)+' '+cy(arr[m]).toFixed(1); return d; }
+
+/* ---------- hedonic curves ---------- */
+function hedonic(kind,p){
+  const W=1560, base=400, n=Math.floor(260*p); let d='';
+  for(let i=0;i<=n;i++){
+    const x=i/260*W, t=i/260; let y;
+    if(t<.12) y=0;
+    else { const u=t-.12;
+      y = kind==='thing' ? 300*Math.exp(-u*14)*Math.min(1,u*60)+ 12*Math.exp(-u*3)
+                         : 190*Math.exp(-u*6)*Math.min(1,u*40) + 112*(1-Math.exp(-u*12))*Math.min(1,u*40); }
+    d+=(i?'L':'M')+x.toFixed(1)+' '+(base-y).toFixed(1);
+  }
+  return d;
+}
+
+/* ---------- per-scene hooks ---------- */
+const hooks = {
+  2(lt){
+    document.getElementById('c1').textContent = fmt(Math.round(10950*eo((lt-9)/1.5)));
+    document.getElementById('c2').textContent = (32.4*eo((lt-11)/1.8)).toFixed(1);
+  },
+  3(lt){
+    const p = eio((lt-1.5)/10); const n = Math.round(360*p);
+    document.getElementById('pInv').setAttribute('d', linePath(inv,n));
+    document.getElementById('pPri').setAttribute('d', linePath(pri,n));
+    document.getElementById('pInvA').setAttribute('d', linePath(inv,n)+`L${cx(n)} ${cy(0)}L${cx(0)} ${cy(0)}Z`);
+    const dot=document.getElementById('dot'); dot.setAttribute('cx',cx(n)); dot.setAttribute('cy',cy(inv[n]));
+    const yr=document.getElementById('yr'); yr.setAttribute('x',cx(n)-22); yr.setAttribute('y',cy(inv[n])+8); yr.setAttribute('text-anchor','end');
+    yr.textContent = n>0? `第 ${Math.round(n/12)} 年`:'';
+    document.getElementById('cInv').textContent = inv[n].toFixed(1);
+    document.getElementById('cPri').textContent = pri[n].toFixed(1);
+  },
+  5(lt, s){
+    s.el.querySelectorAll('.brow').forEach(b=>{
+      const it = +b.dataset.t; const f=b.querySelector('.fill');
+      f.style.width = (100*(+f.dataset.w)*eio((lt-it-0.3)/1.6))+'%';
+    });
+  },
+  7(lt){
+    document.getElementById('hThing').setAttribute('d', hedonic('thing', eio((lt-1.2)/4)));
+    document.getElementById('hExp').setAttribute('d', hedonic('exp', eio((lt-5.5)/4.5)));
+  },
+  13(lt){
+    const ids=['fI','fE','fR','fT'];
+    ids.forEach((id,i)=>{
+      const el=document.getElementById(id), lv=el.querySelector('.lever');
+      const k = clamp((lt-3.5-i*1.8)/0.8) * (1-clamp((lt-11.2)/0.8));
+      el.style.color = k>0.01 ? `rgba(212,180,131,${0.35+0.65*k})` : '';
+      lv.style.opacity = clamp((lt-3.5-i*1.8)/0.8);
+    });
+  }
+};
+
+function seek(t){
+  t = clamp(t,0,TOTAL);
+  let ch='';
+  scenes.forEach((s,i)=>{
+    const lt=t-s.s, fade=0.7;
+    let o = 0;
+    if(t>=s.s-0.01 && t<=s.e) o = Math.min(clamp(lt/fade*3), clamp((s.e-t)/fade));
+    if(i===0) o = Math.min(clamp((s.e-t)/fade),1);
+    if(i===scenes.length-1) o = clamp(lt/fade*3);
+    s.el.style.opacity = o;
+    s.el.style.visibility = o>0 ? 'visible':'hidden';
+    if(o>0){
+      if(s.ch) ch=s.ch;
+      s.el.style.transform = `scale(${1+0.012*clamp(lt/(s.e-s.s))})`;
+      s.items.forEach(({a,t:it,d,fx})=>{
+        const p = eo((lt-it)/d);
+        a.style.opacity = p;
+        if(fx==='up') a.style.transform = `translateY(${(1-p)*28}px)`;
+        else if(fx==='blur'){ a.style.filter = p<1?`blur(${(1-p)*14}px)`:''; a.style.transform=`scale(${1.04-0.04*p})`; }
+      });
+      if(hooks[i]) hooks[i](lt, s);
+    }
+  });
+  document.getElementById('hudR').textContent = ch;
+  const hudO = clamp((t-13)/1) * clamp((TOTAL-14-t)/1);
+  ['hudL','hudR'].forEach(id=>document.getElementById(id).style.opacity = hudO);
+  document.getElementById('bar').style.opacity = hudO;
+  document.getElementById('barF').style.width = (100*t/TOTAL)+'%';
+  const g=document.getElementById('glow');
+  g.style.left = (260+380*Math.sin(t*0.05))+'px'; g.style.top = (-420+200*Math.cos(t*0.037))+'px';
+  document.getElementById('grain').style.transform = `translate(${(Math.floor(t*24)*37)%200-100}px,${(Math.floor(t*24)*53)%200-100}px)`;
+}
+window.seek = seek; window.TOTAL = TOTAL;
+
+/* ---------- preview mode ---------- */
+function fit(){ const k=Math.min(innerWidth/1920, innerHeight/1080); stage.style.transform=`scale(${k})`; }
+const render = location.search.includes('render');
+if(render){ document.body.classList.add('render'); }
+else { fit(); addEventListener('resize',fit); }
+window.ready = document.fonts.ready.then(()=>{ seek(0); return true; });
+
+let playing=false, t0=0, offset=0;
+const audio = new Audio('music.m4a');
+function loop(){ if(!playing) return; const t=offset+(performance.now()-t0)/1000; seek(t); if(t<TOTAL) requestAnimationFrame(loop); else playing=false; }
+function toggle(){
+  const btn=document.getElementById('play');
+  if(playing){ playing=false; offset+=(performance.now()-t0)/1000; audio.pause(); btn.style.display='flex'; }
+  else { if(offset>=TOTAL) offset=0; playing=true; t0=performance.now(); audio.currentTime=offset; audio.play().catch(()=>{}); btn.style.display='none'; loop(); }
+}
+if(!render){ document.getElementById('play').onclick=toggle; addEventListener('keydown',e=>{ if(e.code==='Space'){e.preventDefault();toggle();} }); }
+</script>
+</body>
+</html>
