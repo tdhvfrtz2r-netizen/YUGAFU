@@ -981,9 +981,35 @@ async function offlineUI() {
   };
 }
 
+// ---------- 进入密码 ----------
+// 只挡住拿到链接的普通人：纯前端没法真正保密。存的是密码的 FNV-1a 哈希，改密码就换这个数
+const PW_HASH = 3471793015, PW_KEY = 'xc-pw';
+const pwHash = t => { let h = 0x811c9dc5; for (const c of t) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h; };
+function gate() {
+  let ok = !!window.claude; // 私有版只有本人能开，不用密码
+  try { ok ||= localStorage.getItem(PW_KEY) === String(PW_HASH); } catch (e) { }
+  if (ok) return Promise.resolve();
+  tabs(null);
+  app.innerHTML = `<div class="top"><h1>行测真题库</h1></div><div class="hello">请输入密码</div><div class="sub">输对一次后，这台手机会记住</div>
+    <form id="pwf" style="margin-top:14px"><input id="pw" type="password" inputmode="numeric" autocomplete="off" placeholder="密码" style="width:100%;box-sizing:border-box;font-size:18px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:inherit">
+    <div class="sub" id="pwe" style="color:var(--bad);min-height:20px;margin-top:6px"></div><button class="btn block">进入</button></form>`;
+  const inp = $('#pw'); inp.focus();
+  inp.oninput = () => { $('#pwe').textContent = ''; };
+  return new Promise(res => {
+    $('#pwf').onsubmit = e => {
+      e.preventDefault();
+      if (pwHash(inp.value.trim()) !== PW_HASH) { $('#pwe').textContent = inp.value ? '密码不对，再试一次' : '先输入密码'; inp.select(); return; }
+      try { localStorage.setItem(PW_KEY, String(PW_HASH)); } catch (e2) { }
+      app.innerHTML = `<div class="loadbox">正在载入题库…</div>`;
+      res();
+    };
+  });
+}
+
 // ---------- 启动 ----------
 (async function boot() {
   document.documentElement.style.setProperty('--fs', S.fs + 'px');
+  await gate();
   try { IDX = await gzJSON('index.txt'); }
   catch (e) { app.innerHTML = `<div class="empty">题库没有加载成功，请检查网络后重新打开。<br><br><button class="btn" onclick="location.reload()">重新加载</button></div>`; return; }
   QM = IDX.qm;
