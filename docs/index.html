@@ -487,7 +487,7 @@ function home() {
       <button class="tile" data-go="ana/stats"><i><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17h14M5 14V9M10 14V4M15 14v-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg></i><b>十年考情</b><span>题型趋势、高频词</span></button>
     </div>
     ${!window.claude && !matchMedia('(display-mode: standalone)').matches && !navigator.standalone ? '<div class="tip">想像 App 一样从桌面打开：iPhone 用 Safari 点底部「分享 → 添加到主屏幕」；安卓在浏览器菜单里点「添加到桌面」。</div>' : ''}
-    <div class="note">网友回忆版真题 · 答案和解析来自开源项目 ERRRC/xingcezhenti，仅供个人学习<br>${esc(sync.state)}</div>`;
+    <div class="note">网友回忆版真题 · 答案和解析来自开源项目 ERRRC/xingcezhenti<br>${esc(sync.state)}</div>`;
   $('#daily').onclick = () => startSes({ k: 'daily', mode: 'practice', q: ds.q, title: '每日一练 ' + ds.d.slice(5) });
   $('#hot').onclick = () => topicSetup({ hot: 1 });
   const c = $('#cont'); if (c) c.onclick = () => startSes(S.last.spec, S.last.i);
@@ -960,7 +960,7 @@ function settings() {
     <div class="card" id="offc" hidden><h2>离线使用 <small id="offs"></small></h2><div class="sub">把全部题目和图片（约 120 MB）存到手机里，之后没网也能刷。建议连着 Wi-Fi 下载，下载时请保持页面打开。</div><div class="bar" style="margin-top:10px"><i id="offb" style="width:0"></i></div><button class="btn sm" id="offg" style="margin-top:10px">下载全部题库</button></div>
     <div class="card"><h2>做题记录</h2><div class="sub">做过 ${tt.done} 道 · 错题 ${tt.wrong} · 收藏 ${tt.star} · 模考 ${S.hist.length} 次<br>${esc(sync.state)}</div>
       <button class="btn danger sm" id="clr" style="margin-top:10px">清空全部记录</button></div>
-    <div class="card"><h2>关于题库</h2><div class="sub">2016–2026 年国考、31 个省区市省考、深圳/广州市考、选调，${IDX.stats.papers} 套卷。题目为网友回忆版，个别题缺图；答案和解析来自开源项目 ERRRC/xingcezhenti（github.com/ERRRC/xingcezhenti），版权归原出处，仅供个人学习。</div></div>`;
+    <div class="card"><h2>关于题库</h2><div class="sub">2016–2026 年国考、31 个省区市省考、深圳/广州市考、选调，${IDX.stats.papers} 套卷。题目为网友回忆版，个别题缺图；答案和解析来自开源项目 ERRRC/xingcezhenti（github.com/ERRRC/xingcezhenti），版权归原出处。</div></div>`;
   offlineUI();
   const fs = $('#fs');
   fs.oninput = () => { S.fs = +fs.value; $('#fsv').textContent = S.fs + 'px'; $('#fsd').style.fontSize = S.fs + 'px'; document.documentElement.style.setProperty('--fs', S.fs + 'px'); };
