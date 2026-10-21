@@ -1,7 +1,10 @@
 // Export the question bank (questions + options + answers, no 解析) as data files for the 刷题 web app.
-// Usage: node export_app.js <repo> <siteDir> <fontsDir> <plans.json> <考情速览.md>
+// Usage: node export_app.js <repo> <siteDir> <fontsDir> <plans.json> <考情速览.md> [解析目录]
+// 解析目录里放我们自己写的原创解析：每个 .json 是 {qid: 解析文字}，按 qid 对上题目（同一道题在多套卷里共用一份）
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
-const [repo, site, fontsDir, plansJson, statsMd] = process.argv.slice(2);
+const [repo, site, fontsDir, plansJson, statsMd, expDir] = process.argv.slice(2);
+const EXP = {};
+if (expDir && fs.existsSync(expDir)) for (const f of fs.readdirSync(expDir).sort()) if (f.endsWith('.json')) Object.assign(EXP, JSON.parse(fs.readFileSync(path.join(expDir, f), 'utf8')));
 const { marked } = require(path.join(fontsDir, 'node_modules/marked'));
 const sanitize = require(path.join(fontsDir, 'node_modules/sanitize-html'));
 
@@ -63,7 +66,7 @@ for (const [mi, mod] of MODS.entries()) {
 
 fs.mkdirSync(path.join(site, 'data/p'), { recursive: true });
 const index = { regions: [], papers: {} }, byTitle = {};
-let qTotal = 0, noOpt = 0, multi = 0, matQs = 0;
+let qTotal = 0, noOpt = 0, multi = 0, matQs = 0, expTotal = 0;
 for (const p of papers.values()) {
   const pid = id(p.t); byTitle[p.t] = pid;
   const qs = [], mats = [], mods = [];
@@ -84,15 +87,16 @@ for (const p of papers.values()) {
       if (mat !== null) matQs++;
       qs.push({ q: b.qid, m: mi, ty: b.type, s: clean(marked.parse(stem.join('\n'))),
         k: opts.map(o => o[0]).join(''), o: trivial ? null : opts.map(([, v]) => clean(marked.parseInline(v))),
-        a, x: mat });
+        a, x: mat, ...(EXP[b.qid] ? { e: EXP[b.qid] } : {}) });
       if (mat !== null) { left--; prevQid = b.qid; }
     }
     if (qs.length > start) mods.push([mi, start, qs.length - start]);
   }
-  qTotal += qs.length;
+  qTotal += qs.length; expTotal += qs.filter(q => q.e).length;
   const est = mods.reduce((s, [mi, , n]) => s + Math.max(5, Math.round(MIN_PER_Q[mi] * n / 5) * 5), 0);
   fs.writeFileSync(path.join(site, 'data/p', pid + '.json'), JSON.stringify({ id: pid, qs, mats }));
-  index.papers[pid] = { t: p.t, n: nick(p.t.replace(/^\d{4}年(度)?/, '').trim()), r: p.r, y: p.y, mods, lim: est <= 125 ? 120 : Math.round(est / 5) * 5 };
+  const ec = qs.filter(q => q.e).length;
+  index.papers[pid] = { t: p.t, n: nick(p.t.replace(/^\d{4}年(度)?/, '').trim()), r: p.r, y: p.y, mods, lim: est <= 125 ? 120 : Math.round(est / 5) * 5, ...(ec ? { ec } : {}) };
 }
 const regions = [...new Set([...REGION_ORDER, ...[...papers.values()].map(p => p.r)])].filter(r => [...papers.values()].some(p => p.r === r));
 index.regions = regions.map(r => ({ r, ps: Object.keys(index.papers).filter(k => index.papers[k].r === r).sort((a, b) => index.papers[b].y - index.papers[a].y || index.papers[a].t.localeCompare(index.papers[b].t)) }));
@@ -122,4 +126,4 @@ for (const rel of imgs) {
   fs.copyFileSync(path.join(repo, '90-图片', rel), dst);
   bytes += fs.statSync(dst).size;
 }
-console.log(JSON.stringify({ papers: papers.size, questions: qTotal, noOpt, multi, matQs, images: imgs.size, imgMB: Math.round(bytes / 1e6) }));
+console.log(JSON.stringify({ papers: papers.size, questions: qTotal, explained: expTotal, noOpt, multi, matQs, images: imgs.size, imgMB: Math.round(bytes / 1e6) }));

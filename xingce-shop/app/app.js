@@ -9,7 +9,7 @@ const paperCache = {};
 
 // ---------- 本机存储 ----------
 const KEY = 'xingce-v1';
-const DEF = () => ({ region: null, planStart: null, pp: {}, wrong: {}, star: {}, exams: {}, last: null, fs: 17, auto: true });
+const DEF = () => ({ region: null, planStart: null, pp: {}, wrong: {}, star: {}, exams: {}, last: null, fs: 17, auto: false });
 let S = DEF();
 try { S = Object.assign(DEF(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { /* 隐私模式等，读不到就用默认值 */ }
 let saveTimer = 0;
@@ -139,7 +139,7 @@ function region(r) {
     const p = P(pid);
     if (p.y !== yr) { if (open) html += '</div>'; html += `<div class="yr">${p.y} 年</div><div class="list">`; yr = p.y; open = true; }
     const pr = progress(pid), ex = S.exams[pid];
-    html += `<a class="row" href="#/p/${pid}"><span class="m"><b>${esc(p.n)}</b><span>${pr.n} 题${pr.done ? ` · 已做 ${pr.done} · 正确率 ${pct(pr.ok, pr.done)}%` : ''}${ex && ex.done ? ` · 模考 ${ex.res.score} 分` : ''}</span>
+    html += `<a class="row" href="#/p/${pid}"><span class="m"><b>${esc(p.n)}${p.ec ? ' <span class="badge">解析</span>' : ''}</b><span>${pr.n} 题${pr.done ? ` · 已做 ${pr.done} · 正确率 ${pct(pr.ok, pr.done)}%` : ''}${ex && ex.done ? ` · 模考 ${ex.res.score} 分` : ''}</span>
       <div class="bar"><i style="width:${pct(pr.done, pr.n)}%"></i></div></span><span class="go">›</span></a>`;
   }
   app.innerHTML = html + (open ? '</div>' : '');
@@ -154,11 +154,20 @@ function paperPage(pid) {
   if (ex && ex.done) exBtn = `<a class="main" href="#/report/${pid}"><b>${ex.res.score} 分</b><span>看成绩 / 重考</span></a>`;
   app.innerHTML = `<div class="top"><a class="back" href="#/r/${encodeURIComponent(p.r)}">‹</a><h1>${esc(p.y + ' ' + p.n)}</h1></div>
     <div class="sub">${esc(p.t)}</div>
-    <div class="card"><h2>${pr.n} 题 <small>已做 ${pr.done}${pr.done ? ` · 正确率 ${pct(pr.ok, pr.done)}%` : ''}</small></h2><div class="bar"><i style="width:${pct(pr.done, pr.n)}%"></i></div></div>
+    <div class="card"><h2>${pr.n} 题 <small>已做 ${pr.done}${pr.done ? ` · 正确率 ${pct(pr.ok, pr.done)}%` : ''}</small></h2><div class="bar"><i style="width:${pct(pr.done, pr.n)}%"></i></div>
+      <div class="sub" style="margin-top:8px">${p.ec ? `<span class="badge">解析</span> 本卷 ${p.ec === pr.n ? '全部' : p.ec + ' 道'}题目有解析` : '本卷解析还在编写中，可以先刷题看答案'}</div></div>
     <div class="big3"><a href="#/do/${pid}/practice/all/0"><b>练习</b><span>做一题对一题</span></a><a href="#/do/${pid}/memo/all/0"><b>背题</b><span>直接看答案</span></a>${exBtn}</div>
     <div class="mh">按模块</div>
     <div class="list">${p.mods.map(([mi, st, n]) => { const g = progress(pid, mi); return `<div class="row"><span class="m"><b>${MN()[mi]}</b><span>第 ${st + 1}–${st + n} 题 · ${n} 题${g.done ? ` · 已做 ${g.done} · ${pct(g.ok, g.done)}%` : ''}</span><div class="bar"><i style="width:${pct(g.done, n)}%"></i></div></span>
       <a class="btn sm ghost" href="#/do/${pid}/memo/${mi}/0">背</a><a class="btn sm" href="#/do/${pid}/practice/${mi}/0">练</a></div>`; }).join('')}</div>`;
+}
+
+// ---------- 解析 ----------
+// 解析是纯文字：【思路】【排除】这类标签加粗，换行保留
+function expBlock(q) {
+  if (!q.e) return `<div class="exp none">本题解析还在编写中</div>`;
+  const body = esc(q.e).replace(/【([^】]{1,6})】/g, '<b class="el">$1</b>').replace(/\n/g, '<br>');
+  return `<div class="exp"><div class="exp-h">解析</div>${body}</div>`;
 }
 
 // ---------- 做题 ----------
@@ -238,6 +247,7 @@ function renderQ() {
     fb = q.a ? `<div class="fb ${ok ? 'ok' : 'bad'}"><span>${ok ? '✓ 回答正确' : `✗ 正确答案 ${q.a}`}</span><small>${ok ? '' : '已加入错题本'}</small></div>` : `<div class="fb memo">本题答案缺失</div>`;
   }
   if (mode === 'memo') fb = `<div class="fb memo"><span>答案 ${q.a || (q.k ? '缺失' : '略')}</span></div>`;
+  if (mode === 'memo' || (mode === 'practice' && st.reveal)) fb += expBlock(q);
   const total = SES.items.length;
   const no = SES.src.startsWith('_') ? SES.i + 1 : it.qi + 1;
   const timer = mode === 'exam' ? `<span class="timer" id="timer">${fmtTime(Math.max(0, examLeft()))}</span>` : '';
@@ -285,7 +295,7 @@ function choose(it, v, stay) {
   if (!ok) S.wrong[key] = Date.now();
   else if (S.wrong[key] && SES.src === '_wrong') { delete S.wrong[key]; toast('答对了，已移出错题本'); }
   save(); renderQ();
-  if (ok && S.auto && SES.i < SES.items.length - 1) setTimeout(() => { if (SES && SES.items[SES.i] === it) go(1); }, 650);
+  if (ok && S.auto && !q.e && SES.i < SES.items.length - 1) setTimeout(() => { if (SES && SES.items[SES.i] === it) go(1); }, 650);
 }
 function go(d) {
   const n = SES.i + d; if (n < 0 || n >= SES.items.length) return;
@@ -404,7 +414,7 @@ function me() {
     <div class="list">
       <button class="row" id="reg"><span class="m"><b>考试地区</b><span>首页和 30 天计划按这个地区</span></span><span class="r">${esc(S.region || '未选')} ›</span></button>
       <div class="row"><span class="m"><b>题目字号</b></span><div class="seg" style="width:180px">${sizes.map(([v, n]) => `<button data-fs="${v}" class="${S.fs === v ? 'on' : ''}">${n}</button>`).join('')}</div></div>
-      <div class="row"><span class="m"><b>答对自动下一题</b><span>练习模式</span></span><button class="switch ${S.auto ? 'on' : ''}" id="auto"></button></div>
+      <div class="row"><span class="m"><b>答对自动下一题</b><span>练习模式，有解析的题不自动跳</span></span><button class="switch ${S.auto ? 'on' : ''}" id="auto"></button></div>
       <a class="row" href="#/plan"><span class="m"><b>30 天计划</b><span>${S.planStart ? '已开始，第 ' + planDay() + ' 天' : '还没开始'}</span></span><span class="go">›</span></a>
     </div>
     <div class="list"><button class="row" id="clear"><span class="m"><b style="color:var(--bad)">清空做题记录</b><span>做题进度、错题、收藏、模考成绩全部清掉</span></span></button></div>
