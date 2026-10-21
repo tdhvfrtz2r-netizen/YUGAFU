@@ -398,6 +398,7 @@ regions = [r for r in dict.fromkeys(REGION_ORDER + [p["r"] for p in idx_papers.v
 index = {
     "v": hashlib.md5(json.dumps(stats).encode()).hexdigest()[:8],
     "mn": MN,
+    "nI": len(packs),
     "regions": [{"r": r, "ps": sorted([k for k, p in idx_papers.items() if p["r"] == r], key=lambda k: (-idx_papers[k]["y"], idx_papers[k]["t"]))} for r in regions],
     "papers": idx_papers,
     # 每道题：[分片, 模块, 题型序号, 首次出现年份, 被几套卷使用]

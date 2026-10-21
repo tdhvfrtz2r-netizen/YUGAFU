@@ -4,7 +4,7 @@ set -e
 DIST=$1; OUT=$2; HERE=$(dirname "$0")
 mkdir -p "$OUT"
 cp -r "$DIST/index.txt" "$DIST/t" "$DIST/i" "$OUT/"
-cp "$HERE"/icon-*.png "$HERE/manifest.webmanifest" "$OUT/"
+cp "$HERE"/icon-*.png "$HERE/manifest.webmanifest" "$HERE/sw.js" "$OUT/"
 {
   printf '<!doctype html>\n<html lang="zh-CN">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
   printf '<meta name="theme-color" content="#F3F5F8">\n<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="apple-mobile-web-app-title" content="行测真题库">\n'

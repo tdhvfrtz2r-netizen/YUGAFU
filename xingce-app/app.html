@@ -896,9 +896,11 @@ function settings() {
   app.innerHTML = hdr('设置') + `<div class="card"><h2>题目字号 <small id="fsv">${S.fs}px</small></h2><input type="range" id="fs" min="14" max="22" step="1" value="${S.fs}"><div class="qbody" style="font-size:${S.fs}px" id="fsd">下列各句中，没有语病的一项是：</div></div>
     <div class="list"><div class="switch"><span>答对自动跳到下一题<div class="sub">答错时会停下来让你看解析</div></span><button class="tg ${S.autoNext ? 'on' : ''}" id="an" aria-label="答对自动下一题"></button></div>
     <button class="row" data-go="pick"><span class="m"><b>考试地区</b><span>${esc(S.region || '未选择')}</span></span><span class="go">›</span></button></div>
+    <div class="card" id="offc" hidden><h2>离线使用 <small id="offs"></small></h2><div class="sub">把全部题目和图片（约 120 MB）存到手机里，之后没网也能刷。建议连着 Wi-Fi 下载，下载时请保持页面打开。</div><div class="bar" style="margin-top:10px"><i id="offb" style="width:0"></i></div><button class="btn sm" id="offg" style="margin-top:10px">下载全部题库</button></div>
     <div class="card"><h2>做题记录</h2><div class="sub">做过 ${tt.done} 道 · 错题 ${tt.wrong} · 收藏 ${tt.star} · 模考 ${S.hist.length} 次<br>${esc(sync.state)}</div>
       <button class="btn danger sm" id="clr" style="margin-top:10px">清空全部记录</button></div>
     <div class="card"><h2>关于题库</h2><div class="sub">2016–2026 年国考、31 个省区市省考、深圳/广州市考、选调，${IDX.stats.papers} 套卷。题目为网友回忆版，个别题缺图；答案和解析来自开源项目 ERRRC/xingcezhenti（github.com/ERRRC/xingcezhenti），版权归原出处，仅供个人学习。</div></div>`;
+  offlineUI();
   const fs = $('#fs');
   fs.oninput = () => { S.fs = +fs.value; $('#fsv').textContent = S.fs + 'px'; $('#fsd').style.fontSize = S.fs + 'px'; document.documentElement.style.setProperty('--fs', S.fs + 'px'); };
   fs.onchange = () => touch('core');
@@ -906,6 +908,29 @@ function settings() {
   $('#clr').onclick = () => {
     sheet(`<h3>清空全部记录？<button data-close>✕</button></h3><p>做题记录、错题本、收藏和模考成绩都会删除，不能恢复。</p><div class="grid2"><button class="btn line" data-close>取消</button><button class="btn danger" id="yes">确定清空</button></div>`);
     $('#yes').onclick = () => { const keep = { region: S.region, fs: S.fs }; S = Object.assign(DEF(), keep); for (const b of ['core', ...Array.from({ length: 16 }, (_, i) => 'rec' + i), ...[0, 1, 2, 3].flatMap(i => ['wrong' + i, 'star' + i])]) touch(b); closeSheet(); toast('已清空'); settings(); };
+  };
+}
+
+// ---------- 离线下载 ----------
+async function offlineUI() {
+  if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller || !window.caches) return;
+  const card = $('#offc'); if (!card) return; card.hidden = false;
+  const nT = 66, nI = IDX.nI || 130, total = nT + nI;
+  const urls = [...Array.from({ length: nT }, (_, i) => `t/${i}.txt`), ...Array.from({ length: nI }, (_, i) => `i/${i}.txt`)];
+  const c = await caches.open('xingce-v1');
+  const have = async () => (await Promise.all(urls.map(u => c.match(u)))).filter(Boolean).length;
+  const show = n => { $('#offs').textContent = n >= total ? '已全部下载 ✓' : `已下载 ${n}/${total}`; $('#offb').style.width = pct(n, total) + '%'; $('#offg').hidden = n >= total; };
+  show(await have());
+  $('#offg').onclick = async () => {
+    const btn = $('#offg'); btn.disabled = true; btn.textContent = '下载中…';
+    let n = await have(), fail = 0;
+    const todo = urls.filter(() => true);
+    let k = 0;
+    const worker = async () => { while (k < todo.length) { const u = todo[k++]; try { if (!(await c.match(u))) { const r = await fetch(u); if (!r.ok) throw 0; await c.put(u, r); } n++; show(n); } catch (e) { fail++; } } };
+    await Promise.all([worker(), worker(), worker()]);
+    btn.disabled = false; btn.textContent = '下载全部题库';
+    if (fail) toast(`有 ${fail} 个文件没下载成功，再点一次继续`);
+    show(await have());
   };
 }
 
@@ -919,5 +944,6 @@ function settings() {
   STACK = ['home'];
   render();
   sync.start();
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost') && !window.claude) navigator.serviceWorker.register('sw.js').catch(() => { });
 })();
 </script>
