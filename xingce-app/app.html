@@ -216,9 +216,10 @@ const SHORT = ['政治', '常识', '言语', '数量', '判断', '资料'];
 // ---------- 记录 ----------
 // rec[qid%16][qid] = [最近一次对错, 做过几次, 错过几次, 时间(分钟)]；wrong/star 分 4 桶
 const KEY = 'xc-v2';
-const NB = { rec: 16, wrong: 4, star: 4 };
+// rv[qid%4][qid] = [复习阶段, 到期日 YYYYMMDD]：做错 → 1 天后复习；到期答对 1 次 → 3 天后再复习；到期再答对 → 移出错题本
+const NB = { rec: 16, wrong: 4, star: 4, rv: 4 };
 const DEF = () => ({ region: null, fs: 17, autoNext: false, last: null, ex: {}, hist: [], day: {}, daily: null,
-  rec: Array.from({ length: 16 }, () => ({})), wrong: Array.from({ length: 4 }, () => ({})), star: Array.from({ length: 4 }, () => ({})), _ut: {} });
+  rec: Array.from({ length: 16 }, () => ({})), wrong: Array.from({ length: 4 }, () => ({})), star: Array.from({ length: 4 }, () => ({})), rv: Array.from({ length: 4 }, () => ({})), _ut: {} });
 let S = DEF();
 try { const o = JSON.parse(localStorage.getItem(KEY) || 'null'); if (o) S = Object.assign(DEF(), o); } catch (e) { /* 读不到就用默认 */ }
 const dirty = new Set();
@@ -244,19 +245,35 @@ function record(q, ok, sec) {
   const d = today(), dd = S.day[d] || [0, 0, 0];
   S.day[d] = [dd[0] + 1, dd[1] + (ok ? 1 : 0), dd[2] + Math.min(600, Math.round(sec || 0))];
   touch('core');
-  if (!ok) setBook('wrong', q, true);
+  return review(q, ok);
 }
+
+// ---------- 错题复习 ----------
+const dayN = (add = 0) => { const d = new Date(); d.setDate(d.getDate() + add); return +today(d).replace(/-/g, ''); };
+const fmtDay = n => `${Math.floor(n / 100) % 100} 月 ${n % 100} 日`;
+const rvOf = q => S.rv[q % 4][q] || [0, 0]; // 旧版留下的错题没有复习记录，当作已到期
+const isDue = q => rvOf(q)[1] <= dayN();
+function setRv(q, v) { const b = S.rv[q % 4]; if (v) b[q] = v; else delete b[q]; touch('rv' + (q % 4)); }
+// 返回给做题页看的一句话
+function review(q, ok) {
+  if (!ok) { setBook('wrong', q, true); setRv(q, [0, dayN(1)]); return '已加入错题本，明天复习'; }
+  if (!isWrong(q)) return '';
+  if (!isDue(q)) return '';
+  if (rvOf(q)[0] >= 1) { setBook('wrong', q, false); setRv(q, null); return '复习连对 2 次，已移出错题本'; }
+  setRv(q, [1, dayN(3)]); return '复习答对 1 次，3 天后再考你一次';
+}
+const dueList = () => bookList('wrong').filter(isDue);
 
 // ---------- 同步到 Claude 账号（db 能用时） ----------
 const sync = {
   db: null, uid: null, busy: false, state: '做题记录保存在这台手机的浏览器里',
   bucketData(b) {
     if (b === 'core') { const { region, fs, autoNext, last, ex, hist, day, daily } = S; return { region, fs, autoNext, last, ex, hist, day, daily }; }
-    const m = b.match(/^(rec|wrong|star)(\d+)$/); return m ? S[m[1]][+m[2]] : null;
+    const m = b.match(/^(rec|wrong|star|rv)(\d+)$/); return m ? S[m[1]][+m[2]] : null;
   },
   apply(b, d) {
     if (b === 'core') Object.assign(S, d);
-    else { const m = b.match(/^(rec|wrong|star)(\d+)$/); if (m && +m[2] < NB[m[1]]) S[m[1]][+m[2]] = d; }
+    else { const m = b.match(/^(rec|wrong|star|rv)(\d+)$/); if (m && +m[2] < NB[m[1]]) S[m[1]][+m[2]] = d; }
   },
   async start() {
     if (!window.claude || !claude.use) return;
@@ -561,14 +578,23 @@ function wrongPage(tab) {
   const by = [[], [], [], [], [], []]; for (const q of list) if (QM[q]) by[qMod(q)].push(q);
   const seg = `<div class="seg"><button class="${name === 'wrong' ? 'on' : ''}" data-s="wrong">错题本 ${totals().wrong}</button><button class="${name === 'star' ? 'on' : ''}" data-s="star">收藏 ${totals().star}</button></div>`;
   let body;
-  if (!list.length) body = `<div class="empty">${name === 'wrong' ? '还没有错题。练习时做错的题会自动收进来，重做答对后自动移出。' : '还没有收藏。做题时点右上角 ☆ 收藏。'}</div>`;
-  else body = `<button class="primary" id="all"><span><b>${name === 'wrong' ? '错题全部重做' : '收藏全部练一遍'}</b><span>${list.length} 道 · 最近的在前${name === 'wrong' ? ' · 答对自动移出' : ''}</span></span><span class="go">›</span></button>
+  if (!list.length) body = `<div class="empty">${name === 'wrong' ? '还没有错题。做错的题会自动收进来，第二天提醒你复习，到期再答对 2 次就自动移出。' : '还没有收藏。做题时点右上角 ☆ 收藏。'}</div>`;
+  else body = (name === 'wrong' ? dueHTML(list) : `<button class="primary" id="all"><span><b>收藏全部练一遍</b><span>${list.length} 道 · 最近的在前</span></span><span class="go">›</span></button>`) + `
     <div class="list">${by.map((qs, mi) => qs.length ? `<div class="row"><span class="m"><b>${MN()[mi]}</b><span>${qs.length} 道 · ${topTypes(qs)}</span></span><button class="btn sm ghost" data-m="${mi}" data-md="memo">背</button><button class="btn sm" data-m="${mi}" data-md="practice">重做</button></div>` : '').join('')}</div>
-    ${name === 'wrong' ? '<div class="note">错题来源：练习、每日一练、专项和模考里做错的题</div>' : ''}`;
+    ${name === 'wrong' ? '<div class="note">错题来源：练习、每日一练、专项和模考里做错的题<br>复习规则：做错后第 2 天复习；答对 1 次，3 天后再复习一次；再答对就移出。还没到期时重做不影响进度</div>' : ''}`;
   app.innerHTML = `<div class="top"><h1>${name === 'wrong' ? '错题本' : '收藏'}</h1></div>${seg}${body}`;
   app.querySelectorAll('[data-s]').forEach(b => b.onclick = () => replace('wrong/' + b.dataset.s));
   const a = $('#all'); if (a) a.onclick = () => startSes({ k: name, mode: 'practice', q: list, title: name === 'wrong' ? '错题重做' : '收藏' });
+  const du = $('#due'); if (du) du.onclick = () => startSes({ k: 'wrong', mode: 'practice', q: dueList(), title: '今日复习' });
   app.querySelectorAll('[data-m]').forEach(b => b.onclick = () => startSes({ k: name, mode: b.dataset.md, q: by[+b.dataset.m], title: (name === 'wrong' ? '错题 · ' : '收藏 · ') + MN()[+b.dataset.m] }));
+}
+function dueHTML(list) {
+  const due = list.filter(isDue);
+  if (due.length) return `<button class="primary" id="due"><span><b>今天该复习 ${due.length} 道</b><span>到期答对算一次，连对 2 次自动移出</span></span><span class="go">›</span></button>
+    <button class="row" id="all" style="border:1px solid var(--line);border-radius:14px;background:var(--card);margin-bottom:12px"><span class="m"><b>全部错题重做</b><span>${list.length} 道 · 最近的在前</span></span><span class="go">›</span></button>`;
+  const next = Math.min(...list.map(q => rvOf(q)[1]));
+  return `<div class="fb ok" style="display:block;font-weight:400"><b>今天的复习做完了</b><br><small>下一批 ${fmtDay(next)} 到期</small></div>
+    <button class="row" id="all" style="border:1px solid var(--line);border-radius:14px;background:var(--card);margin-bottom:12px"><span class="m"><b>全部错题重做</b><span>${list.length} 道 · 提前重做不影响复习进度</span></span><span class="go">›</span></button>`;
 }
 function topTypes(qs) { const c = {}; for (const q of qs) { const t = qType(q); c[t] = (c[t] || 0) + 1; } return Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([t, n]) => `${t} ${n}`).join('、'); }
 
@@ -597,7 +623,7 @@ async function startSes(sp, i = 0) {
   catch (e) { app.innerHTML = hdr('载入失败') + `<div class="empty">网络不太好，题目没载入成功。<br><br><button class="btn" id="retry">重试</button></div>`; $('#retry').onclick = () => { STACK.pop(); startSes(sp, i); }; return; }
   if (sp.k === 'review') qids = specQids(sp);
   if (!qids.length) { app.innerHTML = hdr(specTitle(sp)) + `<div class="empty">这里没有题了 🎉</div>`; return; }
-  SES = { sp, qids, i: Math.max(0, Math.min(i, qids.length - 1)), mode: sp.mode, title: specTitle(sp), picked: {}, sel: '', t0: Date.now(), okN: 0, doneN: 0 };
+  SES = { sp, qids, i: Math.max(0, Math.min(i, qids.length - 1)), mode: sp.mode, title: specTitle(sp), picked: {}, sel: '', t0: Date.now(), okN: 0, doneN: 0, tt: {}, msg: {} };
   if (sp.k === 'exam') {
     let ex = S.ex[sp.pid];
     if (!ex || ex.done) { ex = S.ex[sp.pid] = { a: {}, tt: {}, used: 0, done: false, prev: ex && ex.done ? ex.res : null }; touch('core'); }
@@ -656,7 +682,7 @@ function renderQ() {
     const ans = d.a || d.at || '略';
     if (mode === 'memo') html += `<div class="fb memo"><span>答案 ${esc(ans)}</span><small>${rec(q) ? (rec(q)[0] ? '上次做对了' : '上次做错了') : ''}</small></div>`;
     else if (!d.a || !d.k) html += `<div class="fb memo"><span>答案：${esc(ans)}</span></div>`;
-    else { const ok = chosen === d.a; html += `<div class="fb ${ok ? 'ok' : 'bad'}"><span>${chosen == null ? `未作答 · 正确答案 ${d.a}` : ok ? '✓ 回答正确' : `✗ 你选 ${chosen}，正确答案 ${d.a}`}</span><small>${!ok && mode === 'practice' ? '已加入错题本' : ''}</small></div>`; }
+    else { const ok = chosen === d.a; html += `<div class="fb ${ok ? 'ok' : 'bad'}"><span>${chosen == null ? `未作答 · 正确答案 ${d.a}` : ok ? '✓ 回答正确' : `✗ 你选 ${chosen}，正确答案 ${d.a}`}</span><small>${mode === 'practice' ? esc(SES.msg[q] || '') : ''}</small></div>`; }
     html += d.e ? `<div class="exp"><div class="exp-h">解析</div>${d.e}</div>` : `<div class="exp sub">这道题原题库没有解析</div>`;
   }
   html += `</div><div class="qnav"><button class="btn line" id="prev" ${SES.i ? '' : 'disabled style="opacity:.4"'}>上一题</button>`;
@@ -711,9 +737,9 @@ function answer(q, d, k) {
   SES.picked[q] = k; SES.sel = '';
   if (d.a) {
     const ok = k === d.a;
-    record(q, ok, dt);
+    SES.msg[q] = record(q, ok, dt);
+    SES.tt[q] = dt;
     SES.doneN++; if (ok) SES.okN++;
-    if (ok && (SES.sp.k === 'wrong')) setBook('wrong', q, false);
     if (ok && S.autoNext && SES.i < SES.qids.length - 1) { renderQ(); setTimeout(() => { if (SES && SES.qids[SES.i] === q) go(1); }, 700); return; }
   }
   renderQ();
@@ -773,12 +799,33 @@ function submitExam() {
   STACK[STACK.length - 1] = 'report/' + sp.pid;
   render();
 }
+const SUG = [30, 30, 50, 80, 50, 70]; // 每题建议用时（秒）：政治、常识、言语、数量、判断、资料
 function finish() {
   const n = SES.doneN, ok = SES.okN;
+  // 本组按模块汇总：[答对, 做了, 用时]
+  const mods = {}, wrongI = [];
+  let used = 0, slow = null;
+  SES.qids.forEach((q, i) => {
+    const c = SES.picked[q]; if (c == null || !QT[q].a) return;
+    const mi = qMod(q), t = SES.tt[q] || 0, m = mods[mi] ||= [0, 0, 0];
+    m[1]++; m[2] += t; used += t;
+    if (c === QT[q].a) m[0]++; else wrongI.push(i);
+    if (t > SUG[mi] * 1.5 && (!slow || t / SUG[mi] > slow.t / SUG[slow.mi])) slow = { i, mi, t };
+  });
+  const rows = Object.entries(mods).map(([mi, [a, b, t]]) => `<div class="row"><span class="m"><b>${MN()[mi]}</b><span>平均每题 ${Math.round(t / b)} 秒 · 建议 ${SUG[mi]} 秒</span></span><b style="font-weight:600;${a < b ? 'color:var(--bad)' : ''}">${a}/${b}</b></div>`).join('');
+  const wn = n - ok;
   const s = sheet(`<h3>这一组做完了<button data-close>✕</button></h3>
-    ${n ? `<div class="score"><b>${pct(ok, n)}<small>%</small></b><span>本次答对 ${ok}/${n} 题${n - ok ? ` · ${n - ok} 道错题已进错题本` : ''}</span></div>` : '<p>可以去错题本复习，或者换一组继续。</p>'}
-    <div class="grid2" style="margin-top:12px"><button class="btn line" id="again">从头再看</button><button class="btn" id="done">返回</button></div>`);
-  $('#again').onclick = () => { closeSheet(); SES.i = 0; SES.picked = {}; SES.doneN = SES.okN = 0; renderQ(); };
+    ${n ? `<div class="score"><b>${pct(ok, n)}<small>%</small></b><span>答对 ${ok}/${n} 题 · 用时 ${fmtT(used)}</span></div>
+    ${Object.keys(mods).length > 1 || slow ? `<div class="list" style="margin-top:12px">${rows}</div>` : ''}
+    ${wn ? `<div class="fb memo" style="font-weight:400;display:block">${wn} 道错题已进错题本，明天会提醒你复习；之后到期再答对 2 次就自动移出</div>` : ''}
+    ${slow ? `<button class="row" id="slow" style="border:1px solid var(--line);border-radius:14px;margin-bottom:10px"><span class="m"><b>最慢的一题：第 ${slow.i + 1} 题</b><span>${MN()[slow.mi]} · 用了 ${fmtT(slow.t)}，建议 ${SUG[slow.mi]} 秒左右 · 点击回看</span></span><span class="go">›</span></button>` : ''}`
+    : '<p>可以去错题本复习，或者换一组继续。</p>'}
+    <div class="grid2" style="margin-top:12px">${wn ? '<button class="btn line" id="seeW">看错题解析</button>' : '<button class="btn line" id="again">从头再看</button>'}<button class="btn" id="done">返回</button></div>`);
+  const at = i => { closeSheet(); lapQ(); SES.i = i; SES.sel = ''; renderQ(); };
+  const on = (id, fn) => { const e = s.querySelector('#' + id); if (e) e.onclick = fn; };
+  on('slow', () => at(slow.i));
+  on('seeW', () => { at(wrongI[0]); toast('答题卡里红色的是错题'); });
+  on('again', () => { closeSheet(); SES.i = 0; SES.picked = {}; SES.tt = {}; SES.msg = {}; SES.doneN = SES.okN = 0; renderQ(); });
   $('#done').onclick = () => { closeSheet(); S.last = null; touch('core'); back(); };
 }
 function doPage() { if (SES) renderQ(); else back(); }
@@ -943,6 +990,11 @@ async function offlineUI() {
   for (const pid in IDX.papers) for (const q of IDX.papers[pid].q) if (!FIRSTP[q]) FIRSTP[q] = pid;
   STACK = ['home'];
   render();
+  // 微信内置浏览器常会清掉本地数据，做题记录会丢，提醒换浏览器打开（每次打开提醒一次）
+  if (/MicroMessenger/i.test(navigator.userAgent)) {
+    let seen = false; try { seen = sessionStorage.getItem('xc-wx') === '1'; sessionStorage.setItem('xc-wx', '1'); } catch (e) { }
+    if (!seen) sheet(`<h3>建议用浏览器打开<button data-close>✕</button></h3><p>微信里打开时，做题记录和错题本可能会被微信清掉。</p><p>点右上角 <b>···</b>，选「<b>在浏览器打开</b>」，以后都从浏览器进来，记录就不会丢。</p><button class="btn block" data-close>知道了</button>`);
+  }
   sync.start();
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost') && !window.claude) navigator.serviceWorker.register('sw.js').catch(() => { });
 })();
