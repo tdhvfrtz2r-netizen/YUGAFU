@@ -25,3 +25,15 @@ python3 build.py xingcezhenti dist     # 需要 Pillow（带 WebP 支持）
 
 `dist/` 里是 `index.txt`、`t/*.txt`（题目，按 模块×年份 分片）、`i/*.txt`（图片包），和 `app.html` 一起发布。
 题库数据不放进这个仓库。题目为网友回忆版，答案和解析版权归原出处，仅供个人学习。
+
+## 公开网页版（给朋友用）
+
+`docs/` 是 `make_site.sh` 生成的完整站点（含题库数据），用 GitHub Pages 发布：
+仓库 Settings → Pages → Branch 选 `claude/civil-service-exam-app-u44mkb`，文件夹选 `/docs` → Save。
+网址：https://tdhvfrtz2r-netizen.github.io/YUGAFU/
+
+```
+sh make_site.sh dist ../docs
+```
+
+公开版不同步账号，做题记录保存在各自手机的浏览器里。

@@ -249,7 +249,7 @@ function record(q, ok, sec) {
 
 // ---------- 同步到 Claude 账号（db 能用时） ----------
 const sync = {
-  db: null, uid: null, busy: false, state: '仅保存在这台设备',
+  db: null, uid: null, busy: false, state: '做题记录保存在这台手机的浏览器里',
   bucketData(b) {
     if (b === 'core') { const { region, fs, autoNext, last, ex, hist, day, daily } = S; return { region, fs, autoNext, last, ex, hist, day, daily }; }
     const m = b.match(/^(rec|wrong|star)(\d+)$/); return m ? S[m[1]][+m[2]] : null;
@@ -324,8 +324,10 @@ async function imgBlob(loc) {
   const [pk, off, len] = loc;
   if (rangeOK !== false && !packP[pk]) {
     const r = await text(`i/${pk}.txt`, { headers: { Range: `bytes=${off}-${off + len - 1}` } });
-    if (r.status === 206) { rangeOK = true; return new Blob([b64(await r.text())], { type: 'image/webp' }); }
-    rangeOK = false; packP[pk] = r.text();
+    if (r.status === 206) {
+      try { const u8 = b64(await r.text()); if (u8[0] === 0x52 && u8[1] === 0x49 && u8[8] === 0x57) { rangeOK = true; return new Blob([u8], { type: 'image/webp' }); } } catch (e) { /* 分段内容不对，改整包取 */ }
+      rangeOK = false;
+    } else { rangeOK = false; packP[pk] = r.text().catch(e => { delete packP[pk]; throw e; }); }
   }
   const t = await packText(pk);
   return new Blob([b64(t.slice(off, off + len))], { type: 'image/webp' });
@@ -453,6 +455,7 @@ function home() {
       <button class="tile" id="hot"><i>★</i><b>高频重复题</b><span>${IDX.hot.length} 道被 5 套以上卷子考过</span></button>
       <button class="tile" data-go="ana/stats"><i><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17h14M5 14V9M10 14V4M15 14v-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg></i><b>十年考情</b><span>题型趋势、高频词</span></button>
     </div>
+    ${!window.claude && !matchMedia('(display-mode: standalone)').matches && !navigator.standalone ? '<div class="tip">想像 App 一样从桌面打开：iPhone 用 Safari 点底部「分享 → 添加到主屏幕」；安卓在浏览器菜单里点「添加到桌面」。</div>' : ''}
     <div class="note">网友回忆版真题 · 答案和解析来自开源项目 ERRRC/xingcezhenti，仅供个人学习<br>${esc(sync.state)}</div>`;
   $('#daily').onclick = () => startSes({ k: 'daily', mode: 'practice', q: ds.q, title: '每日一练 ' + ds.d.slice(5) });
   $('#hot').onclick = () => topicSetup({ hot: 1 });

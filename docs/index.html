@@ -1,0 +1,940 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F3F5F8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="行测真题库">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px)}body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+<title>行测真题库</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* 答题卡：浅蓝灰纸面，铅笔蓝做主色，红笔判错，绿色判对。单栏手机布局，底部四个标签。 */
+:root {
+  --bg: #F3F5F8; --card: #FFFFFF; --ink: #17202E; --mute: #5E6B7D; --line: #DCE2EA;
+  --acc: #1D5BD6; --acc-soft: #E3ECFC; --ok: #13804A; --ok-soft: #E2F4EA; --bad: #C73A2E; --bad-soft: #FBE7E4;
+  --warn: #B26B00; --img-bg: #FFFFFF;
+  --c0: #7A5AF8; --c1: #E08A00; --c2: #1D5BD6; --c3: #D2417A; --c4: #13804A; --c5: #0E8FA8;
+  --fs: 17px;
+  --sans: -apple-system, "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0F141B; --card: #18202B; --ink: #E7ECF3; --mute: #93A0B2; --line: #2A3442;
+  --acc: #6E9CFF; --acc-soft: #1E2C47; --ok: #45C483; --ok-soft: #15301F; --bad: #FF7A6B; --bad-soft: #3A1D1A;
+  --warn: #F0B04A; --img-bg: #F4F4F4;
+  --c0: #A08BFF; --c1: #F0A93A; --c2: #6E9CFF; --c3: #F07AA8; --c4: #45C483; --c5: #3FC2DB; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0F141B; --card: #18202B; --ink: #E7ECF3; --mute: #93A0B2; --line: #2A3442;
+  --acc: #6E9CFF; --acc-soft: #1E2C47; --ok: #45C483; --ok-soft: #15301F; --bad: #FF7A6B; --bad-soft: #3A1D1A;
+  --warn: #F0B04A; --img-bg: #F4F4F4;
+  --c0: #A08BFF; --c1: #F0A93A; --c2: #6E9CFF; --c3: #F07AA8; --c4: #45C483; --c5: #3FC2DB; color-scheme: dark }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent }
+[hidden] { display: none !important }
+html, body { background: var(--bg) }
+body { color: var(--ink); font: 15px/1.6 var(--sans); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 calc(76px + env(safe-area-inset-bottom, 0px)) }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg) }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0 }
+button:focus-visible, [data-go]:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px }
+#app { max-width: 720px; margin: 0 auto }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); display: flex; align-items: center; gap: 10px; padding-block: 12px 10px; min-height: 56px }
+.top h1 { font-size: 20px; margin: 0; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.back { font-size: 28px; line-height: 1; width: 32px; height: 36px; color: var(--acc) }
+.chip { border: 1px solid var(--line); background: var(--card); border-radius: 99px; padding: 5px 12px; font-size: 14px; white-space: nowrap }
+.chip.on { background: var(--acc); color: #fff; border-color: var(--acc) }
+.sub { color: var(--mute); font-size: 13px }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 12px }
+.card h2 { font-size: 16px; margin: 0 0 10px; display: flex; align-items: baseline; gap: 8px }
+.card h2 small { margin-left: auto; font-weight: 400; color: var(--mute); font-size: 13px }
+.hello { font-size: 18px; font-weight: 600; margin: 8px 0 2px }
+.stats3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px; text-align: center }
+.stat b { display: block; font-size: 22px; font-variant-numeric: tabular-nums; line-height: 1.3 }
+.stat span { color: var(--mute); font-size: 12px }
+.primary { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: var(--acc); color: #fff; border-radius: 14px; padding: 16px; margin-bottom: 12px }
+.primary b { font-size: 18px; display: block }
+.primary span { opacity: .85; font-size: 13px }
+.primary .go { margin-left: auto; font-size: 24px }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px }
+.tile { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; text-align: left; min-height: 82px; display: flex; flex-direction: column; gap: 2px }
+.tile b { font-size: 16px }
+.tile span { color: var(--mute); font-size: 12.5px }
+.tile i { font-style: normal; font-size: 20px; color: var(--acc) }
+.list { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; margin-bottom: 12px }
+.row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-top: 1px solid var(--line); width: 100%; text-align: left }
+.row:first-child { border-top: 0 }
+.row .m { flex: 1; min-width: 0 }
+.row .m b { display: block; font-weight: 500; font-size: 15px }
+.row .m span { color: var(--mute); font-size: 12.5px }
+.row .go { color: var(--mute); font-size: 20px }
+.btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; padding: 9px 14px; background: var(--acc); color: #fff; font-weight: 500; white-space: nowrap }
+.btn.ghost { background: var(--acc-soft); color: var(--acc) }
+.btn.line { background: none; border: 1px solid var(--line); color: var(--ink) }
+.btn.sm { padding: 6px 11px; font-size: 13.5px }
+.btn.block { display: flex; width: 100% }
+.btn.danger { background: var(--bad-soft); color: var(--bad) }
+.bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 6px }
+.bar i { display: block; height: 100%; background: var(--acc); border-radius: 3px }
+.yr { font-size: 13px; color: var(--mute); margin: 14px 2px 6px; font-weight: 600 }
+.seg { display: flex; background: var(--line); border-radius: 10px; padding: 3px; margin-bottom: 12px }
+.seg button { flex: 1; padding: 7px; border-radius: 8px; font-size: 14px; color: var(--mute) }
+.seg button.on { background: var(--card); color: var(--ink); font-weight: 600 }
+.regions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0 14px }
+.regions button { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 9px 4px; font-size: 14px; line-height: 1.3 }
+.regions button span { display: block; font-size: 11px; color: var(--mute) }
+.regions button.on { border-color: var(--acc); background: var(--acc-soft); color: var(--acc) }
+.note { color: var(--mute); font-size: 12px; text-align: center; margin: 16px 8px; line-height: 1.7 }
+.empty { text-align: center; color: var(--mute); padding: 48px 0 }
+.badge { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 99px; background: var(--acc-soft); color: var(--acc); font-weight: 500; vertical-align: 2px }
+.badge.ok { background: var(--ok-soft); color: var(--ok) }
+.badge.bad { background: var(--bad-soft); color: var(--bad) }
+
+/* 做题 */
+.qhead { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 2px 0 10px; font-size: 12.5px; color: var(--mute) }
+.qbody { font-size: var(--fs); line-height: 1.75 }
+.qbody p { margin: 0 0 .5em }
+.qbody img, .mat img, .exp img { max-width: 100%; height: auto; background: var(--img-bg); border-radius: 4px; vertical-align: middle }
+.qbody img.fx, .mat img.fx, .exp img.fx, .opt img.fx { background: none; border-radius: 0 }
+img[data-i]:not([src]) { min-height: 40px; min-width: 60px; background: var(--line); border-radius: 4px }
+img.fx[data-i]:not([src]) { min-height: 1em; min-width: 2em }
+:root[data-theme="dark"] img.fx { filter: invert(.88) }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) img.fx { filter: invert(.88) } }
+.qbody table, .mat table, .exp table { border-collapse: collapse; font-size: .85em; margin: 6px 0 }
+.qbody td, .qbody th, .mat td, .mat th, .exp td, .exp th { border: 1px solid var(--line); padding: 3px 6px }
+.tw { overflow-x: auto; max-width: 100% }
+.mat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; font-size: calc(var(--fs) - 1px); line-height: 1.7 }
+.mat-h { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--mute) }
+.mat-h button { color: var(--acc); font-size: 13px }
+.mat-b { padding: 10px 12px; overflow-x: auto }
+.mat.fold .mat-b { max-height: 38vh; overflow-y: auto }
+.mat-b p { margin: 0 0 .5em }
+.opts { display: flex; flex-direction: column; gap: 8px; margin: 14px 0 }
+.opts.row4 { flex-direction: row }
+.opts.row4 .opt { flex: 1; justify-content: center }
+.opt { display: flex; gap: 10px; align-items: flex-start; text-align: left; width: 100%; background: var(--card); border: 1.5px solid var(--line); border-radius: 12px; padding: 11px 12px; font-size: var(--fs); line-height: 1.6 }
+.opt .ok { flex: none; width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--line); display: grid; place-items: center; font-size: 14px; font-weight: 600; margin-top: 1px }
+.opt .ot { min-width: 0; flex: 1; overflow-wrap: anywhere }
+.opt.sel { border-color: var(--acc); background: var(--acc-soft) }
+.opt.sel .ok { background: var(--acc); border-color: var(--acc); color: #fff }
+.opt.right { border-color: var(--ok); background: var(--ok-soft) }
+.opt.right .ok { background: var(--ok); border-color: var(--ok); color: #fff }
+.opt.wrong { border-color: var(--bad); background: var(--bad-soft) }
+.opt.wrong .ok { background: var(--bad); border-color: var(--bad); color: #fff }
+.fb { display: flex; align-items: center; justify-content: space-between; border-radius: 12px; padding: 11px 14px; margin-bottom: 10px; font-weight: 600 }
+.fb.ok { background: var(--ok-soft); color: var(--ok) }
+.fb.bad { background: var(--bad-soft); color: var(--bad) }
+.fb.memo { background: var(--acc-soft); color: var(--acc) }
+.fb small { font-weight: 400; font-size: 12.5px }
+.exp { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: calc(var(--fs) - 1px); line-height: 1.75; overflow-x: auto }
+.exp-h { font-weight: 600; font-size: 14px; color: var(--acc); margin-bottom: 4px }
+.exp p { margin: 0 0 .55em }
+.qnav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--card); border-top: 1px solid var(--line); display: flex; gap: 8px; padding: 8px max(16px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)) }
+.qnav .btn { flex: 1; padding: 12px }
+.qnav .btn.line { flex: 0 0 auto; min-width: 88px }
+.timer { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--acc); font-size: 15px }
+.timer.low { color: var(--bad) }
+.icon { font-size: 20px; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 8px; color: var(--mute) }
+.icon.on { color: var(--warn) }
+.prog { font-variant-numeric: tabular-nums; font-size: 14px; color: var(--mute) }
+.loadbox { text-align: center; padding: 60px 0; color: var(--mute) }
+
+/* 答题卡 / 弹层 */
+#sheet { position: fixed; inset: 0; z-index: 20; background: rgba(10, 16, 26, .45); display: flex; align-items: flex-end }
+#sheet .pane { background: var(--bg); width: 100%; max-height: 82vh; overflow: auto; border-radius: 18px 18px 0 0; padding: 14px max(16px, env(safe-area-inset-right, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)) }
+#sheet h3 { margin: 0 0 12px; font-size: 17px; display: flex; justify-content: space-between; align-items: center }
+#sheet h3 button { color: var(--mute); font-size: 20px; width: 32px }
+.cardgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 7px; margin-bottom: 12px }
+.cardgrid button { height: 40px; border-radius: 9px; border: 1px solid var(--line); background: var(--card); font-size: 13.5px; font-variant-numeric: tabular-nums }
+.cardgrid button.a { background: var(--acc-soft); border-color: var(--acc); color: var(--acc) }
+.cardgrid button.r { background: var(--ok-soft); border-color: var(--ok); color: var(--ok) }
+.cardgrid button.w { background: var(--bad-soft); border-color: var(--bad); color: var(--bad) }
+.cardgrid button.cur { outline: 2px solid var(--ink); outline-offset: 1px }
+.opt-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 14px }
+.fld { font-size: 13px; color: var(--mute); margin-top: 4px }
+
+/* 底部标签 */
+#tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--card); border-top: 1px solid var(--line); display: flex; padding: 0 max(8px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(8px, env(safe-area-inset-left, 0px)) }
+#tabs button { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 7px 0 6px; font-size: 11.5px; color: var(--mute) }
+#tabs button i { font-style: normal; font-size: 20px; line-height: 1.2 }
+#tabs button.on { color: var(--acc); font-weight: 600 }
+#toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(96px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 8px 16px; border-radius: 99px; font-size: 14px; z-index: 30; max-width: 86vw; text-align: center }
+
+/* 成绩 / 分析 */
+.score { text-align: center; padding: 6px 0 4px }
+.score b { font-size: 52px; line-height: 1.1; color: var(--acc); font-variant-numeric: tabular-nums }
+.score b small { font-size: 18px }
+.score span { display: block; color: var(--mute); font-size: 13px }
+table.t { width: 100%; border-collapse: collapse; font-size: 13.5px; font-variant-numeric: tabular-nums }
+table.t th { color: var(--mute); font-weight: 500; text-align: right; padding: 6px 4px; border-bottom: 1px solid var(--line); white-space: nowrap }
+table.t td { text-align: right; padding: 7px 4px; border-bottom: 1px solid var(--line); white-space: nowrap }
+table.t th:first-child, table.t td:first-child { text-align: left }
+table.t tr.hl td { background: var(--acc-soft) }
+.hbar { display: grid; grid-template-columns: 5.6em 1fr 3.6em; gap: 8px; align-items: center; font-size: 13.5px; margin: 7px 0 }
+.hbar .tr { height: 10px; background: var(--line); border-radius: 5px; overflow: hidden }
+.hbar .tr i { display: block; height: 100%; border-radius: 5px; background: var(--acc) }
+.hbar em { font-style: normal; text-align: right; font-variant-numeric: tabular-nums; color: var(--mute) }
+.hbar .lb { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.stack { display: flex; height: 16px; border-radius: 4px; overflow: hidden; flex: 1 }
+.stack i { display: block; height: 100% }
+.srow { display: flex; align-items: center; gap: 8px; font-size: 12.5px; margin: 5px 0; font-variant-numeric: tabular-nums }
+.srow span { width: 2.6em; color: var(--mute) }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--mute); margin-top: 8px }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px }
+.words { display: flex; flex-wrap: wrap; gap: 6px }
+.words span { background: var(--acc-soft); color: var(--ink); border-radius: 6px; padding: 3px 8px; font-size: 13.5px }
+.words span em { font-style: normal; color: var(--mute); font-size: 11.5px; margin-left: 3px }
+.chart { width: 100%; height: auto; display: block }
+.chart text { fill: var(--mute); font-size: 10px; font-family: var(--sans) }
+.tip { background: var(--acc-soft); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; font-size: 14px; line-height: 1.7 }
+.tip b { color: var(--acc) }
+.tw2 { overflow-x: auto }
+input[type=range] { width: 100%; accent-color: var(--acc) }
+.switch { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-top: 1px solid var(--line) }
+.switch:first-child { border-top: 0 }
+.tg { width: 46px; height: 28px; border-radius: 99px; background: var(--line); position: relative; flex: none }
+.tg::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: left .15s }
+.tg.on { background: var(--acc) }
+.tg.on::after { left: 21px }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important } }
+@media (max-width: 360px) { .regions { grid-template-columns: repeat(3, 1fr) } }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako_inflate.min.js"></script>
+
+<main id="app"><div class="loadbox">正在打开题库…</div></main>
+<nav id="tabs" hidden>
+  <button data-tab="home"><i>⌂</i>首页</button>
+  <button data-tab="bank"><i>▤</i>题库</button>
+  <button data-tab="wrong"><i>✎</i>错题</button>
+  <button data-tab="ana"><i><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17h14M5 14V9M10 14V4M15 14v-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg></i>分析</button>
+</nav>
+<div id="sheet" hidden></div>
+<div id="toast" hidden></div>
+
+<script>
+'use strict';
+// 行测真题库：题库数据按需加载（t/ 题目分片、i/ 图片包），做题记录存本机并同步到 Claude 账号。
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const app = $('#app');
+const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
+const fmtT = s => { s = Math.max(0, Math.round(s)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' : '') + String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0'); };
+const today = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const W = [0.7, 0.6, 0.8, 0.9, 0.7, 1.0]; // 估分权重：政治、常识、言语、数量、判断、资料
+const SHORT = ['政治', '常识', '言语', '数量', '判断', '资料'];
+
+// ---------- 记录 ----------
+// rec[qid%16][qid] = [最近一次对错, 做过几次, 错过几次, 时间(分钟)]；wrong/star 分 4 桶
+const KEY = 'xc-v2';
+const NB = { rec: 16, wrong: 4, star: 4 };
+const DEF = () => ({ region: null, fs: 17, autoNext: false, last: null, ex: {}, hist: [], day: {}, daily: null,
+  rec: Array.from({ length: 16 }, () => ({})), wrong: Array.from({ length: 4 }, () => ({})), star: Array.from({ length: 4 }, () => ({})), _ut: {} });
+let S = DEF();
+try { const o = JSON.parse(localStorage.getItem(KEY) || 'null'); if (o) S = Object.assign(DEF(), o); } catch (e) { /* 读不到就用默认 */ }
+const dirty = new Set();
+let saveT = 0;
+function touch(b) { S._ut[b] = Date.now(); dirty.add(b); save(); }
+function save() {
+  clearTimeout(saveT);
+  saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* 存不下 */ } sync.kick(); }, 300);
+}
+const rec = q => S.rec[q % 16][q];
+const isWrong = q => !!S.wrong[q % 4][q];
+const isStar = q => !!S.star[q % 4][q];
+function setBook(name, q, on) {
+  const b = S[name][q % 4];
+  if (on) b[q] = Date.now(); else delete b[q];
+  touch(name + (q % 4));
+}
+const bookList = name => S[name].flatMap(b => Object.entries(b)).sort((a, b) => b[1] - a[1]).map(([q]) => +q);
+function record(q, ok, sec) {
+  const r = S.rec[q % 16][q] || [0, 0, 0, 0];
+  S.rec[q % 16][q] = [ok ? 1 : 0, r[1] + 1, r[2] + (ok ? 0 : 1), Math.round(Date.now() / 6e4)];
+  touch('rec' + (q % 16));
+  const d = today(), dd = S.day[d] || [0, 0, 0];
+  S.day[d] = [dd[0] + 1, dd[1] + (ok ? 1 : 0), dd[2] + Math.min(600, Math.round(sec || 0))];
+  touch('core');
+  if (!ok) setBook('wrong', q, true);
+}
+
+// ---------- 同步到 Claude 账号（db 能用时） ----------
+const sync = {
+  db: null, uid: null, busy: false, state: '做题记录保存在这台手机的浏览器里',
+  bucketData(b) {
+    if (b === 'core') { const { region, fs, autoNext, last, ex, hist, day, daily } = S; return { region, fs, autoNext, last, ex, hist, day, daily }; }
+    const m = b.match(/^(rec|wrong|star)(\d+)$/); return m ? S[m[1]][+m[2]] : null;
+  },
+  apply(b, d) {
+    if (b === 'core') Object.assign(S, d);
+    else { const m = b.match(/^(rec|wrong|star)(\d+)$/); if (m && +m[2] < NB[m[1]]) S[m[1]][+m[2]] = d; }
+  },
+  async start() {
+    if (!window.claude || !claude.use) return;
+    try {
+      const [db, user] = await Promise.all([claude.use('db'), claude.use('user')]);
+      if (!db || !user) return;
+      const uid = await user.id(); if (!uid) return;
+      this.db = db; this.uid = uid;
+      const snap = await db.collection('data/users/' + uid).get();
+      let changed = false;
+      const seen = new Set();
+      for (const d of snap.docs) {
+        const body = d.data(); if (!body) continue; seen.add(d.id);
+        if ((body.ut || 0) > (S._ut[d.id] || 0)) { this.apply(d.id, body.d || {}); S._ut[d.id] = body.ut; changed = true; }
+        else if ((body.ut || 0) < (S._ut[d.id] || 0)) dirty.add(d.id);
+      }
+      for (const b in S._ut) if (!seen.has(b)) dirty.add(b);
+      this.state = '已同步到你的 Claude 账号';
+      if (changed) { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { } if (!SES) rerender(); }
+      this.kick();
+    } catch (e) { this.state = '同步暂不可用，记录保存在这台设备'; }
+  },
+  kick() { if (this.db && !this.busy && dirty.size) { clearTimeout(this.t); this.t = setTimeout(() => this.flush(), 2500); } },
+  async flush() {
+    if (!this.db || this.busy) return;
+    this.busy = true;
+    try {
+      while (dirty.size) {
+        const b = dirty.values().next().value; dirty.delete(b);
+        const d = this.bucketData(b); if (!d) continue;
+        try { await this.db.doc(`data/users/${this.uid}/${b}`).set({ ut: S._ut[b] || Date.now(), d }); }
+        catch (e) { if (e && e.code === 'unavailable') { dirty.add(b); break; } if (e && (e.code === 'invalid_argument' || e.code === 'revoked' || e.code === 'not_granted')) { this.db = null; this.state = '同步暂不可用，记录保存在这台设备'; break; } }
+      }
+    } finally { this.busy = false; }
+  },
+};
+document.addEventListener('visibilitychange', () => { if (document.hidden) sync.flush(); });
+
+// ---------- 数据 ----------
+let IDX = null, QM = null, FIRSTP = {};
+const QT = {}, MAT = {}, IM = {}, shardP = {};
+// 托管只收文本，所以数据都是 base64：gzip 过的 JSON，或一张张单独编码的 WebP
+const b64 = t => Uint8Array.fromBase64 ? Uint8Array.fromBase64(t) : Uint8Array.from(atob(t), c => c.charCodeAt(0));
+async function text(u, init) { const r = await fetch(u, init); if (!r.ok) throw new Error(u + ' ' + r.status); return r; }
+async function gunzip(u8) {
+  if (u8[0] !== 0x1f || u8[1] !== 0x8b) return u8;
+  if (window.DecompressionStream) { try { return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer()); } catch (e) { /* 退回 pako */ } }
+  return pako.inflate(u8);
+}
+const gzJSON = async u => JSON.parse(new TextDecoder().decode(await gunzip(b64((await (await text(u)).text()).trim()))));
+function loadShard(s) {
+  return shardP[s] ||= gzJSON(`t/${s}.txt`).then(d => { Object.assign(QT, d.q); Object.assign(MAT, d.x); Object.assign(IM, d.im); })
+    .catch(e => { delete shardP[s]; throw e; });
+}
+async function ensure(qids, prog) {
+  const ss = [...new Set(qids.map(q => QM[q] && QM[q][0]).filter(s => s != null))];
+  let n = 0;
+  await Promise.all(ss.map(s => loadShard(s).then(() => prog && prog(++n, ss.length))));
+}
+// 图片：优先按字符范围只取一张，服务器不支持就整包取下来缓存
+let rangeOK = null;
+const packP = {}, imgP = {};
+function packText(pk) { return packP[pk] ||= text(`i/${pk}.txt`).then(r => r.text()).catch(e => { delete packP[pk]; throw e; }); }
+async function imgBlob(loc) {
+  const [pk, off, len] = loc;
+  if (rangeOK !== false && !packP[pk]) {
+    const r = await text(`i/${pk}.txt`, { headers: { Range: `bytes=${off}-${off + len - 1}` } });
+    if (r.status === 206) {
+      try { const u8 = b64(await r.text()); if (u8[0] === 0x52 && u8[1] === 0x49 && u8[8] === 0x57) { rangeOK = true; return new Blob([u8], { type: 'image/webp' }); } } catch (e) { /* 分段内容不对，改整包取 */ }
+      rangeOK = false;
+    } else { rangeOK = false; packP[pk] = r.text().catch(e => { delete packP[pk]; throw e; }); }
+  }
+  const t = await packText(pk);
+  return new Blob([b64(t.slice(off, off + len))], { type: 'image/webp' });
+}
+const imgURL = key => imgP[key] ||= (IM[key] ? imgBlob(IM[key]).then(b => URL.createObjectURL(b)) : Promise.reject(new Error('no img'))).catch(e => { delete imgP[key]; throw e; });
+function hydrate(root) {
+  root.querySelectorAll('img[data-i]:not([src])').forEach(img => {
+    const k = img.dataset.i, loc = IM[k];
+    if (loc && k.startsWith('f:')) img.style.height = (loc[4] / 28 * 1.3).toFixed(2) + 'em';  // 公式图原图约 28px 高，按字号缩放
+    imgURL(k).then(u => { img.src = u; }).catch(() => { img.alt = '[图片加载失败，点重试]'; img.onclick = () => { img.removeAttribute('src'); hydrate(img.parentNode); }; });
+    if (!k.startsWith('f:')) img.onclick = () => zoom(img);
+  });
+  root.querySelectorAll('table').forEach(t => { if (!t.parentNode.classList.contains('tw')) { const w = document.createElement('div'); w.className = 'tw'; t.replaceWith(w); w.appendChild(t); } });
+}
+function zoom(img) {
+  if (!img.src) return;
+  sheet(`<h3>查看大图<button data-close>✕</button></h3><div style="overflow:auto;background:var(--img-bg);border-radius:8px"><img src="${img.src}" style="max-width:none;width:${Math.min(1400, (img.naturalWidth || 400) * 1.6)}px"></div><p class="sub">左右滑动查看，点空白处关闭</p>`);
+}
+const P = pid => IDX.papers[pid];
+const MN = () => IDX.mn;
+const pname = pid => `${P(pid).y} ${P(pid).n}`;
+const qMod = q => QM[q][1];
+const qType = q => IDX.tyn[QM[q][1]][QM[q][2]];
+
+// ---------- 小工具 ----------
+function toast(m) { const t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => (t.hidden = true), 1800); }
+function sheet(html) { const s = $('#sheet'); s.innerHTML = `<div class="pane">${html}</div>`; s.hidden = false; return s; }
+const closeSheet = () => { $('#sheet').hidden = true; };
+$('#sheet').addEventListener('click', e => { if (e.target.id === 'sheet' || e.target.closest('[data-close]')) closeSheet(); });
+function tabs(on) { const t = $('#tabs'); t.hidden = !on; t.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === on)); }
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) nav(b.dataset.tab, true); });
+function shuffle(a, seed) { let s = seed || Math.random() * 1e9 | 0; const r = () => ((s = Math.imul(s ^ (s >>> 15), 2246822507) + 0x9e3779b9 | 0) >>> 0) / 4294967296; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+// ---------- 路由（页面内，不依赖地址栏） ----------
+let STACK = [];
+function nav(path, root) { stopExam(); if (root) STACK = [path]; else STACK.push(path); render(); }
+function back() { stopExam(); if (STACK.length > 1) STACK.pop(); else STACK = ['home']; render(); }
+function replace(path) { STACK[STACK.length - 1] = path; render(); }
+function rerender() { render(true); }
+app.addEventListener('click', e => {
+  const g = e.target.closest('[data-go]'); if (g) { e.preventDefault(); nav(g.dataset.go); return; }
+  if (e.target.closest('.back')) back();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#sheet').hidden) closeSheet(); });
+function render(keepScroll) {
+  const path = STACK[STACK.length - 1] || 'home', [name, ...a] = path.split('/');
+  const y = window.scrollY;
+  closeSheet();
+  if (name !== 'do') SES = null;
+  ({ home, bank: () => bank(a[0] || 'paper'), region: () => regionPage(decodeURIComponent(a[0])), paper: () => paperPage(a[0]), topic: () => topicPage(+a[0]),
+    wrong: () => wrongPage(a[0] || 'wrong'), ana: () => anaPage(a[0] || 'me'), report: () => reportPage(a[0]), set: settings, do: () => doPage(), pick: pickRegionPage }[name] || home)();
+  if (!keepScroll) window.scrollTo(0, 0); else window.scrollTo(0, y);
+}
+const hdr = (title, right = '', backBtn = true) => `<div class="top">${backBtn ? '<button class="back" aria-label="返回">‹</button>' : ''}<h1>${title}</h1>${right}</div>`;
+
+// ---------- 统计 ----------
+function totals() {
+  let done = 0, ok = 0, tries = 0;
+  for (const b of S.rec) for (const k in b) { done++; ok += b[k][0]; tries += b[k][1]; }
+  return { done, ok, tries, wrong: S.wrong.reduce((s, b) => s + Object.keys(b).length, 0), star: S.star.reduce((s, b) => s + Object.keys(b).length, 0) };
+}
+function streak() {
+  let n = 0; const d = new Date();
+  if (!S.day[today(d)]) d.setDate(d.getDate() - 1);
+  while (S.day[today(d)]) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+function progress(qids) { let done = 0, ok = 0; for (const q of qids) { const r = rec(q); if (r) { done++; ok += r[0]; } } return { done, ok, n: qids.length }; }
+const modQids = (pid, mi) => { const p = P(pid); if (mi == null) return p.q; const m = p.mods.find(x => x[0] === mi); return m ? p.q.slice(m[1], m[1] + m[2]) : []; };
+
+// ---------- 首页 ----------
+function regionGrid(cls = '') {
+  return `<div class="regions ${cls}">${IDX.regions.map(g => `<button data-r="${esc(g.r)}" class="${g.r === S.region ? 'on' : ''}">${esc(g.r)}<span>${g.ps.length} 套</span></button>`).join('')}</div>`;
+}
+function bindRegions(after) { app.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { S.region = b.dataset.r; S.daily = null; touch('core'); after(); }); }
+function pickRegionPage() {
+  tabs(null);
+  app.innerHTML = hdr('选择考试地区') + `<div class="sub">首页、每日一练和模考会优先用这个地区的真题，随时可以改</div>${regionGrid()}`;
+  bindRegions(back);
+}
+function dailySet() {
+  const d = today();
+  if (S.daily && S.daily.d === d && S.daily.r === S.region) return S.daily;
+  // 每天 20 题：从本地区近 5 年真卷里挑没做过的，按 政治2 常识3 言语5 数量2 判断5 资料3
+  const g = IDX.regions.find(x => x.r === S.region);
+  const pool = [[], [], [], [], [], []];
+  const yMax = Math.max(...g.ps.map(p => P(p).y));
+  const seen = new Set();
+  for (const pid of g.ps) if (P(pid).y >= yMax - 4) for (const q of P(pid).q) if (!seen.has(q) && !rec(q)) { seen.add(q); pool[qMod(q)].push(q); }
+  const want = [2, 3, 5, 2, 5, 3], seed = +d.replace(/-/g, '');
+  let qs = [];
+  want.forEach((n, mi) => {
+    let src = pool[mi];
+    if (src.length < n) src = src.concat(shuffle(Object.keys(QM).map(Number).filter(q => qMod(q) === mi && !rec(q) && !seen.has(q)), seed).slice(0, n));
+    qs = qs.concat(mi === 5 ? src.slice(0, n) : shuffle(src.slice(), seed + mi).slice(0, n));
+  });
+  S.daily = { d, r: S.region, q: qs };
+  touch('core');
+  return S.daily;
+}
+function home() {
+  tabs('home');
+  if (!S.region) {
+    app.innerHTML = `<div class="top"><h1>行测真题库</h1></div><div class="hello">你要考哪里？</div>
+      <div class="sub">选一次就好，之后首页、每日一练、模考都会用这个地区的真题</div>${regionGrid()}
+      <div class="note">2016–2026 年国考、省考、市考、选调 · ${IDX.stats.papers} 套卷 · ${IDX.stats.uniq.toLocaleString()} 道题（去重后）· 每题都有答案和解析</div>`;
+    bindRegions(home);
+    return;
+  }
+  const g = IDX.regions.find(x => x.r === S.region), tt = totals(), td = S.day[today()] || [0, 0];
+  const ds = dailySet(), dp = progress(ds.q), dDone = dp.done >= dp.n;
+  const latest = g.ps.find(pid => P(pid).mods.length >= 5) || g.ps[0];
+  const ex = S.ex[latest];
+  let cont = '';
+  if (S.last && S.last.spec) cont = `<button class="row" id="cont" style="border-radius:14px;border:1px solid var(--line);background:var(--card);margin-bottom:12px"><span class="m"><b>继续上次</b><span>${esc(S.last.label)}</span></span><span class="go">›</span></button>`;
+  app.innerHTML = `<div class="top"><h1>行测真题库</h1><button class="chip" data-go="pick">${esc(S.region)} ▾</button><button class="chip" data-go="set">设置</button></div>
+    <div class="stats3"><div class="stat"><b>${td[0]}</b><span>今日做题</span></div><div class="stat"><b>${tt.done ? pct(tt.ok, tt.done) + '%' : '–'}</b><span>总正确率</span></div><div class="stat"><b>${streak()}</b><span>连续天数</span></div></div>
+    <button class="primary" id="daily"><span><b>${dDone ? '今日一练已完成 ✓' : '每日一练'}</b><span>${dDone ? `答对 ${dp.ok}/${dp.n} · 点击再看一遍` : `${dp.n} 题 · ${esc(S.region)}近年真题 · 已做 ${dp.done}`}</span></span><span class="go">›</span></button>
+    ${cont}
+    <div class="grid2">
+      <button class="tile" data-go="region/${encodeURIComponent(S.region)}"><i>▤</i><b>历年真卷</b><span>${esc(S.region)} · ${g.ps.length} 套</span></button>
+      <button class="tile" data-go="bank/topic"><i>◎</i><b>专项练习</b><span>按模块、题型刷</span></button>
+      <button class="tile" data-go="wrong"><i>✎</i><b>错题本</b><span>${tt.wrong} 道待复习</span></button>
+      <button class="tile" data-go="paper/${latest}"><i>⏱</i><b>限时模考</b><span>${ex && ex.done ? `上次 ${ex.res.score} 分` : esc(pname(latest))}</span></button>
+      <button class="tile" id="hot"><i>★</i><b>高频重复题</b><span>${IDX.hot.length} 道被 5 套以上卷子考过</span></button>
+      <button class="tile" data-go="ana/stats"><i><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17h14M5 14V9M10 14V4M15 14v-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg></i><b>十年考情</b><span>题型趋势、高频词</span></button>
+    </div>
+    ${!window.claude && !matchMedia('(display-mode: standalone)').matches && !navigator.standalone ? '<div class="tip">想像 App 一样从桌面打开：iPhone 用 Safari 点底部「分享 → 添加到主屏幕」；安卓在浏览器菜单里点「添加到桌面」。</div>' : ''}
+    <div class="note">网友回忆版真题 · 答案和解析来自开源项目 ERRRC/xingcezhenti，仅供个人学习<br>${esc(sync.state)}</div>`;
+  $('#daily').onclick = () => startSes({ k: 'daily', mode: 'practice', q: ds.q, title: '每日一练 ' + ds.d.slice(5) });
+  $('#hot').onclick = () => topicSetup({ hot: 1 });
+  const c = $('#cont'); if (c) c.onclick = () => startSes(S.last.spec, S.last.i);
+}
+
+// ---------- 题库 ----------
+function bank(tab) {
+  tabs('bank');
+  const seg = `<div class="seg"><button class="${tab === 'paper' ? 'on' : ''}" data-s="paper">历年真卷</button><button class="${tab === 'topic' ? 'on' : ''}" data-s="topic">专项练习</button></div>`;
+  let body = '';
+  if (tab === 'paper') {
+    body = `<div class="sub">选地区看历年卷子（${IDX.stats.papers} 套）</div>${regionGrid()}`;
+  } else {
+    body = `<button class="primary" id="hot"><span><b>高频重复题</b><span>${IDX.hot.length} 道题被 5 套以上卷子考过，优先刷</span></span><span class="go">›</span></button>
+      <div class="list">${MN().map((n, mi) => { const qs = modAll(mi), g = progress(qs); return `<button class="row" data-go="topic/${mi}"><span class="m"><b>${n}</b><span>${qs.length.toLocaleString()} 道 · 已做 ${g.done}${g.done ? ` · 正确率 ${pct(g.ok, g.done)}%` : ''}</span><div class="bar"><i style="width:${pct(g.done, g.n)}%"></i></div></span><span class="go">›</span></button>`; }).join('')}</div>
+      <div class="note">专项练习按去重后的题目出题，同一道题在多套卷里只算一道</div>`;
+  }
+  app.innerHTML = `<div class="top"><h1>题库</h1></div>${seg}${body}`;
+  app.querySelectorAll('[data-s]').forEach(b => b.onclick = () => replace('bank/' + b.dataset.s));
+  app.querySelectorAll('[data-r]').forEach(b => b.onclick = () => nav('region/' + encodeURIComponent(b.dataset.r)));
+  const h = $('#hot'); if (h) h.onclick = () => topicSetup({ hot: 1 });
+}
+const modCache = {};
+const modAll = mi => modCache[mi] ||= Object.keys(QM).map(Number).filter(q => QM[q][1] === mi);
+function regionPage(r) {
+  tabs('bank');
+  const g = IDX.regions.find(x => x.r === r); if (!g) return home();
+  let html = hdr(esc(r), `<span class="sub">${g.ps.length} 套</span>`), yr = 0;
+  for (const pid of g.ps) {
+    const p = P(pid), pr = progress(p.q), ex = S.ex[pid];
+    if (p.y !== yr) { html += `${yr ? '</div>' : ''}<div class="yr">${p.y} 年</div><div class="list">`; yr = p.y; }
+    html += `<button class="row" data-go="paper/${pid}"><span class="m"><b>${esc(p.n)}</b><span>${pr.n} 题${pr.done ? ` · 已做 ${pr.done} · 正确率 ${pct(pr.ok, pr.done)}%` : ''}${ex && ex.done ? ` · 模考 ${ex.res.score} 分` : ''}</span>${pr.done ? `<div class="bar"><i style="width:${pct(pr.done, pr.n)}%"></i></div>` : ''}</span><span class="go">›</span></button>`;
+  }
+  app.innerHTML = html + (yr ? '</div>' : '');
+}
+function paperPage(pid) {
+  tabs('bank');
+  const p = P(pid); if (!p) return home();
+  const pr = progress(p.q), ex = S.ex[pid];
+  let exBtn = `<button class="primary" id="exam"><span><b>限时模考</b><span>${p.lim} 分钟 · ${p.q.length} 题 · 交卷自动打分</span></span><span class="go">›</span></button>`;
+  if (ex && !ex.done) exBtn = `<button class="primary" id="exam"><span><b>继续模考</b><span>已答 ${Object.keys(ex.a).length}/${p.q.length} 题 · 已用 ${fmtT(ex.used)}</span></span><span class="go">›</span></button>`;
+  app.innerHTML = hdr(esc(p.y + ' ' + p.n)) + `<div class="sub" style="margin-bottom:10px">${esc(p.t)}</div>
+    ${exBtn}
+    ${ex && ex.done ? `<button class="row" data-go="report/${pid}" style="border-radius:14px;border:1px solid var(--line);background:var(--card);margin-bottom:12px"><span class="m"><b>上次模考 ${ex.res.score} 分</b><span>答对 ${ex.res.ok}/${ex.res.n} · 用时 ${fmtT(ex.res.used)} · 看成绩和解析</span></span><span class="go">›</span></button>` : ''}
+    <div class="grid2"><button class="tile" id="prac"><b>整卷练习</b><span>做一题对一题，马上看解析 · 已做 ${pr.done}/${pr.n}</span></button><button class="tile" id="memo"><b>整卷背题</b><span>直接看答案和解析</span></button></div>
+    <div class="yr">按模块</div>
+    <div class="list">${p.mods.map(([mi, st, n]) => { const g = progress(modQids(pid, mi)); return `<div class="row"><span class="m"><b>${MN()[mi]}</b><span>第 ${st + 1}–${st + n} 题 · ${n} 题${g.done ? ` · 已做 ${g.done} · ${pct(g.ok, g.done)}%` : ''}</span>${g.done ? `<div class="bar"><i style="width:${pct(g.done, n)}%"></i></div>` : ''}</span>
+      <button class="btn sm ghost" data-m="${mi}" data-md="memo">背</button><button class="btn sm" data-m="${mi}" data-md="practice">练</button></div>`; }).join('')}</div>`;
+  $('#exam').onclick = () => startSes({ k: 'exam', pid, mode: 'exam' }, ex && !ex.done ? ex.i || 0 : 0);
+  $('#prac').onclick = () => startSes({ k: 'paper', pid, mode: 'practice' }, firstUndone(p.q));
+  $('#memo').onclick = () => startSes({ k: 'paper', pid, mode: 'memo' });
+  app.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { const mi = +b.dataset.m, md = b.dataset.md; startSes({ k: 'paper', pid, m: mi, mode: md }, md === 'practice' ? firstUndone(modQids(pid, mi)) : 0); });
+}
+const firstUndone = qs => { const i = qs.findIndex(q => !rec(q)); return i < 0 ? 0 : i; };
+
+function topicPage(mi) {
+  tabs('bank');
+  const types = IDX.tyn[mi], all = modAll(mi);
+  const by = types.map(() => []);
+  for (const q of all) by[QM[q][2]].push(q);
+  app.innerHTML = hdr(MN()[mi] + ' · 专项') + `<div class="sub" style="margin-bottom:10px">${all.length.toLocaleString()} 道（去重后），点题型开始练</div>
+    <div class="list"><button class="row" data-t="-1"><span class="m"><b>全部题型混合</b><span>${all.length.toLocaleString()} 道</span></span><span class="go">›</span></button>${types.map((t, ti) => { const g = progress(by[ti]); return `<button class="row" data-t="${ti}"><span class="m"><b>${esc(t)}</b><span>${by[ti].length.toLocaleString()} 道 · 已做 ${g.done}${g.done ? ` · 正确率 ${pct(g.ok, g.done)}%` : ''}</span><div class="bar"><i style="width:${pct(g.done, g.n)}%"></i></div></span><span class="go">›</span></button>`; }).join('')}</div>`;
+  app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => topicSetup({ m: mi, t: +b.dataset.t }));
+}
+// 专项设置：范围、题量、顺序、只做没做过的
+const TS = { scope: 'all', n: 20, order: 'rand', fresh: true, mode: 'practice' };
+function topicSetup(f) {
+  const title = f.hot ? '高频重复题' : (MN()[f.m] + (f.t >= 0 ? ' · ' + IDX.tyn[f.m][f.t] : ''));
+  const pool = () => {
+    let qs = f.hot ? IDX.hot.slice() : modAll(f.m).filter(q => f.t < 0 || QM[q][2] === f.t);
+    if (TS.scope === 'mine') { const mine = new Set(IDX.regions.find(x => x.r === S.region).ps.flatMap(p => P(p).q)); qs = qs.filter(q => mine.has(q)); }
+    if (TS.scope === 'recent') qs = qs.filter(q => QM[q][3] >= 2022);
+    if (TS.fresh) qs = qs.filter(q => !rec(q));
+    return qs;
+  };
+  const opt = (k, v, label) => `<button class="chip ${TS[k] === v ? 'on' : ''}" data-k="${k}" data-v="${v}">${label}</button>`;
+  const draw = () => {
+    const n = pool().length;
+    sheet(`<h3>${esc(title)}<button data-close>✕</button></h3>
+      <div class="fld">范围</div><div class="opt-row">${opt('scope', 'all', '全部地区')}${S.region ? opt('scope', 'mine', '只要' + esc(S.region)) : ''}${opt('scope', 'recent', '2022 年以后')}</div>
+      <div class="fld">题量</div><div class="opt-row">${[10, 20, 50, 100].map(x => opt('n', x, x + ' 题')).join('')}</div>
+      <div class="fld">顺序</div><div class="opt-row">${opt('order', 'rand', '随机')}${opt('order', 'new', '从新到旧')}</div>
+      <div class="fld">方式</div><div class="opt-row">${opt('mode', 'practice', '练习')}${opt('mode', 'memo', '背题')}${opt('fresh', true, '只出没做过的')}${opt('fresh', false, '做过的也出')}</div>
+      <button class="btn block" id="go" ${n ? '' : 'disabled style="opacity:.5"'}>${n ? `开始（共 ${Math.min(n, TS.n)} 题，可选 ${n.toLocaleString()} 道）` : '这个范围里没有题了'}</button>`);
+    $('#sheet').querySelectorAll('[data-k]').forEach(b => b.onclick = () => { const v = b.dataset.v; TS[b.dataset.k] = v === 'true' ? true : v === 'false' ? false : isNaN(+v) ? v : +v; draw(); });
+    $('#go').onclick = () => {
+      let qs = pool(); if (!qs.length) return;
+      qs = TS.order === 'rand' ? shuffle(qs) : qs.sort((a, b) => QM[b][3] - QM[a][3] || b - a);
+      qs = qs.slice(0, TS.n);
+      // 资料分析：同一份材料的题放在一起
+      if (f.m === 5 && TS.order === 'rand') qs.sort((a, b) => QM[a][0] - QM[b][0] || a - b);
+      startSes({ k: 'topic', mode: TS.mode, q: qs, title });
+    };
+  };
+  draw();
+}
+
+// ---------- 错题本 / 收藏 ----------
+function wrongPage(tab) {
+  tabs('wrong');
+  const name = tab === 'star' ? 'star' : 'wrong', list = bookList(name);
+  const by = [[], [], [], [], [], []]; for (const q of list) if (QM[q]) by[qMod(q)].push(q);
+  const seg = `<div class="seg"><button class="${name === 'wrong' ? 'on' : ''}" data-s="wrong">错题本 ${totals().wrong}</button><button class="${name === 'star' ? 'on' : ''}" data-s="star">收藏 ${totals().star}</button></div>`;
+  let body;
+  if (!list.length) body = `<div class="empty">${name === 'wrong' ? '还没有错题。练习时做错的题会自动收进来，重做答对后自动移出。' : '还没有收藏。做题时点右上角 ☆ 收藏。'}</div>`;
+  else body = `<button class="primary" id="all"><span><b>${name === 'wrong' ? '错题全部重做' : '收藏全部练一遍'}</b><span>${list.length} 道 · 最近的在前${name === 'wrong' ? ' · 答对自动移出' : ''}</span></span><span class="go">›</span></button>
+    <div class="list">${by.map((qs, mi) => qs.length ? `<div class="row"><span class="m"><b>${MN()[mi]}</b><span>${qs.length} 道 · ${topTypes(qs)}</span></span><button class="btn sm ghost" data-m="${mi}" data-md="memo">背</button><button class="btn sm" data-m="${mi}" data-md="practice">重做</button></div>` : '').join('')}</div>
+    ${name === 'wrong' ? '<div class="note">错题来源：练习、每日一练、专项和模考里做错的题</div>' : ''}`;
+  app.innerHTML = `<div class="top"><h1>${name === 'wrong' ? '错题本' : '收藏'}</h1></div>${seg}${body}`;
+  app.querySelectorAll('[data-s]').forEach(b => b.onclick = () => replace('wrong/' + b.dataset.s));
+  const a = $('#all'); if (a) a.onclick = () => startSes({ k: name, mode: 'practice', q: list, title: name === 'wrong' ? '错题重做' : '收藏' });
+  app.querySelectorAll('[data-m]').forEach(b => b.onclick = () => startSes({ k: name, mode: b.dataset.md, q: by[+b.dataset.m], title: (name === 'wrong' ? '错题 · ' : '收藏 · ') + MN()[+b.dataset.m] }));
+}
+function topTypes(qs) { const c = {}; for (const q of qs) { const t = qType(q); c[t] = (c[t] || 0) + 1; } return Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([t, n]) => `${t} ${n}`).join('、'); }
+
+// ---------- 做题 ----------
+// spec: {k:'paper'|'exam'|'topic'|'daily'|'wrong'|'star'|'review', pid, m, mode, q, title}
+let SES = null, timerId = 0;
+function specQids(sp) {
+  if (sp.k === 'paper' || sp.k === 'exam') return sp.m != null ? modQids(sp.pid, sp.m) : P(sp.pid).q;
+  if (sp.k === 'review') { const ex = S.ex[sp.pid], qs = P(sp.pid).q; return sp.wrongOnly ? qs.filter((q, i) => QT[q] && ex.a[i] !== QT[q].a) : qs; }
+  return sp.q.filter(q => QM[q]);
+}
+function specTitle(sp) {
+  if (sp.k === 'paper') return pname(sp.pid) + (sp.m != null ? ' · ' + MN()[sp.m] : '');
+  if (sp.k === 'exam') return '模考 · ' + pname(sp.pid);
+  if (sp.k === 'review') return '解析 · ' + pname(sp.pid);
+  return sp.title || '练习';
+}
+async function startSes(sp, i = 0) {
+  if (sp.k === 'paper' || sp.k === 'exam' || sp.k === 'review') { if (!P(sp.pid)) return toast('这套卷找不到了'); }
+  closeSheet();
+  STACK.push('do');
+  tabs(null);
+  app.innerHTML = `<div class="loadbox">正在载入题目…<div class="sub" id="lp"></div></div>`;
+  let qids = specQids(sp);
+  try { await ensure(sp.k === 'review' ? P(sp.pid).q : qids, (a, b) => { const e = $('#lp'); if (e) e.textContent = `${a}/${b}`; }); }
+  catch (e) { app.innerHTML = hdr('载入失败') + `<div class="empty">网络不太好，题目没载入成功。<br><br><button class="btn" id="retry">重试</button></div>`; $('#retry').onclick = () => { STACK.pop(); startSes(sp, i); }; return; }
+  if (sp.k === 'review') qids = specQids(sp);
+  if (!qids.length) { app.innerHTML = hdr(specTitle(sp)) + `<div class="empty">这里没有题了 🎉</div>`; return; }
+  SES = { sp, qids, i: Math.max(0, Math.min(i, qids.length - 1)), mode: sp.mode, title: specTitle(sp), picked: {}, sel: '', t0: Date.now(), okN: 0, doneN: 0 };
+  if (sp.k === 'exam') {
+    let ex = S.ex[sp.pid];
+    if (!ex || ex.done) { ex = S.ex[sp.pid] = { a: {}, tt: {}, used: 0, done: false, prev: ex && ex.done ? ex.res : null }; touch('core'); }
+    SES.ex = ex;
+    timerId = setInterval(tick, 1000);
+  }
+  if (sp.k === 'review') { SES.mode = 'review'; SES.ex = S.ex[sp.pid]; SES.map = qids.map(q => P(sp.pid).q.indexOf(q)); }
+  renderQ();
+}
+function stopExam() { clearInterval(timerId); if (SES && SES.ex && !SES.ex.done && SES.mode === 'exam') { lapQ(); touch('core'); } }
+function lapQ() { if (!SES) return; const now = Date.now(), dt = (now - SES.t0) / 1000; SES.t0 = now; if (SES.mode === 'exam') { const k = SES.i; SES.ex.tt[k] = (SES.ex.tt[k] || 0) + dt; } return dt; }
+function tick() {
+  if (!SES || SES.mode !== 'exam' || document.hidden) return;
+  const ex = SES.ex; ex.used += 1;
+  const left = P(SES.sp.pid).lim * 60 - ex.used, el = $('#timer');
+  if (el) { el.textContent = fmtT(left); el.classList.toggle('low', left < 300); }
+  if (ex.used % 15 === 0) touch('core');
+  if (left <= 0) { toast('时间到，自动交卷'); submitExam(); }
+}
+function qInfo(q) {
+  const pid = FIRSTP[q], n = QM[q][4];
+  let src = '';
+  if (SES.sp.pid && SES.sp.k !== 'topic') { const qs = P(SES.sp.pid).q; src = `第 ${qs.indexOf(q) + 1} 题`; }
+  else if (pid) src = `${pname(pid)} 第 ${P(pid).q.indexOf(q) + 1} 题`;
+  return `<span class="badge">${MN()[qMod(q)]} · ${esc(qType(q))}</span><span>${esc(src)}</span>${n > 1 ? `<span class="badge ok">${n} 套卷考过</span>` : ''}`;
+}
+function curChosen(q) {
+  if (SES.mode === 'exam') return SES.ex.a[SES.i];
+  if (SES.mode === 'review') return SES.ex.a[SES.map[SES.i]];
+  return SES.picked[q];
+}
+function renderQ() {
+  const q = SES.qids[SES.i], d = QT[q], mode = SES.mode, n = SES.qids.length;
+  if (mode !== 'exam' && mode !== 'review') { S.last = { spec: SES.sp, i: SES.i, label: `${SES.title} · 第 ${SES.i + 1}/${n} 题（${mode === 'memo' ? '背题' : '练习'}）` }; touch('core'); }
+  if (mode === 'exam') SES.ex.i = SES.i;
+  const chosen = curChosen(q);
+  const reveal = mode === 'memo' || mode === 'review' || (mode !== 'exam' && chosen != null);
+  const multi = d.a && d.a.length > 1;
+  const right = mode === 'exam' ? `<span class="timer" id="timer">${fmtT(P(SES.sp.pid).lim * 60 - SES.ex.used)}</span>` : '';
+  let html = `<div class="top"><button class="back" aria-label="返回">‹</button><h1 style="font-size:15px">${esc(SES.title)}</h1>${right}<span class="prog">${SES.i + 1}/${n}</span>
+    <button class="icon ${isStar(q) ? 'on' : ''}" id="star" aria-label="收藏">${isStar(q) ? '★' : '☆'}</button><button class="icon" id="card" aria-label="答题卡">▦</button></div>
+    <div id="qa"><div class="qhead">${qInfo(q)}</div>`;
+  if (d.x && MAT[d.x]) html += `<div class="mat ${qMod(q) === 5 ? '' : 'fold'}" id="mat"><div class="mat-h"><span>${qMod(q) === 5 ? '资料' : '材料'}</span><button id="matT">${qMod(q) === 5 ? '收起' : '展开'}</button></div><div class="mat-b">${MAT[d.x]}</div></div>`;
+  html += `<div class="qbody">${d.s}</div>`;
+  if (d.k) {
+    const sel = mode === 'exam' ? (chosen || '') : (SES.sel || '');
+    html += `<div class="opts ${d.o ? '' : 'row4'}">${[...d.k].map((k, j) => {
+      let c = '';
+      if (reveal && d.a) c = d.a.includes(k) ? 'right' : (chosen && chosen.includes(k) ? 'wrong' : '');
+      else if (sel.includes(k)) c = 'sel';
+      return `<button class="opt ${c}" data-k="${k}"><span class="ok">${k}</span><span class="ot">${d.o ? d.o[j] : ''}</span></button>`;
+    }).join('')}</div>`;
+    if (multi && !reveal) html += `<div class="sub" style="margin:-6px 0 10px">多选题：选好后点「确认」</div>`;
+  } else if (!reveal) html += `<div class="opts"><button class="btn ghost block" id="showAns">这道题没有选项，点这里看答案</button></div>`;
+  if (reveal) {
+    const ans = d.a || d.at || '略';
+    if (mode === 'memo') html += `<div class="fb memo"><span>答案 ${esc(ans)}</span><small>${rec(q) ? (rec(q)[0] ? '上次做对了' : '上次做错了') : ''}</small></div>`;
+    else if (!d.a || !d.k) html += `<div class="fb memo"><span>答案：${esc(ans)}</span></div>`;
+    else { const ok = chosen === d.a; html += `<div class="fb ${ok ? 'ok' : 'bad'}"><span>${chosen == null ? `未作答 · 正确答案 ${d.a}` : ok ? '✓ 回答正确' : `✗ 你选 ${chosen}，正确答案 ${d.a}`}</span><small>${!ok && mode === 'practice' ? '已加入错题本' : ''}</small></div>`; }
+    html += d.e ? `<div class="exp"><div class="exp-h">解析</div>${d.e}</div>` : `<div class="exp sub">这道题原题库没有解析</div>`;
+  }
+  html += `</div><div class="qnav"><button class="btn line" id="prev" ${SES.i ? '' : 'disabled style="opacity:.4"'}>上一题</button>`;
+  if (multi && !reveal && mode !== 'exam') html += `<button class="btn" id="confirm">确认</button>`;
+  else if (SES.i < n - 1) html += `<button class="btn" id="next">下一题</button>`;
+  else html += mode === 'exam' ? `<button class="btn" id="submit">交卷</button>` : `<button class="btn" id="finish">完成</button>`;
+  html += '</div>';
+  app.innerHTML = html;
+  hydrate(app);
+  window.scrollTo(0, 0);
+  // 预取下一题图片
+  const nq = SES.qids[SES.i + 1]; if (nq && QT[nq]) for (const k of (QT[nq].s + (QT[nq].x ? MAT[QT[nq].x] || '' : '')).match(/data-i="[^"]+"/g) || []) imgURL(k.slice(8, -1)).catch(() => { });
+  bindQ(q, d, reveal, multi);
+}
+function bindQ(q, d, reveal, multi) {
+  const mode = SES.mode;
+  app.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+    const k = b.dataset.k;
+    if (mode === 'exam') {
+      let a = SES.ex.a[SES.i] || '';
+      a = multi ? (a.includes(k) ? a.replace(k, '') : [...a + k].sort().join('')) : (a === k ? '' : k);
+      if (a) SES.ex.a[SES.i] = a; else delete SES.ex.a[SES.i];
+      touch('core');
+      if (!multi && a && SES.i < SES.qids.length - 1) { renderQ(); setTimeout(() => { if (SES && SES.mode === 'exam' && SES.ex.a[SES.i] === a) go(1); }, 260); }
+      else renderQ();
+      return;
+    }
+    if (reveal) return;
+    if (multi) { SES.sel = SES.sel.includes(k) ? SES.sel.replace(k, '') : [...SES.sel + k].sort().join(''); renderQ(); return; }
+    answer(q, d, k);
+  });
+  const on = (id, fn) => { const e = $('#' + id); if (e) e.onclick = fn; };
+  on('confirm', () => { if (!SES.sel) return toast('先选答案'); answer(q, d, SES.sel); });
+  on('showAns', () => { SES.picked[q] = ''; renderQ(); });
+  on('prev', () => go(-1));
+  on('next', () => go(1));
+  on('submit', confirmSubmit);
+  on('finish', finish);
+  on('card', answerCard);
+  on('star', () => { setBook('star', q, !isStar(q)); toast(isStar(q) ? '已收藏' : '已取消收藏'); renderQ(); });
+  on('matT', () => { const m = $('#mat'); m.classList.toggle('fold'); $('#matT').textContent = m.classList.contains('fold') ? '展开' : '收起'; });
+  // 左右滑动切题
+  const qa = $('#qa'); let sx = 0, sy = 0;
+  qa.addEventListener('touchstart', e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+  qa.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) > 70 && Math.abs(dx) > 2 * Math.abs(dy) && !e.target.closest('.tw,.mat-b')) go(dx < 0 ? 1 : -1);
+  }, { passive: true });
+}
+function answer(q, d, k) {
+  const dt = lapQ();
+  SES.picked[q] = k; SES.sel = '';
+  if (d.a) {
+    const ok = k === d.a;
+    record(q, ok, dt);
+    SES.doneN++; if (ok) SES.okN++;
+    if (ok && (SES.sp.k === 'wrong')) setBook('wrong', q, false);
+    if (ok && S.autoNext && SES.i < SES.qids.length - 1) { renderQ(); setTimeout(() => { if (SES && SES.qids[SES.i] === q) go(1); }, 700); return; }
+  }
+  renderQ();
+}
+function go(step) {
+  const n = SES.qids.length, j = SES.i + step;
+  if (j < 0 || j >= n) return;
+  lapQ(); SES.i = j; SES.sel = ''; renderQ();
+}
+function answerCard() {
+  const mode = SES.mode;
+  let groups = [[null, SES.qids.map((q, i) => i)]];
+  if (SES.sp.pid && (SES.sp.k === 'exam' || SES.sp.k === 'paper' && SES.sp.m == null)) groups = P(SES.sp.pid).mods.map(([mi, st, n]) => [MN()[mi], Array.from({ length: n }, (_, j) => st + j)]);
+  const cls = i => {
+    const q = SES.qids[i];
+    if (mode === 'exam') return SES.ex.a[i] ? 'a' : '';
+    if (mode === 'review') { const c = SES.ex.a[SES.map[i]]; return c === QT[q].a ? 'r' : 'w'; }
+    if (SES.picked[q] != null) return SES.picked[q] === QT[q].a ? 'r' : 'w';
+    return '';
+  };
+  const answered = mode === 'exam' ? Object.keys(SES.ex.a).length : Object.keys(SES.picked).length;
+  const s = sheet(`<h3>答题卡 <span class="sub">已答 ${answered}/${SES.qids.length}</span><button data-close>✕</button></h3>
+    ${groups.map(([name, is]) => `${name ? `<div class="fld">${name}</div>` : ''}<div class="cardgrid">${is.map(i => `<button data-j="${i}" class="${cls(i)} ${i === SES.i ? 'cur' : ''}">${i + 1}</button>`).join('')}</div>`).join('')}
+    ${mode === 'exam' ? '<button class="btn block" id="sub2">交卷</button>' : ''}`);
+  s.querySelectorAll('[data-j]').forEach(b => b.onclick = () => { closeSheet(); lapQ(); SES.i = +b.dataset.j; SES.sel = ''; renderQ(); });
+  const b = $('#sub2'); if (b) b.onclick = confirmSubmit;
+}
+function confirmSubmit() {
+  const left = SES.qids.length - Object.keys(SES.ex.a).length;
+  const s = sheet(`<h3>确定交卷？<button data-close>✕</button></h3><p>${left ? `还有 <b>${left}</b> 题没答。` : '全部答完了。'}已用时 ${fmtT(SES.ex.used)}。</p>
+    <div class="grid2"><button class="btn line" data-close>再检查一下</button><button class="btn" id="yes">交卷看成绩</button></div>`);
+  $('#yes').onclick = () => { closeSheet(); submitExam(); };
+}
+function submitExam() {
+  clearInterval(timerId); lapQ();
+  const sp = SES.sp, p = P(sp.pid), ex = SES.ex;
+  let ok = 0, n = 0, wsum = 0, wok = 0;
+  const mods = p.mods.map(([mi, st, cnt]) => {
+    let a = 0, b = 0, t = 0;
+    for (let i = st; i < st + cnt; i++) {
+      const q = p.q[i], d = QT[q]; t += ex.tt[i] || 0;
+      if (!d || !d.a) continue;
+      b++; wsum += W[mi];
+      const c = ex.a[i];
+      if (c === d.a) { a++; wok += W[mi]; }
+      if (c != null) record(q, c === d.a, ex.tt[i]);
+    }
+    ok += a; n += b;
+    return [mi, a, b, Math.round(t)];
+  });
+  ex.done = true;
+  ex.res = { score: Math.round(1000 * wok / (wsum || 1)) / 10, ok, n, used: ex.used, blank: p.q.filter((q, i) => QT[q] && QT[q].a && ex.a[i] == null).length, mods, at: Date.now() };
+  S.hist.push([Date.now(), sp.pid, ex.res.score, ok, n, ex.used]);
+  if (S.hist.length > 200) S.hist = S.hist.slice(-200);
+  touch('core');
+  SES = null;
+  STACK[STACK.length - 1] = 'report/' + sp.pid;
+  render();
+}
+function finish() {
+  const n = SES.doneN, ok = SES.okN;
+  const s = sheet(`<h3>这一组做完了<button data-close>✕</button></h3>
+    ${n ? `<div class="score"><b>${pct(ok, n)}<small>%</small></b><span>本次答对 ${ok}/${n} 题${n - ok ? ` · ${n - ok} 道错题已进错题本` : ''}</span></div>` : '<p>可以去错题本复习，或者换一组继续。</p>'}
+    <div class="grid2" style="margin-top:12px"><button class="btn line" id="again">从头再看</button><button class="btn" id="done">返回</button></div>`);
+  $('#again').onclick = () => { closeSheet(); SES.i = 0; SES.picked = {}; SES.doneN = SES.okN = 0; renderQ(); };
+  $('#done').onclick = () => { closeSheet(); S.last = null; touch('core'); back(); };
+}
+function doPage() { if (SES) renderQ(); else back(); }
+
+// ---------- 成绩 ----------
+function reportPage(pid) {
+  tabs(null);
+  const p = P(pid), ex = S.ex[pid];
+  if (!ex || !ex.res) return paperPage(pid);
+  const r = ex.res, wrongN = r.n - r.ok - r.blank;
+  const prev = ex.prev ? `<span>上次 ${ex.prev.score} 分，${r.score >= ex.prev.score ? '提高' : '下降'} ${Math.abs(Math.round((r.score - ex.prev.score) * 10) / 10)} 分</span>` : '';
+  const worst = r.mods.filter(m => m[2]).sort((a, b) => a[1] / a[2] - b[1] / b[2])[0];
+  app.innerHTML = hdr('模考成绩') + `<div class="card"><div class="sub" style="text-align:center">${esc(pname(pid))}</div>
+      <div class="score"><b>${r.score}</b><span>估分（按模块加权折算百分制）</span>${prev}</div>
+      <div class="stats3" style="margin:10px 0 0"><div class="stat"><b>${r.ok}</b><span>答对</span></div><div class="stat"><b>${wrongN}</b><span>答错</span></div><div class="stat"><b>${r.blank}</b><span>未答</span></div></div>
+      <div class="sub" style="text-align:center;margin-top:8px">正确率 ${pct(r.ok, r.n)}% · 用时 ${fmtT(r.used)}（限时 ${p.lim} 分钟）</div></div>
+    <div class="card"><h2>各模块</h2><table class="t"><tr><th>模块</th><th>答对</th><th>正确率</th><th>用时</th><th>每题</th></tr>
+      ${r.mods.map(([mi, a, b, t]) => `<tr><td>${MN()[mi]}</td><td>${a}/${b}</td><td>${pct(a, b)}%</td><td>${fmtT(t)}</td><td>${b ? Math.round(t / b) + '秒' : '–'}</td></tr>`).join('')}</table></div>
+    ${worst ? `<div class="tip">这次<b>${MN()[worst[0]]}</b>正确率最低（${pct(worst[1], worst[2])}%），错题已进错题本，建议先把这部分错题看一遍解析，再去专项练习里补这个模块。</div>` : ''}
+    <div class="grid2"><button class="btn" id="rw">看错题解析（${r.n - r.ok}）</button><button class="btn ghost" id="ra">全卷解析</button></div>
+    <button class="btn line block" id="again" style="margin-top:10px">重新考一次</button>
+    <div class="note">估分说明：真实考试各题分值不同，这里按模块给不同权重（政治 0.7、常识 0.6、言语 0.8、数量 0.9、判断 0.7、资料 1.0）折算成 100 分，用来看自己的水平变化。</div>`;
+  $('#rw').onclick = () => startSes({ k: 'review', pid, wrongOnly: true, mode: 'review' });
+  $('#ra').onclick = () => startSes({ k: 'review', pid, mode: 'review' });
+  $('#again').onclick = () => { delete S.ex[pid].done; S.ex[pid] = { a: {}, tt: {}, used: 0, done: false, prev: r }; touch('core'); STACK.pop(); startSes({ k: 'exam', pid, mode: 'exam' }); };
+}
+
+// ---------- 分析 ----------
+function anaPage(tab) {
+  tabs('ana');
+  const seg = `<div class="seg"><button class="${tab === 'me' ? 'on' : ''}" data-s="me">我的学习</button><button class="${tab === 'stats' ? 'on' : ''}" data-s="stats">十年考情</button></div>`;
+  app.innerHTML = `<div class="top"><h1>分析</h1></div>${seg}<div id="ab"></div>`;
+  app.querySelectorAll('[data-s]').forEach(b => b.onclick = () => replace('ana/' + b.dataset.s));
+  $('#ab').innerHTML = tab === 'stats' ? statsHTML() : meHTML();
+  app.querySelectorAll('[data-tp]').forEach(b => b.onclick = () => { const [m, t] = b.dataset.tp.split(',').map(Number); TS.fresh = false; topicSetup({ m, t }); });
+  const h = $('#hot2'); if (h) h.onclick = () => topicSetup({ hot: 1 });
+}
+function meHTML() {
+  const tt = totals();
+  if (!tt.done) return `<div class="empty">还没有做题记录。<br>做几道题后，这里会显示你每个模块、每种题型的正确率、每天做题量和模考成绩变化。</div><button class="btn block" data-go="bank/topic">去专项练习</button>`;
+  // 模块、题型
+  const mod = [0, 1, 2, 3, 4, 5].map(() => [0, 0]), ty = {};
+  for (const b of S.rec) for (const k in b) { const q = +k; if (!QM[q]) continue; const mi = qMod(q), r = b[k]; mod[mi][0]++; mod[mi][1] += r[0]; const key = mi + ',' + QM[q][2]; (ty[key] ||= [0, 0])[0]++; ty[key][1] += r[0]; }
+  const weak = Object.entries(ty).filter(([, v]) => v[0] >= 5).sort((a, b) => a[1][1] / a[1][0] - b[1][1] / b[1][0]).slice(0, 6);
+  // 近 14 天
+  const days = [], d = new Date(); d.setDate(d.getDate() - 13);
+  for (let i = 0; i < 14; i++) { const k = today(d); days.push([k.slice(5), ...(S.day[k] || [0, 0, 0])]); d.setDate(d.getDate() + 1); }
+  const maxD = Math.max(10, ...days.map(x => x[1]));
+  const bw = 300 / 14;
+  const chart = `<svg class="chart" viewBox="0 -8 320 138" role="img" aria-label="近14天做题量">${[0, .5, 1].map(f => `<line x1="20" x2="320" y1="${10 + 90 * (1 - f)}" y2="${10 + 90 * (1 - f)}" stroke="var(--line)" stroke-width="1"/><text x="16" y="${13 + 90 * (1 - f)}" text-anchor="end">${Math.round(maxD * f)}</text>`).join('')}
+    ${days.map(([k, n, ok], i) => { const h = 90 * n / maxD, x = 20 + i * bw + 2; return `<rect x="${x}" y="${100 - h}" width="${bw - 4}" height="${h}" rx="2" fill="var(--acc)"/>${n ? `<text x="${x + (bw - 4) / 2}" y="${96 - h}" text-anchor="middle">${pct(ok, n)}%</text>` : ''}${i % 2 === 1 ? `<text x="${x + (bw - 4) / 2}" y="116" text-anchor="middle">${k.replace('-', '/')}</text>` : ''}`; }).join('')}</svg>`;
+  const tot = days.reduce((s, x) => [s[0] + x[1], s[1] + x[2], s[2] + x[3]], [0, 0, 0]);
+  // 模考
+  const hist = S.hist.slice(-12);
+  let hchart = '';
+  if (hist.length >= 2) {
+    const xs = i => 24 + i * (284 / (hist.length - 1)), ys = v => 100 - 80 * v / 100;
+    hchart = `<svg class="chart" viewBox="0 0 320 120" role="img" aria-label="模考估分变化">${[0, 50, 100].map(v => `<line x1="24" x2="308" y1="${ys(v)}" y2="${ys(v)}" stroke="var(--line)"/><text x="20" y="${ys(v) + 3}" text-anchor="end">${v}</text>`).join('')}
+      <polyline fill="none" stroke="var(--acc)" stroke-width="2" points="${hist.map((h, i) => xs(i) + ',' + ys(h[2])).join(' ')}"/>${hist.map((h, i) => `<circle cx="${xs(i)}" cy="${ys(h[2])}" r="${i === hist.length - 1 ? 4 : 2.5}" fill="var(--acc)"/>`).join('')}
+      <text x="${xs(hist.length - 1)}" y="${ys(hist[hist.length - 1][2]) - 8}" text-anchor="end">${hist[hist.length - 1][2]}</text></svg>`;
+  }
+  const wm = mod.map((v, i) => [i, v]).filter(x => x[1][0] >= 10).sort((a, b) => a[1][1] / a[1][0] - b[1][1] / b[1][0])[0];
+  const advice = [];
+  if (wm) advice.push(`<b>${MN()[wm[0]]}</b>是你目前最弱的模块（正确率 ${pct(wm[1][1], wm[1][0])}%），每天先做一组这个模块的专项。`);
+  if (weak[0]) { const [m, t] = weak[0][0].split(','); advice.push(`题型上<b>${esc(IDX.tyn[m][t])}</b>错得最多，点下面「去练」专门补。`); }
+  if (tt.wrong > 30) advice.push(`错题本里有 <b>${tt.wrong}</b> 道题，隔几天重做一遍，答对会自动移出。`);
+  if (!S.hist.length) advice.push('还没做过整卷模考，建议每周至少一次限时模考，练时间分配。');
+  return `<div class="stats3"><div class="stat"><b>${tt.done.toLocaleString()}</b><span>做过的题</span></div><div class="stat"><b>${pct(tt.ok, tt.done)}%</b><span>正确率</span></div><div class="stat"><b>${S.hist.length}</b><span>模考次数</span></div></div>
+    ${advice.length ? `<div class="tip">${advice.join('<br>')}</div>` : ''}
+    <div class="card"><h2>近 14 天 <small>${tot[0]} 题 · 正确率 ${pct(tot[1], tot[0])}% · ${Math.round(tot[2] / 60)} 分钟</small></h2>${chart}</div>
+    <div class="card"><h2>各模块 <small>正确率 · 已做/总题数</small></h2>${mod.map(([n, ok], mi) => `<div class="hbar"><span class="lb">${MN()[mi]}</span><span class="tr"><i style="width:${pct(ok, n)}%;background:var(--c${mi})"></i></span><em>${n ? pct(ok, n) + '%' : '–'}</em></div><div class="sub" style="margin:-6px 0 4px 6.2em">${n}/${modAll(mi).length.toLocaleString()} 道</div>`).join('')}</div>
+    ${weak.length ? `<div class="card"><h2>最需要补的题型 <small>至少做过 5 道</small></h2><div class="list" style="margin:0;border:0">${weak.map(([k, v]) => { const [m, t] = k.split(','); return `<div class="row" style="padding:9px 0"><span class="m"><b>${esc(IDX.tyn[m][t])}</b><span>${MN()[m]} · 做过 ${v[0]} 道 · 正确率 ${pct(v[1], v[0])}%</span></span><button class="btn sm" data-tp="${k}">去练</button></div>`; }).join('')}</div></div>` : ''}
+    <div class="card"><h2>模考成绩 <small>最近 ${hist.length} 次</small></h2>${hist.length ? hchart + `<table class="t">${hist.slice().reverse().slice(0, 6).map(h => `<tr><td>${P(h[1]) ? esc(pname(h[1])) : '—'}</td><td>${h[2]} 分</td><td>${h[3]}/${h[4]}</td><td>${fmtT(h[5])}</td></tr>`).join('')}</table>` : '<div class="sub">还没有模考记录。去「题库 → 历年真卷」挑一套做限时模考。</div>'}</div>`;
+}
+function statsHTML() {
+  const st = IDX.stats, ys = st.years;
+  const maxP = Math.max(...st.yrPapers), bw = 296 / ys.length;
+  const ychart = `<svg class="chart" viewBox="0 0 320 120" role="img" aria-label="每年卷数">${ys.map((y, i) => { const h = 80 * st.yrPapers[i] / maxP, x = 20 + i * bw + 3; return `<rect x="${x}" y="${96 - h}" width="${bw - 6}" height="${h}" rx="2" fill="var(--acc)"/><text x="${x + (bw - 6) / 2}" y="${92 - h}" text-anchor="middle">${st.yrPapers[i]}</text><text x="${x + (bw - 6) / 2}" y="110" text-anchor="middle">${String(y).slice(2)}</text>`; }).join('')}</svg>`;
+  const stack = (arr) => { const t = arr.reduce((a, b) => a + b, 0) || 1; return `<span class="stack">${arr.map((v, i) => `<i style="width:${100 * v / t}%;background:var(--c${i})" title="${MN()[i]} ${Math.round(100 * v / t)}%"></i>`).join('')}</span>`; };
+  const legend = `<div class="legend">${MN().map((n, i) => `<span><i style="background:var(--c${i})"></i>${n}</span>`).join('')}</div>`;
+  const spark = (arr, c) => { const m = Math.max(1, ...arr); return `<svg viewBox="0 0 66 18" width="66" height="18" aria-hidden="true"><polyline fill="none" stroke="${c}" stroke-width="1.5" points="${arr.map((v, i) => (3 + i * 60 / (arr.length - 1)).toFixed(1) + ',' + (16 - 14 * v / m).toFixed(1)).join(' ')}"/></svg>`; };
+  const gk = st.gk;
+  const gkRows = gk.map((r, i) => { const prev = gk[i - 1]; const chg = prev && Math.abs(r[1] - prev[1]) >= 8; return `<tr class="${chg ? 'hl' : ''}"><td>${r[0]}</td>${r.slice(1).map(v => `<td>${v || '–'}</td>`).join('')}<td>${r.slice(1).reduce((a, b) => a + b, 0)}</td></tr>`; }).join('');
+  const ansT = st.ans.reduce((s, a) => s.map((v, i) => v + a[i]), [0, 0, 0, 0]), ansN = ansT.reduce((a, b) => a + b, 0);
+  const reuse = st.reuseDist, rmax = Math.max(...reuse.map(x => x[1]));
+  const lawMax = st.law.length ? st.law[0][1] : 1;
+  // 题型趋势：比较 2016–2020 与 2022–2026 的占比
+  const yi = y => ys.indexOf(y);
+  const share = (mi, t, from, to) => { let a = 0, b = 0; for (const [tt] of st.types[mi]) { const arr = st.typeYear[mi + '|' + tt]; for (let y = from; y <= to; y++) { const v = arr[yi(y)] || 0; b += v; if (tt === t) a += v; } } return b ? a / b : 0; };
+  return `<div class="stats3"><div class="stat"><b>${st.papers}</b><span>套真卷</span></div><div class="stat"><b>${(st.qtotal / 1e4).toFixed(1)}万</b><span>题次</span></div><div class="stat"><b>${(st.uniq / 1e4).toFixed(2)}万</b><span>去重后</span></div></div>
+    <div class="tip">联考卷各省共用题目，所以 ${st.qtotal.toLocaleString()} 题次去重后是 <b>${st.uniq.toLocaleString()}</b> 道不同的题。其中 <b>${st.hotN}</b> 道被 5 套以上卷子用过，是最值得先刷的。<br><button class="btn sm" id="hot2" style="margin-top:6px">刷高频重复题</button></div>
+    <div class="card"><h2>每年收录的卷数</h2>${ychart}</div>
+    <div class="card"><h2>国考变了 <small>副省级卷各模块题量</small></h2><div class="tw2"><table class="t"><tr><th>年</th>${SHORT.map(s => `<th>${s}</th>`).join('')}<th>合计</th></tr>${gkRows}</table></div>
+      <div class="sub" style="margin-top:8px">标蓝的年份政治理论题量大幅变化：2025 年起国考政治理论从个位数涨到 20 题左右，言语、判断相应减少，时政和政治理论要单独留时间。</div></div>
+    <div class="card"><h2>各年模块占比 <small>所有卷合计</small></h2>${ys.map((y, i) => `<div class="srow"><span>${y}</span>${stack(st.yrMod[i])}</div>`).join('')}${legend}</div>
+    ${[0, 1, 2, 3, 4, 5].map(mi => { const tps = st.types[mi], tot = tps.reduce((s, x) => s + x[1], 0), mx = tps[0][1]; return `<div class="card"><h2>${MN()[mi]} <small>${tot.toLocaleString()} 道 · 右为十年走势</small></h2>
+      ${tps.map(([t, n]) => { const a = share(mi, t, 2016, 2020), b = share(mi, t, 2022, 2026), d = Math.round(100 * (b - a)); return `<div class="hbar" style="grid-template-columns:5.6em 1fr 2.8em 66px"><span class="lb">${esc(t)}</span><span class="tr"><i style="width:${100 * n / mx}%;background:var(--c${mi})"></i></span><em>${Math.round(100 * n / tot)}%</em>${spark(st.typeYear[mi + '|' + t], `var(--c${mi})`)}</div>${Math.abs(d) >= 4 ? `<div class="sub" style="margin:-6px 0 4px 6.2em">近 5 年占比${d > 0 ? '上升' : '下降'} ${Math.abs(d)} 个百分点</div>` : ''}`; }).join('')}
+      <button class="btn sm ghost" data-tp="${mi},-1" style="margin-top:6px">练${MN()[mi]}</button></div>`; }).join('')}
+    <div class="card"><h2>逻辑填空：反复当正确答案的成语</h2><div class="words">${st.four.slice(0, 50).map(([w, n]) => `<span>${esc(w)}<em>${n}</em></span>`).join('')}</div>
+      <h2 style="margin-top:14px">高频双字实词</h2><div class="words">${st.two.slice(0, 30).map(([w, n]) => `<span>${esc(w)}<em>${n}</em></span>`).join('')}</div>
+      <h2 style="margin-top:14px">高频关联词</h2><div class="words">${st.conj.map(([w, n]) => `<span>${esc(w)}<em>${n}</em></span>`).join('')}</div>
+      <div class="sub" style="margin-top:8px">统计的是正确选项里的词，同一道题只算一次</div></div>
+    ${st.law.length ? `<div class="card"><h2>法律常识：解析里最常引用的法律</h2>${st.law.slice(0, 12).map(([w, n]) => `<div class="hbar" style="grid-template-columns:8em 1fr 2.6em"><span class="lb">${esc(w)}</span><span class="tr"><i style="width:${100 * n / lawMax}%;background:var(--c1)"></i></span><em>${n}</em></div>`).join('')}</div>` : ''}
+    <div class="card"><h2>单选题答案分布 <small>去重后 ${ansN.toLocaleString()} 道</small></h2><table class="t"><tr><th>模块</th><th>A</th><th>B</th><th>C</th><th>D</th></tr>
+      ${st.ans.map((a, mi) => { const t = a.reduce((x, y) => x + y, 0); return `<tr><td>${MN()[mi]}</td>${a.map(v => `<td>${pct(v, t)}%</td>`).join('')}</tr>`; }).join('')}<tr><td><b>合计</b></td>${ansT.map(v => `<td><b>${pct(v, ansN)}%</b></td>`).join('')}</tr></table>
+      <div class="sub" style="margin-top:8px">四个选项基本各占四分之一，蒙题没有捷径，会的题一定要做对。</div></div>
+    <div class="card"><h2>一道题被几套卷用过</h2>${reuse.map(([k, n]) => `<div class="hbar" style="grid-template-columns:4.4em 1fr 4em"><span class="lb">${k >= 10 ? '10 套以上' : k + ' 套'}</span><span class="tr"><i style="width:${100 * n / rmax}%"></i></span><em>${n.toLocaleString()}</em></div>`).join('')}</div>
+    <div class="note">网友回忆版题库，个别卷不完整，统计看趋势就好。题型沿用题库原始标注。</div>`;
+}
+
+// ---------- 设置 ----------
+function settings() {
+  tabs(null);
+  const tt = totals();
+  app.innerHTML = hdr('设置') + `<div class="card"><h2>题目字号 <small id="fsv">${S.fs}px</small></h2><input type="range" id="fs" min="14" max="22" step="1" value="${S.fs}"><div class="qbody" style="font-size:${S.fs}px" id="fsd">下列各句中，没有语病的一项是：</div></div>
+    <div class="list"><div class="switch"><span>答对自动跳到下一题<div class="sub">答错时会停下来让你看解析</div></span><button class="tg ${S.autoNext ? 'on' : ''}" id="an" aria-label="答对自动下一题"></button></div>
+    <button class="row" data-go="pick"><span class="m"><b>考试地区</b><span>${esc(S.region || '未选择')}</span></span><span class="go">›</span></button></div>
+    <div class="card"><h2>做题记录</h2><div class="sub">做过 ${tt.done} 道 · 错题 ${tt.wrong} · 收藏 ${tt.star} · 模考 ${S.hist.length} 次<br>${esc(sync.state)}</div>
+      <button class="btn danger sm" id="clr" style="margin-top:10px">清空全部记录</button></div>
+    <div class="card"><h2>关于题库</h2><div class="sub">2016–2026 年国考、31 个省区市省考、深圳/广州市考、选调，${IDX.stats.papers} 套卷。题目为网友回忆版，个别题缺图；答案和解析来自开源项目 ERRRC/xingcezhenti（github.com/ERRRC/xingcezhenti），版权归原出处，仅供个人学习。</div></div>`;
+  const fs = $('#fs');
+  fs.oninput = () => { S.fs = +fs.value; $('#fsv').textContent = S.fs + 'px'; $('#fsd').style.fontSize = S.fs + 'px'; document.documentElement.style.setProperty('--fs', S.fs + 'px'); };
+  fs.onchange = () => touch('core');
+  $('#an').onclick = () => { S.autoNext = !S.autoNext; touch('core'); $('#an').classList.toggle('on', S.autoNext); };
+  $('#clr').onclick = () => {
+    sheet(`<h3>清空全部记录？<button data-close>✕</button></h3><p>做题记录、错题本、收藏和模考成绩都会删除，不能恢复。</p><div class="grid2"><button class="btn line" data-close>取消</button><button class="btn danger" id="yes">确定清空</button></div>`);
+    $('#yes').onclick = () => { const keep = { region: S.region, fs: S.fs }; S = Object.assign(DEF(), keep); for (const b of ['core', ...Array.from({ length: 16 }, (_, i) => 'rec' + i), ...[0, 1, 2, 3].flatMap(i => ['wrong' + i, 'star' + i])]) touch(b); closeSheet(); toast('已清空'); settings(); };
+  };
+}
+
+// ---------- 启动 ----------
+(async function boot() {
+  document.documentElement.style.setProperty('--fs', S.fs + 'px');
+  try { IDX = await gzJSON('index.txt'); }
+  catch (e) { app.innerHTML = `<div class="empty">题库没有加载成功，请检查网络后重新打开。<br><br><button class="btn" onclick="location.reload()">重新加载</button></div>`; return; }
+  QM = IDX.qm;
+  for (const pid in IDX.papers) for (const q of IDX.papers[pid].q) if (!FIRSTP[q]) FIRSTP[q] = pid;
+  STACK = ['home'];
+  render();
+  sync.start();
+})();
+</script>
+
+</body>
+</html>
