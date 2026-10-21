@@ -177,6 +177,7 @@ def task_line(p, m):
     return "- [ ] %s · %d 题 · 限时 %d 分钟" % (link(p, m, "%d %s · %s" % (p["year"], nick(p), SHORT[m])), n, minutes(m, n))
 
 
+PLANS = []
 for region in regions:
     mocks = pick_mocks(region)
     chosen = pick_practice(region, mocks)
@@ -208,6 +209,10 @@ for region in regions:
         days[study_days[-1]].append(t)
 
     own_cnt = len(by_region[region])
+    PLANS.append({"region": region,
+                  "supplemented": region != "国考" and (own_cnt < 8 or any(p["region"] == "国考" for p in mocks)),
+                  "days": {d: [[p["title"], m] for p, m in days[d]] for d in days},
+                  "mocks": [p["title"] for p in mocks]})
     L = ["# %s · 30 天刷题计划" % region, "",
          "%s · %s · %s" % (HOME, region_link(region, "%s 全部卷" % region), WRONG), "",
          "> **怎么用**：每天把当天的方框全部打勾就算完成。第 1–24 天按模块专项练，从老卷刷到新卷；"
@@ -394,3 +399,6 @@ H += ["", "## 30 天计划", "",
 write("00-从这里开始.md", "\n".join(H))
 
 print("regions", len(regions), "files", sum(len(f) for _, _, f in os.walk(base)))
+
+if len(sys.argv) > 3:
+    json.dump(PLANS, open(sys.argv[3], "w", encoding="utf-8"), ensure_ascii=False)
