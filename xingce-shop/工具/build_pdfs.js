@@ -81,6 +81,7 @@ const CSS = `
 * { box-sizing: border-box; }
 body { font-family: 'Noto Sans SC', sans-serif; font-size: 10.5pt; line-height: 1.7; color: #1b1b1f; margin: 0; }
 p { margin: 0 0 1.2mm; }
+.qb p, .mat p { white-space: pre-line; }
 img { max-width: 100%; height: auto; }
 img[flag="tex"] { vertical-align: middle; max-width: none; }
 .cover { border-bottom: 2px solid #1b1b1f; padding-bottom: 3mm; margin-bottom: 4mm; }
