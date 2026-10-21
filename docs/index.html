@@ -487,7 +487,7 @@ function home() {
       <button class="tile" data-go="ana/stats"><i><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17h14M5 14V9M10 14V4M15 14v-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg></i><b>十年考情</b><span>题型趋势、高频词</span></button>
     </div>
     ${!window.claude && !matchMedia('(display-mode: standalone)').matches && !navigator.standalone ? '<div class="tip">想像 App 一样从桌面打开：iPhone 用 Safari 点底部「分享 → 添加到主屏幕」；安卓在浏览器菜单里点「添加到桌面」。</div>' : ''}
-    <div class="note">网友回忆版真题 · 答案和解析来自开源项目 ERRRC/xingcezhenti<br>${esc(sync.state)}</div>`;
+    <div class="note">${esc(sync.state)}</div>`;
   $('#daily').onclick = () => startSes({ k: 'daily', mode: 'practice', q: ds.q, title: '每日一练 ' + ds.d.slice(5) });
   $('#hot').onclick = () => topicSetup({ hot: 1 });
   const c = $('#cont'); if (c) c.onclick = () => startSes(S.last.spec, S.last.i);
