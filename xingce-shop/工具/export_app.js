@@ -3,6 +3,8 @@
 // 解析目录里放我们自己写的原创解析：每个 .json 是 {qid: 解析文字}，按 qid 对上题目（同一道题在多套卷里共用一份）
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
 const [repo, site, fontsDir, plansJson, statsMd, expDir] = process.argv.slice(2);
+// WITH_ORIG=1 时额外带上原题库解析（字段 oe），只用于用户自己学习的个人版，不进可分发的包
+const WITH_ORIG = process.env.WITH_ORIG === '1';
 const EXP = {};
 if (expDir && fs.existsSync(expDir)) for (const f of fs.readdirSync(expDir).sort()) if (f.endsWith('.json')) Object.assign(EXP, JSON.parse(fs.readFileSync(path.join(expDir, f), 'utf8')));
 const { marked } = require(path.join(fontsDir, 'node_modules/marked'));
@@ -14,17 +16,28 @@ const MIN_PER_Q = [0.5, 0.5, 0.875, 1.0, 0.875, 1.25];
 const REGION_ORDER = ['国考', '北京', '天津', '河北', '山西', '内蒙古', '辽宁', '吉林', '黑龙江', '上海', '江苏', '浙江', '安徽', '福建', '江西', '山东', '河南', '湖北', '湖南', '广东', '广西', '海南', '重庆', '四川', '贵州', '云南', '西藏', '陕西', '甘肃', '青海', '宁夏', '新疆', '深圳市考', '广州市考', '选调'];
 const SAN = {
   allowedTags: ['p', 'br', 'img', 'b', 'strong', 'i', 'em', 'u', 'sub', 'sup', 'span', 'div', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'ul', 'ol', 'li', 'blockquote', 'hr'],
-  allowedAttributes: { img: ['src', 'width', 'height'], td: ['colspan', 'rowspan'], th: ['colspan', 'rowspan'] },
+  allowedAttributes: { img: ['src', 'width', 'height'], td: ['colspan', 'rowspan'], th: ['colspan', 'rowspan'], p: ['class'] },
+  allowedClasses: { p: ['src'] },
   allowedSchemes: [], allowProtocolRelative: false,
   exclusiveFilter: f => f.tag === 'img' && !/^img\/[tf]\/[\w.-]+$/.test(f.attribs.src || ''),
 };
 const imgs = new Set();
+let missing = 0;
 function clean(html) {
   html = html.replace(/✅/g, '').replace(/src="\.\.\/90-图片\/(题目图|公式图)\/([^"]+)"/g, (_, d, f) => {
+    if (!fs.existsSync(path.join(repo, '90-图片', d, f))) { missing++; return 'src="missing"'; }  // 原库缺图：去掉这张图
     imgs.add(`${d}/${f}`);
     return `src="img/${d === '题目图' ? 't' : 'f'}/${f}"`;
   });
   return sanitize(html, SAN).trim();
+}
+// 原解析只做机械清理：去掉“故正确答案为X”这类重复句，出处单独一行
+function origExp(lines) {
+  const t = lines.join('\n')
+    .replace(/(本题为选非题，)?故(正确)?答案为[A-H]+[。.]?/g, '')
+    .replace(/【文段出处】(.*)/g, '<p class="src">出处：$1</p>').trim();
+  if (t.replace(/<[^>]+>/g, '').trim().length < 4) return {};
+  return { oe: clean(marked.parse(t)) };
 }
 const id = s => crypto.createHash('md5').update(s).digest('hex').slice(0, 8);
 function nick(short) {
@@ -43,12 +56,13 @@ function parseFile(file) {
   for (; i < lines.length; i++) {
     const l = lines[i]; let m;
     if (/^#{2,3} 材料 \d+/.test(l)) { cur = { kind: 'mat', lines: [] }; blocks.push(cur); mode = 'body'; continue; }
-    if ((m = l.match(/^#{2,3} 第 (\d+) 题　<sub>qid (\d+) · (.*?)<\/sub>/))) { cur = { kind: 'q', qid: +m[2], type: m[3], lines: [], ans: null }; blocks.push(cur); mode = 'body'; continue; }
+    if ((m = l.match(/^#{2,3} 第 (\d+) 题　<sub>qid (\d+) · (.*?)<\/sub>/))) { cur = { kind: 'q', qid: +m[2], type: m[3], lines: [], ans: null, expl: [] }; blocks.push(cur); mode = 'body'; continue; }
     if (!cur) continue;
     if ((m = l.match(/^\*\*答案\*\*：(.*)$/)) && cur.kind === 'q') { cur.ans = m[1].trim(); mode = 'after'; continue; }
     if (l.startsWith('**官方解析**')) { mode = 'expl'; continue; }
     if (l.trim() === '---') continue;
     if (mode === 'body') cur.lines.push(l);
+    else if (mode === 'expl' && cur.kind === 'q') cur.expl.push(l);
   }
   return { fm, blocks };
 }
@@ -87,7 +101,7 @@ for (const p of papers.values()) {
       if (mat !== null) matQs++;
       qs.push({ q: b.qid, m: mi, ty: b.type, s: clean(marked.parse(stem.join('\n'))),
         k: opts.map(o => o[0]).join(''), o: trivial ? null : opts.map(([, v]) => clean(marked.parseInline(v))),
-        a, x: mat, ...(EXP[b.qid] ? { e: EXP[b.qid] } : {}) });
+        a, x: mat, ...(EXP[b.qid] ? { e: EXP[b.qid] } : {}), ...(WITH_ORIG ? origExp(b.expl) : {}) });
       if (mat !== null) { left--; prevQid = b.qid; }
     }
     if (qs.length > start) mods.push([mi, start, qs.length - start]);
@@ -101,6 +115,7 @@ for (const p of papers.values()) {
 const regions = [...new Set([...REGION_ORDER, ...[...papers.values()].map(p => p.r)])].filter(r => [...papers.values()].some(p => p.r === r));
 index.regions = regions.map(r => ({ r, ps: Object.keys(index.papers).filter(k => index.papers[k].r === r).sort((a, b) => index.papers[b].y - index.papers[a].y || index.papers[a].t.localeCompare(index.papers[b].t)) }));
 index.mn = MN;
+if (WITH_ORIG) index.orig = true;
 fs.writeFileSync(path.join(site, 'data/index.json'), JSON.stringify(index));
 
 // plans: titles → ids, module dir → module index
@@ -126,4 +141,4 @@ for (const rel of imgs) {
   fs.copyFileSync(path.join(repo, '90-图片', rel), dst);
   bytes += fs.statSync(dst).size;
 }
-console.log(JSON.stringify({ papers: papers.size, questions: qTotal, explained: expTotal, noOpt, multi, matQs, images: imgs.size, imgMB: Math.round(bytes / 1e6) }));
+console.log(JSON.stringify({ papers: papers.size, questions: qTotal, explained: expTotal, missingImgs: missing, noOpt, multi, matQs, images: imgs.size, imgMB: Math.round(bytes / 1e6) }));

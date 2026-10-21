@@ -155,7 +155,7 @@ function paperPage(pid) {
   app.innerHTML = `<div class="top"><a class="back" href="#/r/${encodeURIComponent(p.r)}">‹</a><h1>${esc(p.y + ' ' + p.n)}</h1></div>
     <div class="sub">${esc(p.t)}</div>
     <div class="card"><h2>${pr.n} 题 <small>已做 ${pr.done}${pr.done ? ` · 正确率 ${pct(pr.ok, pr.done)}%` : ''}</small></h2><div class="bar"><i style="width:${pct(pr.done, pr.n)}%"></i></div>
-      <div class="sub" style="margin-top:8px">${p.ec ? `<span class="badge">解析</span> 本卷 ${p.ec === pr.n ? '全部' : p.ec + ' 道'}题目有解析` : '本卷解析还在编写中，可以先刷题看答案'}</div></div>
+      <div class="sub" style="margin-top:8px">${IDX.orig ? `<span class="badge">解析</span> 每道题都有原题库解析${p.ec ? `，其中 ${p.ec} 道另有精简解析` : ''}` : p.ec ? `<span class="badge">解析</span> 本卷 ${p.ec === pr.n ? '全部' : p.ec + ' 道'}题目有解析` : '本卷解析还在编写中，可以先刷题看答案'}</div></div>
     <div class="big3"><a href="#/do/${pid}/practice/all/0"><b>练习</b><span>做一题对一题</span></a><a href="#/do/${pid}/memo/all/0"><b>背题</b><span>直接看答案</span></a>${exBtn}</div>
     <div class="mh">按模块</div>
     <div class="list">${p.mods.map(([mi, st, n]) => { const g = progress(pid, mi); return `<div class="row"><span class="m"><b>${MN()[mi]}</b><span>第 ${st + 1}–${st + n} 题 · ${n} 题${g.done ? ` · 已做 ${g.done} · ${pct(g.ok, g.done)}%` : ''}</span><div class="bar"><i style="width:${pct(g.done, n)}%"></i></div></span>
@@ -164,10 +164,11 @@ function paperPage(pid) {
 
 // ---------- 解析 ----------
 // 解析是纯文字：【思路】【排除】这类标签加粗，换行保留
+// 个人版另有原题库解析 q.oe（HTML），有精简解析时折叠在下面，没有时直接展开
 function expBlock(q) {
-  if (!q.e) return `<div class="exp none">本题解析还在编写中</div>`;
-  const body = esc(q.e).replace(/【([^】]{1,6})】/g, '<b class="el">$1</b>').replace(/\n/g, '<br>');
-  return `<div class="exp"><div class="exp-h">解析</div>${body}</div>`;
+  const ours = q.e ? `<div class="exp"><div class="exp-h">解析</div>${esc(q.e).replace(/【([^】]{1,6})】/g, '<b class="el">$1</b>').replace(/\n/g, '<br>')}</div>` : '';
+  const orig = q.oe ? `<details class="exp orig"${q.e ? '' : ' open'}><summary>原题库解析</summary><div class="oe">${q.oe}</div></details>` : '';
+  return ours + orig || `<div class="exp none">本题解析还在编写中</div>`;
 }
 
 // ---------- 做题 ----------
@@ -418,7 +419,7 @@ function me() {
       <a class="row" href="#/plan"><span class="m"><b>30 天计划</b><span>${S.planStart ? '已开始，第 ' + planDay() + ' 天' : '还没开始'}</span></span><span class="go">›</span></a>
     </div>
     <div class="list"><button class="row" id="clear"><span class="m"><b style="color:var(--bad)">清空做题记录</b><span>做题进度、错题、收藏、模考成绩全部清掉</span></span></button></div>
-    <div class="note">题目为网友回忆版，含题目和参考答案，不含解析。<br>做题记录只保存在这台手机的浏览器里，换手机或清理浏览器数据后记录会丢失。<br>添加到主屏幕：iPhone 用 Safari 点「分享 → 添加到主屏幕」；安卓在浏览器菜单里点「添加到桌面」。</div>`;
+    <div class="note">${IDX.orig ? '个人学习版：题目为网友回忆版；「原题库解析」来自 xingcezhenti 开源项目，版权归原出处，仅供个人学习，请勿传播。' : '题目为网友回忆版，含题目和参考答案。'}<br>做题记录只保存在这台手机的浏览器里，换手机或清理浏览器数据后记录会丢失。<br>添加到主屏幕：iPhone 用 Safari 点「分享 → 添加到主屏幕」；安卓在浏览器菜单里点「添加到桌面」。</div>`;
   $('#reg').onclick = () => pickRegion(me);
   app.querySelectorAll('[data-fs]').forEach(b => b.onclick = () => { S.fs = +b.dataset.fs; document.documentElement.style.setProperty('--fs', S.fs + 'px'); save(); me(); });
   $('#auto').onclick = () => { S.auto = !S.auto; save(); me(); };
