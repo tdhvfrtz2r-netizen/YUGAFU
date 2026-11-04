@@ -1,7 +1,7 @@
 #!/bin/bash
 # 成片自检：规格、每 4 秒一帧的总览图、逐帧亮度跳变（找闪烁和黑帧）
 cd "$(dirname "$0")/.."
-V=out/video.mp4
+V=${1:-out/video.mp4}
 ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate,nb_frames,codec_name,pix_fmt -show_entries format=duration,size,bit_rate -of default=nw=1 "$V"
 mkdir -p shots/check && rm -f shots/check/*.jpg
 ffmpeg -v error -i "$V" -vf "fps=1/4,scale=640:-1" -q:v 4 shots/check/t%03d.jpg
