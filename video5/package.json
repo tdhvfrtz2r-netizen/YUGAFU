@@ -1,0 +1,20 @@
+{
+  "name": "video5",
+  "version": "1.0.0",
+  "private": true,
+  "description": "为什么我们觉得「土」的东西，偏偏最火？（纯音乐科普短片，Remotion）",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "still": "remotion still src/index.ts Main",
+    "render": "remotion render src/index.ts Main out/video.mp4"
+  },
+  "dependencies": {
+    "@fontsource/inter": "5.1.0",
+    "@fontsource/noto-sans-sc": "5.3.1",
+    "@fontsource/noto-serif-sc": "5.3.1",
+    "@remotion/cli": "4.0.540",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.540"
+  }
+}
