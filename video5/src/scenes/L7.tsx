@@ -31,15 +31,15 @@ const ME = [
 
 const Rings: React.FC<{f: number}> = ({f}) => {
   // 0→1：AI 换成理财；1→2：理财换成健身
-  const s1 = prog(f, 246, 50, ease.inOut);
-  const s2 = prog(f, 404, 40, ease.inOut);
+  const s1 = prog(f, 262, 50, ease.inOut);
+  const s2 = prog(f, 420, 40, ease.inOut);
   const stage = s1 + s2;
   const i0 = Math.min(1, Math.floor(stage));
   const t = stage - i0;
   const me = {x: lerp(ME[i0].x, ME[i0 + 1].x, t), y: lerp(ME[i0].y, ME[i0 + 1].y, t)};
   const vis = prog(f, 40, 40);
-  const card = prog(f, 300, 30, ease.out) * (1 - prog(f, 404, 20));
-  const star = prog(f, 352, 16, ease.back);
+  const card = prog(f, 312, 30, ease.out) * (1 - prog(f, 420, 20));
+  const star = prog(f, 360, 16, ease.back);
   return (
     <>
       <CanvasLayer
@@ -119,7 +119,7 @@ const Rings: React.FC<{f: number}> = ({f}) => {
         <div>理财入门</div>
         <div style={{fontSize: 26, fontWeight: 500, color: color.dim, marginTop: 6}}>全网最全 · 不跳步</div>
         <div style={{height: 6, background: color.faint, borderRadius: 3, marginTop: 16, marginRight: 70}} />
-        <div style={{position: 'absolute', right: 20, top: 30, transform: `scale(${0.8 + 0.5 * star - 0.3 * prog(f, 368, 12)})`}}>
+        <div style={{position: 'absolute', right: 20, top: 30, transform: `scale(${0.8 + 0.5 * star - 0.3 * prog(f, 376, 12)})`}}>
           <IconStar size={56} c={color.warm} w={7} fill={star > 0.3 ? color.warm : 'none'} />
         </div>
       </div>
@@ -197,7 +197,7 @@ export const L7: React.FC = () => {
   const S23 = S22 + len('22');
   const END = S23 + len('23');
   const zoomOut = prog(f, S21 - 6, 70, ease.inOut);
-  const dim = prog(f, S21 + 214, 26);
+  const dim = prog(f, S21 + 240, 26);
   const endFade = prog(f, END - 30, 30, ease.in);
   return (
     <AbsoluteFill>
@@ -206,16 +206,16 @@ export const L7: React.FC = () => {
           <Rings f={f} />
         </AbsoluteFill>
       ) : null}
-      <Line text="那我呢？" at={8} out={100} y={150} size={70} />
-      <Line text="我懂 AI，所以嫌那个教程磨叽；" at={110} out={250} y={965} size={56} />
-      <Line text="换到理财、健身，我就是要「全网最全、不跳步」的人。" at={286} out={S21 - 10} y={965} size={54} />
+      <Line text="那我呢？" at={8} out={92} y={150} size={70} />
+      <Line text="我懂 AI，所以嫌那个教程磨叽；" at={100} out={262} y={965} size={56} />
+      <Line text="换到理财、健身，我也要「全网最全、不跳步」。" at={280} out={S21 - 10} y={965} size={56} />
       {f >= S21 && f < S22 ? (
         <AbsoluteFill style={{opacity: (1 - 0.7 * dim) * prog(f, S21, 50)}}>
           <Many f={f - S21} />
         </AbsoluteFill>
       ) : null}
-      <Line text="下沉，不是地理位置，是你离一个领域的信息源有多远。" at={S21 + 24} out={S21 + 206} y={965} size={54} kind="opinion" opinion />
-      <KeySentence n={3} text="每个人，都是某个领域的下沉用户。" at={S21 + 232} out={S22 - 12} y={540} opinion />
+      <Line text="下沉不是地理位置，是你离信息源有多远。" at={S21 + 20} out={S21 + 232} y={965} size={56} kind="opinion" opinion />
+      <KeySentence n={3} text="每个人，都是某个领域的下沉用户。" at={S21 + 252} out={S22 - 12} y={540} opinion />
       {f >= S22 && f < S23 ? (
         <AbsoluteFill style={{opacity: prog(f, S22, 20) * (1 - prog(f, S23 - 16, 16))}}>
           <svg width={1920} height={1080} style={{position: 'absolute', inset: 0}}>
@@ -232,7 +232,7 @@ export const L7: React.FC = () => {
           <Sea f={f - S23} dur={len('23')} />
         </AbsoluteFill>
       ) : null}
-      <Line text="你觉得土的，是十亿人的日常。" at={S23 + 24} y={470} kind="key" size={84} />
+      <Line text="你觉得土的，是十亿人的日常。" at={S23 + 21} y={470} kind="key" size={84} />
       <Line text="全片数据来源见视频简介" at={S23 + 120} y={1010} kind="small" size={28} />
       <AbsoluteFill style={{background: '#000', opacity: endFade}} />
     </AbsoluteFill>

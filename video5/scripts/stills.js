@@ -4,7 +4,7 @@ const path = require('path');
 const {execSync} = require('child_process');
 const {bundle} = require('@remotion/bundler');
 const {renderStill, selectComposition, openBrowser} = require('@remotion/renderer');
-const EXE = '/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell';
+const EXE = process.env.REMOTION_BROWSER ?? path.resolve(__dirname, 'chrome-sw.sh');
 (async () => {
   execSync('node scripts/glyphs.js');
   const frames = process.argv.slice(2).map(Number);

@@ -13,16 +13,16 @@ const R = rng(99);
 const PRODUCTS = Array.from({length: 420}, (_, i) => ({
   x: 140 + R() * 1640,
   y: 150 + R() * 600,
-  die: 330 + R() * 200,
+  die: 434 + R() * 200,
   keep: i % 37 === 0,
 }));
 
 const Survivors: React.FC<{f: number}> = ({f}) => (
   <CanvasLayer
     draw={(ctx) => {
-      const vis = prog(f, 300, 30);
+      const vis = prog(f, 404, 30);
       if (vis <= 0) return;
-      const spot = prog(f, 470, 50);
+      const spot = prog(f, 574, 50);
       for (const p of PRODUCTS) {
         const dead = p.keep ? 0 : prog(f, p.die, 20);
         const a = vis * (1 - dead * 0.92);
@@ -55,7 +55,7 @@ const Survivors: React.FC<{f: number}> = ({f}) => (
 );
 
 const Profit: React.FC<{f: number}> = ({f}) => {
-  const vis = prog(f, 84, 24) * (1 - prog(f, 290, 24));
+  const vis = prog(f, 84, 24) * (1 - prog(f, 408, 24));
   if (vis <= 0) return null;
   const grow = prog(f, 90, 44, ease.out);
   const drop = prog(f, 136, 40, ease.inOut);
@@ -82,7 +82,7 @@ const Profit: React.FC<{f: number}> = ({f}) => {
 export const L6: React.FC = () => {
   const f = useCurrentFrame();
   const END = len('19');
-  const fieldO = (1 - prog(f, 280, 30)) * prog(f, 0, 20);
+  const fieldO = (1 - prog(f, 398, 30)) * prog(f, 0, 20);
   const pack = prog(f, 0, 120, ease.inOut);
   const shift = prog(f, 40, 50, ease.inOut);
   return (
@@ -96,10 +96,10 @@ export const L6: React.FC = () => {
       <AbsoluteFill style={{opacity: 1 - prog(f, END - 22, 22)}}>
         <Survivors f={f} />
       </AbsoluteFill>
-      <Line text="蜜雪集团 2026 年上半年净利润同比下降 *14.7%*" at={70} out={292} y={830} kind="data" size={52} hl={color.red} />
-      <Line text="上市后首次半年度利润下滑" at={120} out={292} y={905} kind="data" size={44} color={color.ink} source="蜜雪集团 2026 年中期报告" />
-      <Line text="下沉市场很大，但不是无限大；" at={316} out={END - 14} y={850} size={58} kind="opinion" opinion />
-      <Line text="火起来的被看见了，失败的更多。" at={440} out={END - 14} y={935} size={58} kind="opinion" />
+      <Line text="蜜雪集团 2026 年上半年净利润同比下降 *14.7%*" at={70} out={410} y={830} kind="data" size={52} hl={color.red} />
+      <Line text="上市后首次半年度利润下滑" at={120} out={410} y={905} kind="data" size={44} color={color.ink} source="蜜雪集团 2026 年中期报告" />
+      <Line text="下沉市场很大，但不是无限大；" at={428} out={END - 14} y={850} size={58} kind="opinion" opinion />
+      <Line text="火起来的被看见了，失败的更多。" at={536} out={END - 14} y={935} size={58} kind="opinion" />
     </AbsoluteFill>
   );
 };

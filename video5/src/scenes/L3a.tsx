@@ -119,29 +119,29 @@ export const L3a: React.FC = () => {
   const END = S12 + len('12');
   const g = f - S12;
   const introO = 1 - prog(f, S12 - 16, 16);
-  const lockZoom = prog(g, 116, 44, ease.in);
-  const fieldO = prog(g, 140, 30) * (1 - prog(g, len('12') - 16, 16));
+  const lockZoom = prog(g, 100, 44, ease.in);
+  const fieldO = prog(g, 124, 30) * (1 - prog(g, len('12') - 16, 16));
   return (
     <AbsoluteFill>
       {/* 11：单看钥匙，形状很怪 → 锁浮现 → 咔 */}
       {f < S12 ? (
-        <Lock x={1290} y={500} scale={0.9} bits={[0.85, 0.1, 0.65, 0.25, 0.95]} lockIn={b(3.2)} keyIn={b(4.3)} click={b(7)} opacity={introO} />
+        <Lock x={1290} y={500} scale={0.9} bits={[0.85, 0.1, 0.65, 0.25, 0.95]} lockIn={b(2.8)} keyIn={b(3.6)} click={b(6)} opacity={introO} />
       ) : null}
       <Line text="单看钥匙，形状很怪。" at={16} out={b(4.2)} y={900} size={62} />
-      <Line text="每一种「土」，都对着一个真实的约束。" at={b(7.6)} out={S12 - 14} y={900} size={60} kind="opinion" opinion />
+      <Line text="每一种「土」，都对着一个真实的约束。" at={b(6) + 12} out={S12 - 14} y={900} size={60} kind="opinion" opinion />
 
       {/* 12：锁①：钱 */}
-      {g >= 0 && g < 170 ? (
+      {g >= 0 && g < 150 ? (
         <AbsoluteFill style={{transform: `scale(${1 + lockZoom * 2.2})`, transformOrigin: '1060px 500px', opacity: 1 - lockZoom}}>
-          <Lock x={1160} y={520} scale={0.72} bits={[0.3, 0.9, 0.5, 0.15, 0.7]} lockIn={S12 - 6} keyIn={S12 + 4} click={S12 + b(2.5)} label="钱" icon="cup" />
+          <Lock x={1160} y={520} scale={0.72} bits={[0.3, 0.9, 0.5, 0.15, 0.7]} lockIn={S12 - 6} keyIn={S12 + 4} click={S12 + 60} label="钱" icon="cup" />
         </AbsoluteFill>
       ) : null}
-      {g >= 0 ? <LockCount n={1} at={S12 + 4} out={S12 + 140} /> : null}
-      <Line text="几块钱一杯，不是品味低，是预算真实。" at={S12 + 96} out={S12 + 236} y={900} size={58} kind="opinion" opinion />
-      {g >= 140 ? (
+      {g >= 0 ? <LockCount n={1} at={S12 + 4} out={S12 + 124} /> : null}
+      <Line text="几块钱一杯，不是品味低，是预算真实。" at={S12 + 66} out={S12 + 258} y={900} size={58} kind="opinion" opinion />
+      {g >= 124 ? (
         <AbsoluteFill style={{opacity: fieldO}}>
-          <CanvasLayer draw={(ctx) => drawStores(ctx, g)} />
-          <div style={{position: 'absolute', left: 960, top: 150, transform: 'translate(-50%, -50%)', fontFamily: font.sans, fontWeight: 500, fontSize: 34, color: color.dim, opacity: prog(g, 210, 24), whiteSpace: 'nowrap'}}>
+          <CanvasLayer draw={(ctx) => drawStores(ctx, g + 16)} />
+          <div style={{position: 'absolute', left: 960, top: 150, transform: 'translate(-50%, -50%)', fontFamily: font.sans, fontWeight: 500, fontSize: 34, color: color.dim, opacity: prog(g, 226, 24), whiteSpace: 'nowrap'}}>
             <span style={{display: 'inline-block', width: 12, height: 12, background: '#D6DEE8', marginRight: 14, verticalAlign: 'middle'}} />1 个光点 = 1 家店
           </div>
           <div
@@ -165,7 +165,7 @@ export const L3a: React.FC = () => {
           </div>
         </AbsoluteFill>
       ) : null}
-      <Line text="蜜雪集团：全球约 *6.4 万*家门店" at={S12 + 240} out={END - 14} y={800} kind="data" size={54} hl={color.warmHi} />
+      <Line text="蜜雪集团：全球约 *6.4 万*家门店" at={S12 + 266} out={END - 14} y={800} kind="data" size={54} hl={color.warmHi} />
       <Line
         text="三线及以下城市约 *3.5 万*家，占中国内地门店的 *58%*"
         at={S12 + 380}

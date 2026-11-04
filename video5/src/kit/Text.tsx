@@ -1,9 +1,18 @@
-import React from 'react';
-import {useCurrentFrame} from 'remotion';
+import React, {createContext, useContext} from 'react';
+import {getInputProps, useCurrentFrame} from 'remotion';
 import {color, ease, font, motion, textStyle, TextKind} from '../theme';
 import {clamp, prog} from './anim';
 
 type Align = 'center' | 'left' | 'right';
+
+/** 所在 Sequence 的起始帧（Main.tsx 里提供），只给阅读时长自检用 */
+export const SeqBase = createContext(0);
+let auditFlag: boolean | null = null;
+const audit = (kind: string, base: number, text: string, at: number, out: number | undefined, extra: Record<string, unknown> = {}) => {
+  if (auditFlag === null) auditFlag = Boolean((getInputProps() as {audit?: boolean}).audit);
+  if (!auditFlag) return;
+  console.log('AUDIT ' + JSON.stringify({kind, base, text, at, out: out ?? null, ...extra}));
+};
 
 export type LineProps = {
   text: string;
@@ -142,6 +151,7 @@ export const Line: React.FC<LineProps> = ({
   scrim = true,
 }) => {
   const f = useCurrentFrame();
+  audit('line', useContext(SeqBase), text, at, out, {opinion: Boolean(opinion), stagger: stagger ?? motion.charStagger, source: source ?? null});
   if (f < at - 1) return null;
   const o = outFactor(f, out);
   if (o <= 0) return null;
@@ -199,6 +209,7 @@ export const KeySentence: React.FC<{n: 1 | 2 | 3; text: string; at: number; out?
   opinion,
 }) => {
   const f = useCurrentFrame();
+  audit('key', useContext(SeqBase), text, at, out, {opinion: Boolean(opinion), stagger: 2.2});
   if (f < at - 1) return null;
   const o = outFactor(f, out);
   if (o <= 0) return null;

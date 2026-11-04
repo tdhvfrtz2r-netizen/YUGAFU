@@ -11,7 +11,7 @@ import {LockCount} from './L3a';
 
 /** 第三层 13–14：锁②时间和情绪（一天只剩几道窄缝）；锁③知识门槛（一步 = 十步；进度条变楼梯） */
 
-const LockIntro: React.FC<{f: number; label: string; icon: 'phone' | 'bar'; bits: number[]; n: number}> = ({f, label, icon, bits, n}) => {
+const LockIntro: React.FC<{f: number; label: string; icon: 'phone' | 'stairs'; bits: number[]; n: number}> = ({f, label, icon, bits, n}) => {
   const zoom = prog(f, 98, 44, ease.in);
   return (
     <>
@@ -40,9 +40,9 @@ const GAPS: [number, number, string][] = [
 ];
 
 const Day: React.FC<{f: number}> = ({f}) => {
-  const vis = prog(f, 118, 30) * (1 - prog(f, 372, 24));
+  const vis = prog(f, 118, 30) * (1 - prog(f, 410, 24));
   if (vis <= 0) return null;
-  const zoom = prog(f, 228, 54, ease.inOut);
+  const zoom = prog(f, 238, 54, ease.inOut);
   const g0 = GAPS[2];
   const gc = hx((g0[0] + g0[1]) / 2);
   const k = lerp(1, 1000 / (hx(g0[1]) - hx(g0[0])), zoom);
@@ -74,7 +74,7 @@ const Day: React.FC<{f: number}> = ({f}) => {
           <rect key={'g' + i} x={hx(a)} y={RY - 40} width={hx(z) - hx(a)} height={80} fill="rgba(255,181,71,0.42)" />
         ))}
         {tiles.map((i) => {
-          const p = prog(f, 286 + i * 4.5, 14, ease.out);
+          const p = prog(f, 296 + i * 4.5, 14, ease.out);
           if (p <= 0) return null;
           const x0 = hx(g0[0]) + (gapW / 15) * i;
           return <rect key={'t' + i} x={x0 + gapW / 150} y={RY - 36 - (1 - p) * 120} width={(gapW / 15) * 0.86} height={72} rx={0.6} fill={color.pink} opacity={p} />;
@@ -83,7 +83,7 @@ const Day: React.FC<{f: number}> = ({f}) => {
       {/* 缝里每块短剧上的情绪尖峰：放大以后才画 */}
       {zoom > 0.98
         ? tiles.map((i) => {
-            const p = prog(f, 292 + i * 4.5, 14);
+            const p = prog(f, 302 + i * 4.5, 14);
             if (p <= 0) return null;
             const x0 = 460 + (1000 / 15) * i + 6;
             const w = (1000 / 15) * 0.86 - 4;
@@ -130,9 +130,9 @@ const Day: React.FC<{f: number}> = ({f}) => {
 };
 
 const Chart: React.FC<{f: number}> = ({f}) => {
-  const vis = prog(f, 380, 24);
+  const vis = prog(f, 418, 24);
   if (vis <= 0) return null;
-  const grow = prog(f, 392, 60, ease.out);
+  const grow = prog(f, 430, 60, ease.out);
   const base = 720;
   const hBar = 400;
   const line = base - hBar * 0.84;
@@ -140,8 +140,8 @@ const Chart: React.FC<{f: number}> = ({f}) => {
     <svg width={1920} height={1080} style={{position: 'absolute', inset: 0, opacity: vis}}>
       <line x1={560} y1={base} x2={1360} y2={base} stroke={color.line} strokeWidth={3} />
       <rect x={880} y={base - hBar * grow} width={160} height={hBar * grow} rx={6} fill={color.pink} />
-      <line x1={600} y1={line} x2={1320} y2={line} stroke={color.ink} strokeWidth={3} strokeDasharray="12 10" opacity={prog(f, 400, 20)} />
-      <text x={860} y={line - 18} textAnchor="end" fontFamily={font.sans} fontWeight={500} fontSize={32} fill={color.ink} opacity={prog(f, 400, 20)}>
+      <line x1={600} y1={line} x2={1320} y2={line} stroke={color.ink} strokeWidth={3} strokeDasharray="12 10" opacity={prog(f, 438, 20)} />
+      <text x={860} y={line - 18} textAnchor="end" fontFamily={font.sans} fontWeight={500} fontSize={32} fill={color.ink} opacity={prog(f, 438, 20)}>
         2024 年全年电影票房（示意）
       </text>
       <text x={960} y={base - hBar * grow - 24} textAnchor="middle" fontFamily={font.sans} fontWeight={700} fontSize={48} fill={color.data} opacity={grow}>
@@ -153,7 +153,7 @@ const Chart: React.FC<{f: number}> = ({f}) => {
 
 // ---------- 锁③：一步 = 十步；进度条变成不缺台阶的楼梯 ----------
 const Steps: React.FC<{f: number}> = ({f}) => {
-  const vis = prog(f, 128, 30) * (1 - prog(f, 262, 22));
+  const vis = prog(f, 128, 30) * (1 - prog(f, 280, 22));
   if (vis <= 0) return null;
   const reveal = (i: number) => prog(f, 176 + i * 5, 16, ease.out);
   const topY = 400;
@@ -183,19 +183,19 @@ const Steps: React.FC<{f: number}> = ({f}) => {
 };
 
 const Stairs: React.FC<{f: number}> = ({f}) => {
-  const vis = prog(f, 262, 24) * (1 - prog(f, 626, 20));
+  const vis = prog(f, 280, 24) * (1 - prog(f, 698, 20));
   if (vis <= 0) return null;
-  const rise = (i: number) => prog(f, 300 + i * 6, 22, ease.out);
+  const rise = (i: number) => prog(f, 318 + i * 6, 22, ease.out);
   const x0 = 260;
   const w = 64;
   const baseY = 780;
   const h = 44;
-  const climb = prog(f, 380, 150, ease.inOut);
+  const climb = prog(f, 398, 150, ease.inOut);
   const stepAt = Math.min(9, Math.floor(climb * 10));
   const gx0 = 1080;
   const gaps = [3, 4, 7];
-  const stuck = Math.min(2, Math.floor(prog(f, 380, 60) * 3));
-  const booksIn = prog(f, 470, 30, ease.out);
+  const stuck = Math.min(2, Math.floor(prog(f, 398, 60) * 3));
+  const booksIn = prog(f, 488, 30, ease.out);
   return (
     <svg width={1920} height={1080} style={{position: 'absolute', inset: 0, opacity: vis}}>
       {/* 开场那根 50 分钟的进度条，刻度一格格升起 */}
@@ -211,7 +211,7 @@ const Stairs: React.FC<{f: number}> = ({f}) => {
       <text x={x0 + w * 5} y={baseY + 64} textAnchor="middle" fontFamily={font.sans} fontWeight={700} fontSize={36} fill={color.cool}>
         50 分钟 · 一步不跳
       </text>
-      <Person x={x0 + stepAt * w + w / 2} y={baseY - (stepAt + 1) * h * rise(stepAt)} s={80} c={color.warm} o={prog(f, 360, 20)} />
+      <Person x={x0 + stepAt * w + w / 2} y={baseY - (stepAt + 1) * h * rise(stepAt)} s={80} c={color.warm} o={prog(f, 378, 20)} />
       {/* 精华版：缺了好几级 */}
       {Array.from({length: 10}).map((_, i) =>
         gaps.includes(i) ? null : (
@@ -221,8 +221,8 @@ const Stairs: React.FC<{f: number}> = ({f}) => {
       <text x={gx0 + w * 5} y={baseY + 64} textAnchor="middle" fontFamily={font.sans} fontWeight={700} fontSize={36} fill={color.dim}>
         精华版
       </text>
-      <Person x={gx0 + stuck * w + w / 2} y={baseY - (stuck + 1) * h * rise(stuck)} s={80} c={color.warm} o={prog(f, 360, 20) * 0.9} />
-      <text x={gx0 + 3 * w + w / 2} y={baseY - 4 * h - 30} textAnchor="middle" fontFamily={font.sans} fontWeight={700} fontSize={44} fill={color.dim} opacity={prog(f, 440, 16)}>
+      <Person x={gx0 + stuck * w + w / 2} y={baseY - (stuck + 1) * h * rise(stuck)} s={80} c={color.warm} o={prog(f, 378, 20) * 0.9} />
+      <text x={gx0 + 3 * w + w / 2} y={baseY - 4 * h - 30} textAnchor="middle" fontFamily={font.sans} fontWeight={700} fontSize={44} fill={color.dim} opacity={prog(f, 458, 16)}>
         ?
       </text>
       {/* 开场那排"收藏"的书，立在楼梯脚下 */}
@@ -252,11 +252,11 @@ export const L3b: React.FC = () => {
           <Chart f={f} />
         </>
       ) : null}
-      <Line text="累了一天，只剩碎片时间。" at={84} out={222} y={850} size={58} kind="opinion" opinion />
-      <Line text="短剧把爽点压进一两分钟。" at={262} out={384} y={850} size={58} kind="opinion" />
+      <Line text="累了一天，只剩碎片时间。" at={84} out={232} y={850} size={58} kind="opinion" opinion />
+      <Line text="短剧把爽点压进一两分钟。" at={270} out={420} y={850} size={58} kind="opinion" />
       <Line
         text="2024 年微短剧市场规模 *505 亿元*，首次超过全年电影票房"
-        at={392}
+        at={430}
         out={S14 - 14}
         y={860}
         kind="data"
@@ -266,14 +266,14 @@ export const L3b: React.FC = () => {
       />
       {g >= 0 ? (
         <>
-          <LockIntro f={g} label="知识门槛" icon="bar" bits={[0.15, 0.75, 0.35, 0.9, 0.5]} n={3} />
+          <LockIntro f={g} label="知识门槛" icon="stairs" bits={[0.15, 0.75, 0.35, 0.9, 0.5]} n={3} />
           <Steps f={g} />
           <Stairs f={g} />
         </>
       ) : null}
-      <Line text="你眼里的一步，是别人眼里的十步。" at={S14 + 84} out={S14 + 252} y={900} size={58} kind="opinion" opinion />
-      <Line text="不会的人要的不是精华，是不跳步。" at={S14 + 270} out={S14 + 420} y={930} size={58} kind="opinion" />
-      <Line text="长教程、「全几百集」的课，卖的是确定性。" at={S14 + 432} out={END - 14} y={930} size={58} kind="opinion" />
+      <Line text="你眼里的一步，是别人眼里的十步。" at={S14 + 84} out={S14 + 270} y={900} size={58} kind="opinion" opinion />
+      <Line text="不会的人要的不是精华，是不跳步。" at={S14 + 290} out={S14 + 476} y={930} size={58} kind="opinion" />
+      <Line text="长教程、「全几百集」的课，卖的是确定性。" at={S14 + 488} out={END - 14} y={930} size={58} kind="opinion" />
     </AbsoluteFill>
   );
 };

@@ -7,49 +7,43 @@ import {Line} from '../kit/Text';
 import {len} from '../timeline';
 import {color, ease, font} from '../theme';
 
-/** 第四层 17–18："土"的东西沿台阶往上爬（四站数据）→ 管理学里的"低端颠覆" */
+/** 第四层 17–18："土"的东西沿台阶往上爬（三站数据）→ 管理学里的"低端颠覆" */
 
 const STEP_W = 120;
 const STEP_H = 60;
 const NS = 24;
 const WH = NS * STEP_H;
 const stepTop = (i: number) => ({x: i * STEP_W, y: WH - (i + 1) * STEP_H});
-const ST = [2, 8, 14, 20].map((i) => ({x: stepTop(i).x + STEP_W * 0.5, y: stepTop(i).y}));
+const ST = [2, 8, 14].map((i) => ({x: stepTop(i).x + STEP_W * 0.5, y: stepTop(i).y}));
 
 const Climb: React.FC<{f: number}> = ({f}) => {
   const camX = keys(f, [
     [0, ST[0].x],
-    [196, ST[0].x],
-    [252, ST[1].x],
-    [414, ST[1].x],
-    [470, ST[2].x],
-    [692, ST[2].x],
-    [748, ST[3].x],
-    [936, ST[3].x + 40],
+    [278, ST[0].x],
+    [338, ST[1].x],
+    [568, ST[1].x],
+    [628, ST[2].x],
+    [936, ST[2].x + 40],
   ]);
   const camY = keys(f, [
     [0, ST[0].y],
-    [196, ST[0].y],
-    [252, ST[1].y],
-    [414, ST[1].y],
-    [470, ST[2].y],
-    [692, ST[2].y],
-    [748, ST[3].y],
-    [936, ST[3].y - 20],
+    [278, ST[0].y],
+    [338, ST[1].y],
+    [568, ST[1].y],
+    [628, ST[2].y],
+    [936, ST[2].y - 20],
   ]);
   const tx = 960 - camX;
   const ty = 560 - camY;
   const pinkTo = keys(f, [
     [0, 2],
-    [196, 2],
-    [252, 8],
-    [414, 8],
-    [470, 14],
+    [278, 2],
+    [338, 8],
   ]);
   const amberTo = keys(f, [
     [0, 0],
-    [600, 0],
-    [748, 20],
+    [540, 0],
+    [650, 14],
   ]);
   const nose = (to: number, dy: number) => {
     let d = `M0 ${WH - STEP_H + dy}`;
@@ -65,10 +59,8 @@ const Climb: React.FC<{f: number}> = ({f}) => {
   const vis = prog(f, 0, 24);
   // 站 2：光罩里的手机一部部亮起
   const s2 = ST[1];
-  const s3 = ST[2];
-  const s4 = ST[3];
-  const bars = prog(f, 486, 60, ease.out);
-  const grow = prog(f, 764, 70, ease.out);
+  const s4 = ST[2];
+  const grow = prog(f, 644, 70, ease.out);
   return (
     <svg width={1920} height={1080} style={{position: 'absolute', inset: 0, opacity: vis}}>
       <defs>
@@ -86,7 +78,8 @@ const Climb: React.FC<{f: number}> = ({f}) => {
         <path d={nose(pinkTo, -6)} fill="none" stroke={color.pink} strokeWidth={6} strokeLinejoin="round" />
         {amberTo > 0 ? <path d={nose(amberTo, 6)} fill="none" stroke={color.warm} strokeWidth={6} strokeLinejoin="round" /> : null}
 
-        {/* 站 1：2023，最先亮起来的手机 */}
+        {/* 站 1：2023，最先亮起来的手机（镜头离开后压暗，留作走过的台阶） */}
+        <g opacity={lerp(1, 0.3, prog(f, 300, 40))}>
         {[-80, 0, 80].map((dx, i) => {
           const Icon = [IconCap, IconBroom, IconBottle][i];
           const x = ST[0].x + dx - 60;
@@ -102,11 +95,13 @@ const Climb: React.FC<{f: number}> = ({f}) => {
             </g>
           );
         })}
+        </g>
 
         {/* 站 2：爬进光罩 */}
+        <g opacity={lerp(1, 0.3, prog(f, 590, 40))}>
         <path d={`M${s2.x - 230} ${s2.y} A230 190 0 0 1 ${s2.x + 230} ${s2.y} Z`} fill="url(#dome4)" stroke="rgba(190,232,255,0.5)" strokeWidth={2} />
         {[-150, -90, -30, 30, 90, 150].map((dx, i) => {
-          const lit = prog(f, 236 + i * 9, 16);
+          const lit = prog(f, 322 + i * 9, 16);
           return (
             <g key={i}>
               <Person x={s2.x + dx} y={s2.y} s={96} c="#8CCBEF" />
@@ -115,37 +110,17 @@ const Climb: React.FC<{f: number}> = ({f}) => {
             </g>
           );
         })}
-        <g transform={`translate(${s2.x - 230} ${s2.y - 260})`} opacity={prog(f, 262, 24) * (1 - prog(f, 430, 40))}>
+        </g>
+        <g transform={`translate(${s2.x - 230} ${s2.y - 260})`} opacity={prog(f, 348, 24) * (1 - prog(f, 580, 30))}>
           <rect x={0} y={0} width={460} height={18} rx={9} fill="#273141" />
-          <rect x={0} y={0} width={460 * 0.2173 * prog(f, 270, 50, ease.out)} height={18} rx={9} fill={color.pink} />
-          <text x={0} y={-16} fontFamily={font.sans} fontWeight={500} fontSize={28} fill={color.dim}>
-            一线城市观众占比
-          </text>
+          <rect x={0} y={0} width={460 * 0.2173 * prog(f, 356, 50, ease.out)} height={18} rx={9} fill={color.pink} />
           <text x={460} y={-16} textAnchor="end" fontFamily={font.sans} fontWeight={700} fontSize={34} fill={color.pink}>
             21.73%
           </text>
         </g>
 
-        {/* 站 3：产值 vs 票房（柱高按真实比例） */}
-        <g transform={`translate(${s3.x} ${s3.y})`} opacity={1 - prog(f, 700, 40)}>
-          <rect x={-170} y={-340 * bars} width={120} height={340 * bars} rx={6} fill={color.pink} />
-          <rect x={30} y={-340 * 0.51832 * bars} width={120} height={340 * 0.51832 * bars} rx={6} fill="#5B6A80" />
-          <text x={-110} y={-340 * bars - 54} textAnchor="middle" fontFamily={font.sans} fontWeight={700} fontSize={40} fill={color.data} opacity={bars}>
-            约千亿元
-          </text>
-          <text x={-110} y={-340 * bars - 18} textAnchor="middle" fontFamily={font.sans} fontWeight={500} fontSize={24} fill={color.dim} opacity={bars}>
-            微短剧、漫剧产值
-          </text>
-          <text x={90} y={-340 * 0.51832 * bars - 54} textAnchor="middle" fontFamily={font.sans} fontWeight={700} fontSize={40} fill={color.data} opacity={bars}>
-            518.32 亿元
-          </text>
-          <text x={90} y={-340 * 0.51832 * bars - 18} textAnchor="middle" fontFamily={font.sans} fontWeight={500} fontSize={24} fill={color.dim} opacity={bars}>
-            全国电影总票房
-          </text>
-        </g>
-
-        {/* 站 4：一个光点长成一间大店，旁边一个小人作比例尺 */}
-        <g transform={`translate(${s4.x + 40} ${s4.y})`} opacity={prog(f, 740, 20)}>
+        {/* 站 3：一个光点长成一间大店，旁边一个小人作比例尺 */}
+        <g transform={`translate(${s4.x + 40} ${s4.y})`} opacity={prog(f, 620, 20)}>
           <ellipse cx={0} cy={-70 * grow} rx={300 * grow + 20} ry={150 * grow + 10} fill={color.warm} opacity={0.1 * grow} />
           <rect x={-220 * grow} y={-128 * grow} width={440 * grow} height={128 * grow} rx={4} fill="#3B2E1C" stroke={color.warm} strokeWidth={3} />
           <rect x={-236 * grow} y={-140 * grow} width={472 * grow} height={18 * grow} rx={4} fill={color.warm} />
@@ -156,7 +131,7 @@ const Climb: React.FC<{f: number}> = ({f}) => {
             : null}
           {grow > 0.6 ? <rect x={-6} y={-70} width={34} height={70} rx={2} fill={color.warmHi} opacity={(grow - 0.6) * 2.4} /> : null}
           <circle cx={0} cy={-6} r={7} fill={color.warmHi} opacity={1 - grow} />
-          <Person x={262} y={0} s={16} c={color.ink} o={prog(f, 830, 20)} />
+          <Person x={262} y={0} s={16} c={color.ink} o={prog(f, 710, 20)} />
         </g>
       </g>
     </svg>
@@ -233,16 +208,14 @@ export const L4: React.FC = () => {
           <Climb f={f} />
         </AbsoluteFill>
       ) : null}
-      <Line text="2023 年：微短剧用户以保安、保洁、保姆为主" at={30} out={204} y={900} kind="data" size={50} source="WETRUE《2025年微短剧行业洞察报告》" />
-      <Line text="2025 年：一线城市观众占比 *21.73%*" at={262} out={420} y={900} kind="data" size={50} hl={color.pink} source="WETRUE《2025年微短剧行业洞察报告》" />
-      <Line text="2025 年：微短剧、漫剧全年产值约 *千亿元*" at={482} out={690} y={852} kind="data" size={50} hl={color.pink} />
-      <Line text="同期全国电影总票房 *518.32 亿元*" at={520} out={690} y={924} kind="data" size={46} hl={color.ink} source="DataEye 研究院，2025" />
-      <Line text="蜜雪集团南京旗舰店：约 *2000 平方米*" at={762} out={S18 - 16} y={900} kind="data" size={50} hl={color.warm} source="蜜雪集团 2026 年中期报告" />
+      <Line text="2023 年：微短剧用户以保安、保洁、保姆为主" at={30} out={290} y={900} kind="data" size={50} source="WETRUE《2025年微短剧行业洞察报告》" />
+      <Line text="2025 年：一线城市观众占比 *21.73%*" at={348} out={580} y={900} kind="data" size={50} hl={color.pink} source="WETRUE《2025年微短剧行业洞察报告》" />
+      <Line text="蜜雪集团南京旗舰店：约 *2000 平方米*" at={650} out={S18 - 16} y={900} kind="data" size={50} hl={color.warm} source="蜜雪集团 2026 年中期报告" />
       {f >= S18 ? <Disrupt f={f - S18} /> : null}
       <Line text="管理学里有个概念：「低端颠覆」（克里斯坦森）" at={S18 + 16} out={END - 16} y={150} size={56} />
-      <Line text="① 先服务被忽视的大多数" at={S18 + 110} out={END - 16} x={286} y={772} kind="label" color={color.warmHi} size={34} align="left" />
-      <Line text="② 把成本和门槛压到最低" at={S18 + 200} out={END - 16} x={286} y={850} kind="label" color={color.warmHi} size={30} align="left" />
-      <Line text="③ 再一路往上走" at={S18 + 290} out={END - 16} x={1290} y={742} kind="label" color={color.warmHi} size={38} align="left" />
+      <Line text="① 先服务被忽视的大多数" at={S18 + 96} out={END - 16} x={286} y={772} kind="label" color={color.warmHi} size={34} align="left" />
+      <Line text="② 把成本和门槛压到最低" at={S18 + 170} out={END - 16} x={286} y={850} kind="label" color={color.warmHi} size={30} align="left" />
+      <Line text="③ 再一路往上走" at={S18 + 250} out={END - 16} x={1290} y={742} kind="label" color={color.warmHi} size={38} align="left" />
     </AbsoluteFill>
   );
 };

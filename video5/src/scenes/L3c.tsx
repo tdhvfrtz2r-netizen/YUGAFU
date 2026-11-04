@@ -69,7 +69,7 @@ const Express: React.FC<{f: number}> = ({f}) => {
 const LOCKS = [
   {label: '钱', icon: 'cup' as const, bits: [0.3, 0.9, 0.5, 0.15, 0.7]},
   {label: '时间和情绪', icon: 'phone' as const, bits: [0.6, 0.2, 0.95, 0.4, 0.1]},
-  {label: '知识门槛', icon: 'bar' as const, bits: [0.15, 0.75, 0.35, 0.9, 0.5]},
+  {label: '知识门槛', icon: 'stairs' as const, bits: [0.15, 0.75, 0.35, 0.9, 0.5]},
   {label: '表达', icon: 'wave' as const, bits: [0.8, 0.45, 0.1, 0.6, 0.3]},
 ];
 
@@ -92,41 +92,47 @@ const drawField = (ctx: CanvasRenderingContext2D, f: number) => {
 
 const AllOpen: React.FC<{f: number}> = ({f}) => {
   const shrink = prog(f, 90, 70, ease.inOut);
+  const k = lerp(1, 0.62, shrink);
   return (
     <AbsoluteFill>
       <CanvasLayer draw={(ctx) => drawField(ctx, f)} />
-      <AbsoluteFill style={{transform: `scale(${lerp(1, 0.62, shrink)})`, transformOrigin: '960px 430px', opacity: 1 - 0.5 * shrink}}>
+      <AbsoluteFill style={{transform: `scale(${k})`, transformOrigin: '960px 430px', opacity: 1 - 0.5 * shrink}}>
         {LOCKS.map((l, i) => {
           const x = (i % 2 ? 1440 : 700) - 70;
           const y = i < 2 ? 300 : 580;
-          const flip = prog(f, 40 + i * 10, 16, ease.inOut);
-          const sx = Math.abs(Math.cos(flip * Math.PI));
-          const back = flip > 0.5;
-          return (
-            <React.Fragment key={l.label}>
-              <Lock x={x + 70} y={y} scale={0.44} bits={l.bits} keyIn={-60} click={-12} label={l.label} icon={l.icon} />
-              <div
-                style={{
-                  position: 'absolute',
-                  left: x - 115,
-                  top: y + 72,
-                  transform: `translate(-50%, 0) scaleX(${sx})`,
-                  fontFamily: back ? font.sans : font.serif,
-                  fontWeight: 700,
-                  fontSize: 34,
-                  color: back ? '#1A1206' : color.ink,
-                  background: back ? color.warmHi : '#3A4558',
-                  padding: '6px 16px',
-                  borderRadius: 8,
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {back ? '刚好' : '土'}
-              </div>
-            </React.Fragment>
-          );
+          // 缩小之后锁上的字太小，淡掉（前面已经看清过）；"刚好"标签放在缩放层外面，字号保持可读
+          return <Lock key={l.label} x={x + 70} y={y} scale={0.44} bits={l.bits} keyIn={-60} click={-12} label={l.label} icon={l.icon} labelOpacity={1 - shrink} />;
         })}
       </AbsoluteFill>
+      {LOCKS.map((l, i) => {
+        const x = (i % 2 ? 1440 : 700) - 70;
+        const y = i < 2 ? 300 : 580;
+        const flip = prog(f, 40 + i * 10, 16, ease.inOut);
+        const sx = Math.abs(Math.cos(flip * Math.PI));
+        const back = flip > 0.5;
+        return (
+          <div
+            key={l.label}
+            style={{
+              position: 'absolute',
+              left: 960 + (x - 115 - 960) * k,
+              top: 430 + (y + 72 - 430) * k,
+              transform: `translate(-50%, 0) scaleX(${sx})`,
+              fontFamily: back ? font.sans : font.serif,
+              fontWeight: 700,
+              fontSize: lerp(34, 30, shrink),
+              color: back ? '#1A1206' : color.ink,
+              background: back ? color.warmHi : '#3A4558',
+              padding: '6px 16px',
+              borderRadius: 8,
+              whiteSpace: 'nowrap',
+              opacity: 1 - 0.25 * shrink,
+            }}
+          >
+            {back ? '刚好' : '土'}
+          </div>
+        );
+      })}
     </AbsoluteFill>
   );
 };
@@ -137,7 +143,7 @@ export const L3c: React.FC = () => {
   const END = S16 + len('16');
   const g = f - S16;
   const zoom = prog(f, 98, 44, ease.in);
-  const dim = prog(g, 206, 24);
+  const dim = prog(g, 250, 24);
   return (
     <AbsoluteFill>
       {f < 150 ? (
@@ -150,12 +156,12 @@ export const L3c: React.FC = () => {
       <Line text="好记、能跟着唱的旋律，" at={96} out={S16 - 14} y={170} size={58} />
       <Line text="替普通人说出了自己说不出的情绪。" at={200} out={S16 - 14} y={260} size={58} kind="opinion" opinion />
       {g >= 0 ? (
-        <AbsoluteFill style={{opacity: 1 - 0.65 * dim}}>
+        <AbsoluteFill style={{opacity: 1 - 0.8 * dim}}>
           <AllOpen f={g} />
         </AbsoluteFill>
       ) : null}
-      <Line text="「土」不是缺点，是精准回应了大多数人的处境。" at={S16 + 16} out={S16 + 196} y={880} size={58} kind="opinion" opinion />
-      <KeySentence n={2} text="土，是约束下的最优解。" at={S16 + 214} out={END - 12} y={540} opinion />
+      <Line text="「土」不是缺点，是精准回应了大多数人的处境。" at={S16 + 16} out={S16 + 240} y={880} size={58} kind="opinion" opinion />
+      <KeySentence n={2} text="土，是约束下的最优解。" at={S16 + 252} out={END - 12} y={540} opinion />
     </AbsoluteFill>
   );
 };

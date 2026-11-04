@@ -55,9 +55,10 @@ export type LockProps = {
   lockIn?: number; // 锁从暗处浮现的帧
   keyOnlyFrom?: number;
   opacity?: number;
+  labelOpacity?: number;
 };
 
-export const Lock: React.FC<LockProps> = ({x, y, scale = 1, bits, keyIn, click, label, icon, lockIn = -100, opacity = 1}) => {
+export const Lock: React.FC<LockProps> = ({x, y, scale = 1, bits, keyIn, click, label, icon, lockIn = -100, opacity = 1, labelOpacity = 1}) => {
   const f = useCurrentFrame();
   const lockO = prog(f, lockIn, 40);
   const insert = prog(f, keyIn, click - keyIn - 6, ease.inOut);
@@ -93,7 +94,7 @@ export const Lock: React.FC<LockProps> = ({x, y, scale = 1, bits, keyIn, click, 
           <rect x={-320} y={-230} width={640} height={370} rx={36} fill="url(#housing)" stroke="rgba(242,213,156,0.35)" strokeWidth={3} />
           <rect x={-290} y={SHEAR} width={590} height={118} rx={12} fill="#0F131B" stroke="rgba(242,213,156,0.25)" strokeWidth={2} />
           {label ? (
-            <text x={0} y={-168} textAnchor="middle" fontFamily={font.sans} fontWeight={700} fontSize={label.length > 3 ? 50 : 62} fill={color.brassHi} letterSpacing="0.08em">
+            <text x={0} y={-168} textAnchor="middle" fontFamily={font.sans} fontWeight={700} fontSize={label.length > 3 ? 50 : 62} fill={color.brassHi} letterSpacing="0.08em" opacity={labelOpacity}>
               {label}
             </text>
           ) : null}

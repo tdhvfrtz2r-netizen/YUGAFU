@@ -113,7 +113,7 @@ export const L1: React.FC = () => {
   const END = S8 + len('08');
   const cam = camAt(f, S7, S8, END);
   const dome = prog(f, S8 + 10, 70, ease.inOut);
-  const dimForKey = prog(f, S8 + 112, 30) * 1.2;
+  const dimForKey = prog(f, S8 + 100, 30) * 1.2;
 
   const shift = prog(f, S7 + 60, 300, ease.inOut) * (1 - prog(f, S8 + 100, 40, ease.inOut));
   const OX = -250 * shift;
@@ -230,7 +230,7 @@ export const L1: React.FC = () => {
       <CanvasLayer draw={draw} />
       <AbsoluteFill style={{background: '#06080C', opacity: 0.62 * dimForKey}} />
       <Line text="你每天刷到的「正常」……" at={86} out={S7 + 14} y={930} size={60} />
-      <Line text="如果全国只有 100 个人" at={S7 + 26} out={S8 - 12} y={120} size={58} />
+      <Line text="如果全国只有 100 个人" at={S7 + 26} out={S8 - 22} y={120} size={58} />
       {cluster && lbl1 > 0 ? (
         <div style={{position: 'absolute', left: cluster.x + OX, top: cluster.y + OY + 34, transform: 'translate(-50%, 0)', opacity: lbl1, textAlign: 'center', whiteSpace: 'nowrap'}}>
           <div style={{fontFamily: font.sans, fontWeight: 700, fontSize: 46, color: color.cool}}>
@@ -249,8 +249,8 @@ export const L1: React.FC = () => {
           <SourceTag text="艾瑞咨询，约 2022 年" at={S7 + 262} align="left" />
         </div>
       ) : null}
-      <Line text="……只是少数人的正常。" at={S8 + 8} out={S8 + 118} y={930} size={60} />
-      <KeySentence n={1} text="大多数人，不是你。" at={S8 + 126} out={END - 12} y={540} />
+      <Line text="……只是少数人的正常。" at={S8 - 20} out={S8 + 104} y={930} size={60} />
+      <KeySentence n={1} text="大多数人，不是你。" at={S8 + 108} out={END - 10} y={540} />
     </AbsoluteFill>
   );
 };

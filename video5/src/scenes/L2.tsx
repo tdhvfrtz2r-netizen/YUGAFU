@@ -16,9 +16,9 @@ const HANG = 210;
 const R = rng(42);
 const CROWD = Array.from({length: 26}, (_, i) => ({
   x: 1210 + (i % 13) * 50 + (Math.floor(i / 13) ? 25 : 0) + (R() - 0.5) * 14,
-  y: 975 - Math.floor(i / 13) * 30,
+  y: 862 - Math.floor(i / 13) * 30,
   s: 54 + R() * 10,
-  t: 330 + i * 7 + R() * 6,
+  t: 272 + i * 6 + R() * 6,
   kind: i % 3 === 0 ? 'glass' : 'coin',
 }));
 
@@ -36,10 +36,10 @@ const Token: React.FC<{x: number; y: number; kind: string; o?: number}> = ({x, y
 
 const Scale: React.FC<{f: number}> = ({f}) => {
   const theta = keys(f, [
-    [330, 0],
-    [560, 10.5],
-    [600, 9.2],
-    [640, 9.6],
+    [272, 0],
+    [476, 10.5],
+    [506, 9.2],
+    [536, 9.6],
   ], ease.inOut);
   const rad = (theta * Math.PI) / 180;
   const L = {x: PX - ARM * Math.cos(rad), y: PY - ARM * Math.sin(rad)};
@@ -47,7 +47,7 @@ const Scale: React.FC<{f: number}> = ({f}) => {
   const panL = {x: L.x, y: L.y + HANG};
   const panR = {x: Rr.x, y: Rr.y + HANG};
   const leftIn = prog(f, 90, 40);
-  const ringsOn = clamp((f - 120) / 20) * (1 - clamp((f - 600) / 30));
+  const ringsOn = clamp((f - 120) / 20) * (1 - clamp((f - 520) / 30));
   const words = ['好音乐', '好电影', '好内容'];
 
   // 右盘里越堆越高的钱和沙漏
@@ -120,7 +120,7 @@ const Scale: React.FC<{f: number}> = ({f}) => {
 
       {/* 右边：光罩外的人群，投进钱和时间 */}
       {CROWD.map((c, i) => {
-        const vis = prog(f, 300 + i * 3, 30);
+        const vis = prog(f, 246 + i * 3, 30);
         const fly = clamp((f - c.t) / 34);
         const tx = lerp(c.x, panR.x + ((i * 37) % 200) - 100, ease.inOut(fly));
         const ty = lerp(c.y - c.s, panR.y - 10 - Math.floor(landed.indexOf(c) / 8) * 16, ease.inOut(fly)) - Math.sin(fly * Math.PI) * 160;
@@ -219,7 +219,7 @@ export const L2: React.FC = () => {
   const f = useCurrentFrame();
   const S10 = len('09');
   const END = S10 + len('10');
-  const scaleO = 1 - prog(f, S10 - 24, 24);
+  const scaleO = 1 - prog(f, S10 - 18, 18);
   return (
     <AbsoluteFill>
       {f < S10 ? (
@@ -227,10 +227,10 @@ export const L2: React.FC = () => {
           <Scale f={f} />
         </AbsoluteFill>
       ) : null}
-      <Line text="定义好坏的人，不是掏钱的人。" at={14} out={S10 - 20} y={120} size={62} kind="opinion" opinion />
-      <Line text="乐评 · 媒体 · 从业者 · 做内容的人" at={b(4)} out={S10 - 20} x={480} y={845} kind="label" color={color.cool} size={36} />
-      <Line text="大多在少数城市，习惯用自己的口味投票" at={b(5.4)} out={S10 - 20} x={480} y={915} kind="opinion" size={40} />
-      <Line text="另外那十亿人：花钱，也花时间" at={b(11)} out={S10 - 20} x={1450} y={838} kind="opinion" size={40} />
+      <Line text="定义好坏的人，不是掏钱的人。" at={14} out={S10 - 6} y={120} size={62} kind="opinion" opinion />
+      <Line text="乐评 · 媒体 · 从业者 · 做内容的人" at={b(3.6)} out={S10 - 6} x={480} y={845} kind="label" color={color.cool} size={36} />
+      <Line text="大多在少数城市，习惯用自己的口味投票" at={b(5)} out={S10 - 6} x={480} y={915} kind="opinion" size={40} />
+      <Line text="另外那十亿人：花钱，也花时间" at={b(9)} out={S10 - 6} x={1470} y={915} kind="opinion" size={40} />
       {f >= S10 ? (
         <AbsoluteFill style={{opacity: 1 - prog(f, END - 18, 18)}}>
           <Daolang f={f - S10} />
