@@ -40,9 +40,9 @@ export const Background: React.FC = () => (
 
 /** 颗粒 + 暗角：每帧随机挪动颗粒贴图，像胶片 */
 export const Finish: React.FC = () => {
-  const f = useCurrentFrame();
-  const ox = (f * 137) % 512;
-  const oy = (f * 251) % 512;
+  // 颗粒固定不动：每帧都变的噪点会让码率暴涨几倍
+  const ox = 0;
+  const oy = 0;
   return (
     <>
       <AbsoluteFill
@@ -55,7 +55,7 @@ export const Finish: React.FC = () => {
         style={{
           backgroundImage: `url(${staticFile('grain.png')})`,
           backgroundPosition: `${ox}px ${oy}px`,
-          opacity: 0.045,
+          opacity: 0.035,
           mixBlendMode: 'screen',
           pointerEvents: 'none',
         }}

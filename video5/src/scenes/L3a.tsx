@@ -46,41 +46,70 @@ const hash = (k: number) => {
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 };
 
+let IMG: ImageData | null = null;
+
+/** 6.4 万个光点直接写进像素缓冲，再一次性贴到画布上 */
 export const drawStores = (ctx: CanvasRenderingContext2D, f: number, pack = 0) => {
-  // 从中心往外一圈圈"开灯"
+  const W = 1920;
+  const H = 1080;
   const split = ease.inOut(clamp((f - 330) / 60));
-  const cx = GX + (COLS * SP) / 2;
+  const cx = 960;
   const cy = GY + (ROWS * SP) / 2;
   const maxD = Math.hypot((COLS * SP) / 2, (ROWS * SP) / 2);
-  const wb = (WARM_N / ROWS) * SP;
-  if (split > 0) {
-    const g = ctx.createRadialGradient(GX - 36 + wb / 2, cy, 0, GX - 36 + wb / 2, cy, wb * 0.9);
-    g.addColorStop(0, `rgba(255,181,71,${0.22 * split})`);
-    g.addColorStop(1, 'rgba(255,181,71,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(GX - 400, GY - 300, wb + 800, ROWS * SP + 600);
-  }
+  if (!IMG) IMG = ctx.createImageData(W, H);
+  const d = IMG.data;
+  d.fill(0);
+  const sp = SP * (1 - 0.18 * pack);
   for (let k = 0; k < N; k++) {
     const col = Math.floor(k / ROWS);
     const row = k % ROWS;
-    const sp = SP * (1 - 0.18 * pack);
-    const x0 = 960 + (col - COLS / 2) * sp * (1 + 0.0 * pack);
-    const y = GY + (ROWS * SP) / 2 + (row - ROWS / 2) * sp;
-    const d = Math.hypot(x0 - cx, y - cy) / maxD;
-    const p = clamp((f - 150 - d * 70) / 18);
+    const x0 = cx + (col - COLS / 2) * sp;
+    const y0 = cy + (row - ROWS / 2) * sp;
+    const dist = Math.hypot(x0 - cx, y0 - cy) / maxD;
+    const p = clamp((f - 150 - dist * 70) / 18);
     if (p <= 0) continue;
     const warm = k < WARM_N;
-    const x = x0 + (warm ? -36 * split : 36 * split) * (1 - pack);
+    const x = Math.round(x0 + (warm ? -36 * split : 36 * split) * (1 - pack));
+    const y = Math.round(y0);
     const h = hash(k);
-    const tw = 0.55 + 0.45 * h;
-    const a = p * tw;
+    const a = p * (0.55 + 0.45 * h);
+    let r = 214;
+    let g = 224;
+    let b = 236;
+    let al = a * (warm ? 0.8 : lerp(0.8, 0.5, split));
     if (warm && split > 0) {
-      ctx.fillStyle = `rgba(255,${Math.round(lerp(222, 186, split))},${Math.round(lerp(230, 90, split))},${a * lerp(0.8, 1, split)})`;
-    } else {
-      ctx.fillStyle = `rgba(214,224,236,${a * (warm ? 0.8 : lerp(0.8, 0.5, split))})`;
+      g = Math.round(lerp(222, 186, split));
+      b = Math.round(lerp(230, 90, split));
+      r = 255;
+      al = a * lerp(0.8, 1, split);
     }
-    const sz = 1.4 + 1.2 * p * (0.6 + 0.4 * h);
-    ctx.fillRect(x, y, sz, sz);
+    const sz = p * (0.6 + 0.4 * h) > 0.75 ? 2 : 1;
+    const A = Math.round(255 * Math.min(1, al));
+    for (let dy = 0; dy < sz; dy++) {
+      const yy = y + dy;
+      if (yy < 0 || yy >= H) continue;
+      for (let dx = 0; dx < sz; dx++) {
+        const xx = x + dx;
+        if (xx < 0 || xx >= W) continue;
+        const i = (yy * W + xx) * 4;
+        d[i] = r;
+        d[i + 1] = g;
+        d[i + 2] = b;
+        d[i + 3] = A;
+      }
+    }
+  }
+  ctx.putImageData(IMG, 0, 0);
+  if (split > 0) {
+    const wb = (WARM_N / ROWS) * sp;
+    const gx = cx - (COLS / 2) * sp - 36 * (1 - pack) + wb / 2;
+    const g2 = ctx.createRadialGradient(gx, cy, 0, gx, cy, wb * 0.9);
+    g2.addColorStop(0, `rgba(255,181,71,${0.22 * split})`);
+    g2.addColorStop(1, 'rgba(255,181,71,0)');
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.fillStyle = g2;
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'source-over';
   }
 };
 

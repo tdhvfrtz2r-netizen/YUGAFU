@@ -8,7 +8,8 @@ Config.setBrowserExecutable(
 Config.setVideoImageFormat('jpeg');
 Config.setJpegQuality(94);
 Config.setCodec('h264');
-Config.setCrf(17);
+Config.setCrf(19);
+Config.setX264Preset('slow');
 Config.setPixelFormat('yuv420p');
 Config.setConcurrency(4);
 Config.setChromiumOpenGlRenderer('swangle');

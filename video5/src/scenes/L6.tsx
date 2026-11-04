@@ -62,7 +62,7 @@ const Profit: React.FC<{f: number}> = ({f}) => {
   const base = 600;
   const H = 300;
   return (
-    <svg width={1920} height={1080} style={{position: 'absolute', inset: 0, opacity: vis}}>
+    <svg width={1920} height={1080} style={{position: 'absolute', inset: 0, opacity: vis, transform: 'translateX(-130px)'}}>
       <rect x={1180} y={base - H * grow} width={150} height={H * grow} rx={6} fill="#5B6A80" />
       <rect x={1400} y={base - H * grow * (1 - 0.147 * drop)} width={150} height={H * grow * (1 - 0.147 * drop)} rx={6} fill={color.red} opacity={0.9} />
       <line x1={1170} y1={base - H * grow} x2={1560} y2={base - H * grow} stroke={color.ink} strokeDasharray="10 8" strokeWidth={2} opacity={0.6 * drop} />
@@ -93,7 +93,9 @@ export const L6: React.FC = () => {
         </AbsoluteFill>
       ) : null}
       <Profit f={f} />
-      <Survivors f={f} />
+      <AbsoluteFill style={{opacity: 1 - prog(f, END - 22, 22)}}>
+        <Survivors f={f} />
+      </AbsoluteFill>
       <Line text="蜜雪集团 2026 年上半年净利润同比下降 *14.7%*" at={70} out={292} y={830} kind="data" size={52} hl={color.red} />
       <Line text="上市后首次半年度利润下滑" at={120} out={292} y={905} kind="data" size={44} color={color.ink} source="蜜雪集团 2026 年中期报告" />
       <Line text="下沉市场很大，但不是无限大；" at={316} out={END - 14} y={850} size={58} kind="opinion" opinion />

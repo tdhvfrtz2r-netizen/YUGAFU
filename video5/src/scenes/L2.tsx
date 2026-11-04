@@ -231,7 +231,11 @@ export const L2: React.FC = () => {
       <Line text="乐评 · 媒体 · 从业者 · 做内容的人" at={b(4)} out={S10 - 20} x={480} y={845} kind="label" color={color.cool} size={36} />
       <Line text="大多在少数城市，习惯用自己的口味投票" at={b(5.4)} out={S10 - 20} x={480} y={915} kind="opinion" size={40} />
       <Line text="另外那十亿人：花钱，也花时间" at={b(11)} out={S10 - 20} x={1450} y={838} kind="opinion" size={40} />
-      {f >= S10 ? <Daolang f={f - S10} /> : null}
+      {f >= S10 ? (
+        <AbsoluteFill style={{opacity: 1 - prog(f, END - 18, 18)}}>
+          <Daolang f={f - S10} />
+        </AbsoluteFill>
+      ) : null}
       <Line text="2004 年，刀郎出道，被乐坛看不上。" at={S10 + 14} out={S10 + 196} y={930} size={58} />
       <Line text="多年后，因为《罗刹海市》，被网友「封神」。" at={S10 + 214} out={END - 14} y={930} size={58} />
     </AbsoluteFill>

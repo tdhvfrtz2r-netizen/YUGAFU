@@ -47,17 +47,32 @@ export const drawPerson = (ctx: CanvasRenderingContext2D, x: number, y: number, 
   ctx.globalAlpha = 1;
 };
 
-/** 柔光点：径向渐变 */
+/** 柔光点：预先画好一张径向渐变贴图，之后每次只是缩放贴上去（比每帧新建渐变快得多） */
+const SPRITES = new Map<string, HTMLCanvasElement>();
+const glowSprite = (rgb: string) => {
+  let c = SPRITES.get(rgb);
+  if (!c) {
+    c = document.createElement('canvas');
+    c.width = 128;
+    c.height = 128;
+    const g = c.getContext('2d')!;
+    const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    gr.addColorStop(0, `rgba(${rgb},1)`);
+    gr.addColorStop(0.35, `rgba(${rgb},0.35)`);
+    gr.addColorStop(1, `rgba(${rgb},0)`);
+    g.fillStyle = gr;
+    g.fillRect(0, 0, 128, 128);
+    SPRITES.set(rgb, c);
+  }
+  return c;
+};
+
 export const drawGlow = (ctx: CanvasRenderingContext2D, x: number, y: number, r: number, rgb: string, alpha = 1) => {
   if (alpha <= 0.003 || r < 0.5) return;
-  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-  g.addColorStop(0, `rgba(${rgb},${alpha})`);
-  g.addColorStop(0.35, `rgba(${rgb},${alpha * 0.35})`);
-  g.addColorStop(1, `rgba(${rgb},0)`);
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, TAU);
-  ctx.fill();
+  const prev = ctx.globalAlpha;
+  ctx.globalAlpha = prev * Math.min(1, alpha);
+  ctx.drawImage(glowSprite(rgb), x - r, y - r, r * 2, r * 2);
+  ctx.globalAlpha = prev;
 };
 
 export const hexToRgb = (hex: string) =>
