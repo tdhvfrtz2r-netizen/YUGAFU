@@ -35,7 +35,7 @@ npx remotion studio src/index.ts            # 可视化预览、拖时间轴
 npx remotion render src/index.ts Main out/video.mp4
 bash scripts/check.sh                       # 成片自检：规格、每 4 秒一帧的总览图、亮度跳变
 ```
-4 核 CPU、无显卡，全片约 25 分钟。
+4 核 CPU、无显卡，全片约 18 分钟。
 
 ## 结构
 - `src/timeline.ts`：23 个镜头的小节数。改这里，全片时间线自动重排（各场景里的帧号是相对镜头起点写的，改了小节数要跑一遍 `scripts/audit.js`）
