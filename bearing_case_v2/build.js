@@ -129,6 +129,7 @@ function drive(s, ox, oy, k, st, opts = {}) {
   const L = { x: ox + D.L.x * k, y: oy + D.L.y * k, r: D.rL * k };
   S(s, SH.OVAL, { x: L.x - 2.2 * L.r, y: L.y - 2.2 * L.r, w: 4.4 * L.r, h: 4.4 * L.r, fill: { color: C.accent4, transparency: 75 }, line: NONE });
   S(s, SH.OVAL, { x: L.x - L.r, y: L.y - L.r, w: 2 * L.r, h: 2 * L.r, fill: { color: C.accent4 }, line: { color: 'E8EEF6', width: 1.5 } });
+  if (opts.noLabels) return;
   const lab = (t, x, y, w, al = 'center') => T(s, t, { x, y, w, h: 0.3, fontSize: 11, color: C.accent6, align: al, margin: 0, valign: 'middle' }, opts.labelA);
   lab(opts.lampText || '运行', L.x + 2.4 * L.r, L.y - 0.15, 1.3, 'left');
   lab('电流表（约 55 A）', ox + (D.A.x - 0.9) * k, oy + (D.A.y + D.rA) * k + 0.04, 1.8 * k);
@@ -164,7 +165,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
     warnA: await icon('FaExclamationTriangle', HX.accent2), fileA: await icon('FaFileAlt', HX.accent2),
     checkG: await icon('FaCheck', HX.accent4), plusA: await icon('FaPlus', HX.accent2),
     eyeG: await icon('FaEye', HX.accent5), handG: await icon('FaHandPaper', HX.accent5), earG: await icon('FaAssistiveListeningSystems', HX.accent5), boltG: await icon('FaBolt', HX.accent5),
-    commA: await icon('FaComments', HX.accent2), calcB: await icon('FaCalculator', HX.accent1), cameraB: await icon('FaCamera', HX.accent1),
+    commA: await icon('FaComments', HX.accent2), calcB: await icon('FaCalculator', HX.accent1), cameraB: await icon('FaCamera', HX.accent1), walkB: await icon('FaWalking', null, HX.accent1),
     cogsB: await icon('FaCogs', HX.accent1), clipA: await icon('FaClipboardList', HX.accent2), penG: await icon('FaPenNib', HX.accent4),
   };
 
@@ -680,13 +681,19 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
     const bw = badge(s, r[4], tx0, y + 0.13, { st, fx: 'fade', d: 1000 });
     T(s, r[1], { x: slotX[0] + 3.5, y: y + 0.42, w: W - M - (slotX[0] + 3.5) - 0.12, h: 0.66, fontSize: 12, color: C.text1, margin: 0, valign: 'top' }, { st, fx: 'fade', d: 1100 });
   });
+  T(s, [
+    { text: '落到现场：同类故障先查', options: { bold: true, color: C.accent2, fontSize: 14, breakLine: true } },
+    { text: '① 加脂记录、轴承温度', options: { breakLine: true } },
+    { text: '② 皮带张力、对中、地脚', options: { breakLine: true } },
+    { text: '③ 轴承型号、安装记录' },
+  ], { x: M + 0.25, y: 2.55, w: 3.3, h: 1.95, fontSize: 13.5, color: C.text2, margin: 0, valign: 'middle', paraSpaceAfter: 6 }, { st, fx: 'float', d: 1500 });
   T(s, '排序依据：现场照片 + 工况推断。拿到加脂记录、皮带张力、旧轴承后要再修正。', { x: M, y: 4.95, w: 3.75, h: 0.9, fontSize: 12.5, color: C.accent5, italic: true, margin: 0, valign: 'top' }, { st, fx: 'fade', d: 1500 });
   N(s, `【嫌疑排序 · 约1.5分钟】
 · 左边是我上一版的讲法：六个方向平铺——听的人不知道先查哪个。
 [点击] 第1名：润滑失效 + 温度高。"润滑不良"和"散热差、粉尘大"合并：油脂发黑、积灰、封闭机箱。2极高速、高温、粉尘叠在一起，油脂老化比平常快得多，按常规周期加脂很可能不够。
 [点击] 第2名：皮带不对中/振动。坏在负荷侧。正常张紧的皮带拉力不至于压坏轴承，真正要查的是对中、张力、地脚——不对中和抖动才伤轴承。
 [点击] 第3名：2极高转速——它不是原因，是"放大器"，让前两条更快出问题。
-[点击] 第4名：轴承寿命/安装质量——没数据，待双兴提供。
+[点击] 第4名：轴承寿命/安装质量——没数据，待双兴提供。左边同时出现"落到现场"的查找顺序：先查加脂记录和轴承温度，再查皮带，最后查轴承型号和安装。
 · 强调：这是推断排序，拿到加脂记录、皮带张力、旧轴承后要再修正。`);
 
   // =====================================================================
@@ -696,26 +703,35 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
   tagPill(s, '04  深挖②');
   title(s, '深挖②：为什么跳闸前没人发现？—— 监测盲区');
   st = step('auto');
-  const ex = 0.85, ey = 1.95, ew = 5.2, eh = 2.9;
+  const ex = 0.85, ey = 1.9, ew = 5.2, eh = 2.7;
   S(s, SH.ROUNDED_RECTANGLE, { x: ex, y: ey, w: ew, h: eh, fill: { color: C.background2 }, line: { color: C.accent5, width: 4 }, rectRadius: 0.08 }, { st, fx: 'fade', d: 0 });
   T(s, '封闭机箱（示意）', { x: ex + 0.15, y: ey + 0.1, w: 2.2, h: 0.3, fontSize: 12, bold: true, color: C.accent5, margin: 0 }, { st, fx: 'fade', d: 0 });
-  S(s, SH.ROUNDED_RECTANGLE, { x: ex + 0.6, y: ey + 0.95, w: 2.1, h: 1.35, fill: { color: C.accent1 }, line: NONE, rectRadius: 0.08 }, { st, fx: 'fade', d: 100 });
-  for (let k = 0; k < 6; k++) S(s, SH.LINE, { x: ex + 0.75 + k * 0.33, y: ey + 0.95, w: 0, h: 1.35, line: { color: '174E92', width: 2 } }, { st, fx: 'fade', d: 100 });
-  T(s, '电机', { x: ex + 0.6, y: ey + 1.4, w: 2.1, h: 0.4, fontSize: 14, bold: true, color: C.background1, align: 'center', margin: 0 }, { st, fx: 'fade', d: 100 });
-  S(s, SH.RECTANGLE, { x: ex + 2.7, y: ey + 1.5, w: 0.35, h: 0.25, fill: { color: '5C6D82' }, line: NONE }, { st, fx: 'fade', d: 100 });
-  S(s, SH.OVAL, { x: ex + 3.0, y: ey + 1.1, w: 0.4, h: 1.05, fill: { color: '8796AA' }, line: NONE }, { st, fx: 'fade', d: 100 });
-  S(s, SH.LINE, { x: ex + 3.2, y: ey + 0.3, w: 0, h: 0.85, line: { color: '1C2733', width: 4 } }, { st, fx: 'fade', d: 100 });
-  T(s, '皮带 → 风机', { x: ex + 3.3, y: ey + 0.4, w: 1.4, h: 0.3, fontSize: 11, color: C.accent5, margin: 0 }, { st, fx: 'fade', d: 100 });
-  [[0.35, 2.55], [1.2, 2.65], [2.1, 2.5], [3.75, 0.95], [4.7, 0.75], [4.0, 1.5], [4.6, 1.95], [0.3, 0.7], [2.5, 0.55]].forEach(([dx, dy], k) =>
+  S(s, SH.ROUNDED_RECTANGLE, { x: ex + 0.6, y: ey + 0.85, w: 2.1, h: 1.35, fill: { color: C.accent1 }, line: NONE, rectRadius: 0.08 }, { st, fx: 'fade', d: 100 });
+  for (let k = 0; k < 6; k++) S(s, SH.LINE, { x: ex + 0.75 + k * 0.33, y: ey + 0.85, w: 0, h: 1.35, line: { color: '174E92', width: 2 } }, { st, fx: 'fade', d: 100 });
+  T(s, '电机', { x: ex + 0.6, y: ey + 1.3, w: 2.1, h: 0.4, fontSize: 14, bold: true, color: C.background1, align: 'center', margin: 0 }, { st, fx: 'fade', d: 100 });
+  S(s, SH.RECTANGLE, { x: ex + 2.7, y: ey + 1.4, w: 0.35, h: 0.25, fill: { color: '5C6D82' }, line: NONE }, { st, fx: 'fade', d: 100 });
+  S(s, SH.OVAL, { x: ex + 3.0, y: ey + 1.0, w: 0.4, h: 1.05, fill: { color: '8796AA' }, line: NONE }, { st, fx: 'fade', d: 100 });
+  S(s, SH.LINE, { x: ex + 3.2, y: ey + 0.3, w: 0, h: 0.75, line: { color: '1C2733', width: 4 } }, { st, fx: 'fade', d: 100 });
+  T(s, '皮带 → 风机', { x: ex + 3.3, y: ey + 0.35, w: 1.4, h: 0.3, fontSize: 11, color: C.accent5, margin: 0 }, { st, fx: 'fade', d: 100 });
+  // the hidden fault: load-side bearing, blinking where nobody can see it
+  S(s, SH.OVAL, { x: ex + 2.43, y: ey + 1.36, w: 0.34, h: 0.34, fill: { color: C.accent2 }, line: { color: 'FFFFFF', width: 1.5 } }, [{ st, fx: 'zoom', d: 300 }, { st, fx: 'blink', d: 900, dur: 500, repeat: 8 }]);
+  T(s, '轴承在"生病"', { x: ex + 1.95, y: ey + 2.25, w: 1.4, h: 0.3, fontSize: 11, bold: true, color: C.accent2, margin: 0, align: 'center' }, { st, fx: 'fade', d: 900 });
+  [[0.35, 2.35], [1.2, 2.45], [3.75, 0.95], [4.7, 0.75], [4.0, 1.5], [4.6, 1.85], [0.3, 0.6], [2.5, 0.5]].forEach(([dx, dy], k) =>
     S(s, SH.OVAL, { x: ex + dx, y: ey + dy, w: 0.09 + (k % 3) * 0.03, h: 0.09 + (k % 3) * 0.03, fill: { color: 'A79A86' }, line: NONE }, { st, fx: 'fade', d: 200 }));
-  T(s, '粉尘 · 高噪声 · 散热差', { x: ex + 3.15, y: ey + 2.45, w: 1.95, h: 0.3, fontSize: 11, color: C.accent5, margin: 0, align: 'right' }, { st, fx: 'fade', d: 200 });
+  T(s, '粉尘 · 高噪声 · 散热差', { x: ex + 3.15, y: ey + 2.3, w: 1.95, h: 0.3, fontSize: 11, color: C.accent5, margin: 0, align: 'right' }, { st, fx: 'fade', d: 200 });
+  // inspection route outside the box; the inspector walks by
+  const routeY = ey + eh + 0.42;
+  S(s, SH.LINE, { x: ex - 0.15, y: routeY, w: ew + 0.3, h: 0, line: { color: C.accent1, width: 1.5, dashType: 'dash' } }, { st, fx: 'wipeL', d: 300, dur: 800 });
+  T(s, '巡检路线', { x: ex + ew - 1.0, y: routeY + 0.04, w: 1.1, h: 0.26, fontSize: 11, color: C.accent1, margin: 0, align: 'right' }, { st, fx: 'fade', d: 300 });
+  I(s, { data: I_.walkB, x: ex - 0.25, y: routeY - 0.5, w: 0.5, h: 0.5, altText: '巡检人员' }, [{ st, fx: 'fade', d: 500 }, { st, fx: 'path', d: 700, dur: 3200, path: `M 0 0 L ${(3.4 / W).toFixed(4)} 0 E`, ease: false }]);
+  T(s, '"看着都正常。"', { x: ex + 3.65, y: routeY - 0.42, w: 1.6, h: 0.32, fontSize: 12, italic: true, bold: true, color: C.accent5, margin: 0 }, { st, fx: 'zoom', d: 4000 });
   const senses = [[I_.eyeG, '看不见'], [I_.handG, '摸不到'], [I_.earG, '听不清'], [I_.boltG, '电流反应太晚']];
   st = step('click');
   senses.forEach((sn, i) => {
-    const x = ex + i * 1.32, y = 5.1, a = { st, fx: 'fade', d: 0 };
-    I(s, { data: sn[0], x: x + 0.25, y, w: 0.65, h: 0.65 }, { st: cur.steps[0], fx: 'zoom', d: 600 + i * 150 });
-    T(s, sn[1], { x: x - 0.1, y: y + 0.72, w: 1.35, h: 0.55, fontSize: 12, bold: true, color: C.text2, align: 'center', margin: 0, valign: 'top' }, { st: cur.steps[0], fx: 'fade', d: 600 + i * 150 });
-    S(s, SH.LINE, { x: x + 0.12, y: y + 0.05, w: 0.9, h: 0.55, line: { color: C.accent3, width: 4 } }, { st, fx: 'wipeL', d: i * 450, dur: 300 });
+    const x = ex + i * 1.32, y = routeY + 0.38;
+    I(s, { data: sn[0], x: x + 0.3, y, w: 0.55, h: 0.55 }, { st, fx: 'zoom', d: i * 450 });
+    T(s, sn[1], { x: x - 0.1, y: y + 0.58, w: 1.35, h: 0.3, fontSize: 12, bold: true, color: C.text2, align: 'center', margin: 0, valign: 'top' }, { st, fx: 'fade', d: i * 450 });
+    S(s, SH.LINE, { x: x + 0.2, y: y + 0.03, w: 0.75, h: 0.49, line: { color: C.accent3, width: 4 } }, { st, fx: 'wipeL', d: i * 450 + 250, dur: 300 });
   });
   const rx15 = 6.55, rw15 = W - M - rx15;
   S(s, SH.ROUNDED_RECTANGLE, { x: rx15, y: 1.95, w: rw15, h: 1.6, fill: { color: C.accent3, transparency: 90 }, line: NONE, rectRadius: 0.1 }, { st, fx: 'float', d: 1900 });
@@ -731,7 +747,8 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
     T(s, t, { x: rx15 + 0.48, y, w: rw15 - 0.5, h: 0.42, fontSize: 13.5, color: C.text1, margin: 0, valign: 'middle' }, a);
   });
   N(s, `【深挖② 监测盲区 · 约1.5分钟 · 回答第⑤个为什么】
-· 左边（自动）：电机在封闭机箱里，粉尘大、噪声大、散热差。下面四个"感官"：看、摸、听、电流。
+· 左边（自动）：电机在封闭机箱里，粉尘大、噪声大、散热差；橙点在闪——负荷侧轴承已经在"生病"。
+· 巡检的人沿路线走过去："看着都正常。"——不是他不认真，是根本看不到。
 [点击] 一个个划掉：看不见、摸不到、听不清，电流要到快卡死才明显上升——结论【推断】：这是一台"监测盲区设备"，很可能也不在冲击脉冲路线上。
 · 重点：巡检再认真也发现不了，所以原报告"加强巡检"解决不了问题。
 [点击] 对策：单列清单；测点和注油管引到机箱外；纳入冲击脉冲路线；必要时加在线传感器；缩短加脂周期。
@@ -794,7 +811,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
     S(s, SH.CUSTOM_GEOMETRY, { x: xa, y: ya, w: xb - xa, h: Math.max(yb - ya, 0.01), points: pts, fill: CLEAR, line: { color: pf[i][4], width: 4 } }, { st, fx: 'wipeL', d: i * 500, dur: 500 });
   }
   T(s, '设备状态', { x: M, y: 2.3, w: 1.2, h: 0.3, fontSize: 11, color: C.accent5, margin: 0 }, { st, fx: 'fade', d: 0 });
-  T(s, '时间 →', { x: W - M - 1.0, y: 3.88, w: 1.0, h: 0.3, fontSize: 11, color: C.accent5, margin: 0, align: 'right' }, { st, fx: 'fade', d: 0 });
+  T(s, '时间 →', { x: W - M - 2.2, y: 3.9, w: 1.0, h: 0.3, fontSize: 11, color: C.accent5, margin: 0, align: 'right' }, { st, fx: 'fade', d: 0 });
   pf.forEach((p, i) => {
     const d = 300 + i * 500, x = M + i * (pcw + pgap), y = 4.15, last = i === 3, cy_ = curveY(pcx(i));
     S(s, SH.OVAL, { x: pcx(i) - 0.13, y: cy_ - 0.13, w: 0.26, h: 0.26, fill: { color: p[4] }, line: { color: 'FFFFFF', width: 2 } }, { st, fx: 'zoom', d });
@@ -825,6 +842,40 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
 [点击] 看这个点沿曲线走——时间在走，状态在变差……本案例到阶段四才发现。
 [点击] 目标：在阶段一、二就发现。我们班正在做的冲击脉冲档案表（HDm/HDc）就是这个阶段的工具——单次数值意义有限，关键是连成趋势。
 · 说明：这是P-F曲线示意，不是这台电机的实测数据。`);
+
+  // =====================================================================
+  // 17b ON-SITE CHECK POINTS (dark): numbered hotspots on the running drive
+  s = newSlide('DARK', '04 怎么防');
+  st = step('auto');
+  T(s, '现场怎么查：一台皮带传动电机，盯住这 6 个点', { x: 0.7, y: 1.2, w: 11.9, h: 0.6, fontSize: 26, bold: true, color: C.background1, margin: 0, valign: 'middle' }, { st, fx: 'fade', d: 0 });
+  const hk = 0.9, hox = 0.75, hoy = 1.95;
+  drive(s, hox, hoy, hk, st, { noLabels: true });
+  const HS = [
+    ['轴承', '听音棒听、测温枪测、冲击脉冲测；每次同一个点，记下来比趋势', [3.55, 3.6]],
+    ['加脂', '按台账加；高速电机少量多次、不加满，加完盯一下温度', [0.95, 2.75]],
+    ['皮带', '张力计（或按压中点）查松紧；直尺靠两轮端面查对中；看裂纹、打滑发亮', [2.37, 1.92]],
+    ['散热筋', '积灰结块就清，封闭机箱里的更要清', [0.3, 3.55]],
+    ['地脚', '螺栓紧固、无松动；底座、机架无裂纹', [0.55, 4.85]],
+    ['电流', '只作后期佐证：电流明显上升时，轴承已接近卡死', [1.42, 0.38]],
+  ];
+  const hlx = 6.35, hlw = W - 0.6 - hlx;
+  HS.forEach((h, i) => {
+    if (i % 2 === 0) st = step('click');
+    const [lx_, ly_] = h[2], mx = hox + lx_ * hk, my = hoy + ly_ * hk, d = (i % 2) * 400;
+    S(s, SH.OVAL, { x: mx - 0.32, y: my - 0.32, w: 0.64, h: 0.64, fill: { color: C.accent2, transparency: 65 }, line: NONE }, [{ st, fx: 'zoom', d }, { st, fx: 'blink', d: d + 500, dur: 400, repeat: 3 }]);
+    numDot(s, i + 1, mx - 0.21, my - 0.21, 0.42, C.accent2, { st, fx: 'zoom', d }, 15);
+    const y = 2.05 + i * 0.8, a = { st, fx: 'float', d };
+    numDot(s, i + 1, hlx, y + 0.04, 0.4, C.accent2, a, 14);
+    T(s, h[0], { x: hlx + 0.55, y, w: 1.2, h: 0.48, fontSize: 17, bold: true, color: C.background1, margin: 0, valign: 'middle' }, a);
+    T(s, h[1], { x: hlx + 1.75, y: y - 0.04, w: hlw - 1.75, h: 0.62, fontSize: 13, color: 'D6E2F2', margin: 0, valign: 'middle' }, a);
+  });
+  T(s, '看不到、够不着的点，按"盲区"处理：测点、注油管引到机箱外', { x: hlx, y: 6.9, w: hlw, h: 0.36, fontSize: 12.5, bold: true, color: C.accent2, margin: 0, valign: 'middle' }, { st, fx: 'fade', d: 900 });
+  N(s, `【现场检查要点 · 约1.5分钟 · 落到每天的巡检】
+· 还是开头那台电机，在转。今天讲的东西落到现场，就是盯住6个点。
+[点击] ①轴承：听音棒听、测温枪测、冲击脉冲测——关键是每次同一个点，记下来比趋势。②加脂：按台账，高速电机少量多次、别加满，加完盯温度。
+[点击] ③皮带：张力计或按压中点查松紧，直尺靠两个皮带轮端面查对中，看裂纹、打滑发亮。④散热筋：积灰结块就清。
+[点击] ⑤地脚：螺栓紧固、底座无裂纹。⑥电流：只能作后期佐证，等它明显上升已经晚了。
+· 看不到、够不着的点，就按上一节的"盲区"处理。会后发每人一张"巡检口袋卡"。`);
 
   // =====================================================================
   // 18 SPREAD THE LESSON 2.0
@@ -943,7 +994,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
 · （自动）三句话：查——四步缩小范围；追——直接原因之后还有根因；防——在跳闸前发现。
 · 右边电机重新转起来，绿灯"恢复运行"，和开头首尾呼应。
 [点击] 三个讨论题：哪些是"皮带+2极"？哪几台最难巡检到位？上次加脂什么时候、有没有记录？
-· 可以当场把第16页的清单分工定下来。
+· 可以当场把第17页的清单分工定下来。
 · 收尾：谢谢大家。`);
 
   await pres.writeFile({ fileName: OUT });

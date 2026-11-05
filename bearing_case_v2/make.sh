@@ -14,3 +14,4 @@ ls -la out
 python3 clickguide.py out/bearing_case_v2.pptx build/anim.json out/点击说明.md >/dev/null
 cp assets/gen/opening.mp4 out/opening.mp4
 node request_list.js >/dev/null
+node handouts.js >/dev/null
