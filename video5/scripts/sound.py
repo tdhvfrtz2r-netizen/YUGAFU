@@ -685,7 +685,7 @@ def piano(m, dur, vel, rng):
 
 def kick(rng):
     n = ns(0.5)
-    x = sine(np.geomspace(120, 44, n), n) * env(n, 0.22, 0.002)
+    x = sine(np.geomspace(130, 55, n), n) * env(n, 0.2, 0.002)
     x += bp(noise(n, rng), 1500, 5000) * env(n, 0.002, 0.0002) * 0.3
     return x
 
@@ -811,8 +811,8 @@ def compose(shots, total_sec, rng, cues):
     # 各段亮度不同：铺底和琶音走一个随时间变化的低通
     cut_t.append(total_sec + 4)
     cut_v.append(cut_v[-1])
-    pad = tv_lowpass(pad, np.array(cut_t), np.array(cut_v))
-    arp = tv_lowpass(arp, np.array(cut_t), np.array(cut_v) * 1.6)
+    pad = tv_lowpass(pad, np.array(cut_t), np.array(cut_v) * 1.35)
+    arp = tv_lowpass(arp, np.array(cut_t), np.array(cut_v) * 2.1)
     bass = lp(bass, 220)
     # 琶音加一个附点八分的回声
     d = ns(BEAT * 0.75)
@@ -822,11 +822,11 @@ def compose(shots, total_sec, rng, cues):
         fb = lp(np.concatenate([np.zeros((d, 2)), fb[:-d]]), 3000) * 0.35
         echo += fb[:, ::-1] if i % 2 == 0 else fb
     arp = arp + echo
-    music = pad * 1.0 + arp * 0.55 + bass * 0.9 + drums * 0.5 + mel * 0.6
+    music = pad * 1.0 + arp * 0.55 + bass * 0.58 + drums * 0.5 + mel * 0.6
     # 混响送一份
     ir = make_ir(3.0, rng, damp=5500)
     wet = conv_reverb(pad * 0.35 + arp * 0.5 + mel * 0.45 + drums * 0.1, ir)[: len(music)]
-    music = hp(music + wet * 0.55, 30)
+    music = hp(music + wet * 0.55, 40, 4)
     # 收尾：最后两小节淡出到无声，和画面一起黑
     end_n = ns(total_sec)
     fade_n = ns(BAR * 1.6)
