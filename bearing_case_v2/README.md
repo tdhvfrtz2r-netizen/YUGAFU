@@ -10,6 +10,7 @@
 | `bearing_case_v2_preview.pdf` | 静态预览：每页显示动画**播完后**的样子（看不到动画本身） |
 | `点击说明.md` | 一页“每页点几下”，由脚本按实际动画步骤生成 |
 | `opening.mp4` | 开场 14 秒示意动画（1080p，无声），嵌入失败时备用 |
+| `向双兴索要数据清单.pdf` | A4 一页，8 项数据 + 每项用途，可直接发给双兴；`.md` 是内部版，多一列“对应我方 PPT 页”，拿到数据后照着改 |
 
 ## 动起来的地方（全部用 WPS 也支持的普通动画，不依赖 Morph）
 
@@ -44,7 +45,7 @@ LibreOffice 只能检查静态版式，已确认所有动画 XML 都能被识别
 
 ```bash
 npm i                      # pptxgenjs react react-dom react-icons sharp；Playwright/Chromium、ffmpeg、LibreOffice 需已安装
-./make.sh                  # 画 PNG 零件 → 渲染视频 → 生成 pptx → 注入动画 → 预览 PDF → 点击说明
+./make.sh                  # 画 PNG 零件 → 渲染视频 → 生成 pptx → 注入动画 → 预览 PDF → 点击说明 → 数据清单
 SKIP_RENDER=1 ./make.sh    # 只改了文字时用，跳过图片和视频渲染
 ```
 
@@ -56,5 +57,6 @@ SKIP_RENDER=1 ./make.sh    # 只改了文字时用，跳过图片和视频渲染
 | `build.js` | 20 页版式、文字、备注；把动画步骤记到 `build/anim.json` |
 | `anim.py` | 注入动画、切换、主题色、雅黑字体；`--final` 输出“动画播完后”的静态版，用于 PDF 预览 |
 | `clickguide.py` | 生成点击说明，并检查备注里的 `[点击]` 次数和实际动画步骤一致 |
+| `request_list.js` | 生成向双兴索要数据清单（PDF + 内部 md） |
 
 原始材料在 `materials/`（原报告 PPT 和照片），交接说明见 `HANDOFF.md`。

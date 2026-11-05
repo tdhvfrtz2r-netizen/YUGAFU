@@ -627,12 +627,22 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
     if (b[3]) badge(s, b[3], rx11 + 1.55, yy + 0.1, a);
     T(s, b[1], { x: rx11 + 0.22, y: yy + 0.4, w: rw11 - 0.35, h: hh - 0.46, fontSize: 12.5, color: C.text1, margin: 0, valign: 'top' }, a);
   });
+  const shots = ['滚道', '滚珠', '保持架断口', '油脂', '轴颈', '轴承室', '密封'];
+  I(s, { data: I_.cameraB, x: tblX, y: 5.95, w: 0.42, h: 0.42 }, { st, fx: 'fade', d: 300 });
+  T(s, '下次拆检必拍', { x: tblX + 0.5, y: 5.95, w: 1.6, h: 0.42, fontSize: 14, bold: true, color: C.accent1, margin: 0, valign: 'middle' }, { st, fx: 'fade', d: 300 });
+  let shx = tblX + 1.95;
+  shots.forEach((t, k) => {
+    const w = textW(t, 12) + 0.22;
+    T(s, t, { x: shx, y: 5.98, w, h: 0.36, fontSize: 12, bold: true, color: C.accent1, fill: { color: C.accent1, transparency: 88 }, shape: SH.ROUNDED_RECTANGLE, rectRadius: 0.18, align: 'center', valign: 'middle', margin: 0 }, { st, fx: 'zoom', d: 450 + k * 90 });
+    shx += w + 0.08;
+  });
+  T(s, '旧件封存、贴标签（设备位号 + 日期 + DE/NDE），必要时取油脂样', { x: tblX + 0.5, y: 6.42, w: c1w + c2w - 0.5, h: 0.32, fontSize: 12, color: C.text1, margin: 0, valign: 'middle' }, { st, fx: 'fade', d: 1100 });
   N(s, `【深挖① 断口会说话 · 约1.5分钟】
 · 左表（自动逐行出现）：保持架/轴承上的痕迹，各自常见指向什么。这是失效分析的常识，不是本案结论。
 · 举两个例子：兜孔磨大有磨屑 → 多半是润滑不良；钢件发蓝 → 曾经过热。
 [点击] 本案能确认的：保持架撕裂变形、滚珠扎堆、油脂发黑——这是事实。
 [点击] 判断不了的：到底哪种失效模式？照片没拍滚道、滚珠、轴颈，没取油脂样，旧件在不在也不知道。
-[点击] 教训：拆下来的东西就是证据——先拍、先留、先贴标签，再扔。`);
+[点击] 教训：拆下来的东西就是证据——先拍、先留、先贴标签，再扔。左下是下次拆检必拍的7样：滚道、滚珠、保持架断口、油脂、轴颈、轴承室、密封；旧件封存贴标签。`);
 
   // =====================================================================
   // 12 DEEP DIVE 2A: relubrication interval waterfall
@@ -817,7 +827,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
   S(s, SH.OVAL, { x: ex + 3.0, y: ey + 1.1, w: 0.4, h: 1.05, fill: { color: '8796AA' }, line: NONE }, { st, fx: 'fade', d: 100 });
   S(s, SH.LINE, { x: ex + 3.2, y: ey + 0.3, w: 0, h: 0.85, line: { color: '1C2733', width: 4 } }, { st, fx: 'fade', d: 100 });
   T(s, '皮带 → 风机', { x: ex + 3.3, y: ey + 0.4, w: 1.4, h: 0.3, fontSize: 11, color: C.accent5, margin: 0 }, { st, fx: 'fade', d: 100 });
-  [[0.35, 2.55], [1.2, 2.65], [2.1, 2.5], [3.6, 2.6], [4.4, 2.45], [4.0, 1.4], [4.6, 1.9], [0.3, 0.7], [2.5, 0.55]].forEach(([dx, dy], k) =>
+  [[0.35, 2.55], [1.2, 2.65], [2.1, 2.5], [3.75, 0.95], [4.7, 0.75], [4.0, 1.5], [4.6, 1.95], [0.3, 0.7], [2.5, 0.55]].forEach(([dx, dy], k) =>
     S(s, SH.OVAL, { x: ex + dx, y: ey + dy, w: 0.09 + (k % 3) * 0.03, h: 0.09 + (k % 3) * 0.03, fill: { color: 'A79A86' }, line: NONE }, { st, fx: 'fade', d: 200 }));
   T(s, '粉尘 · 高噪声 · 散热差', { x: ex + 3.15, y: ey + 2.45, w: 1.95, h: 0.3, fontSize: 11, color: C.accent5, margin: 0, align: 'right' }, { st, fx: 'fade', d: 200 });
   const senses = [[I_.eyeG, '看不见'], [I_.handG, '摸不到'], [I_.earG, '听不清'], [I_.boltG, '电流不敏感（<1%）']];

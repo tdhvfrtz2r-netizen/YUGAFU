@@ -17,7 +17,8 @@ because the target player is WPS. Transitions are plain fades.
 import json, re, sys, zipfile, itertools
 
 FINAL = '--final' in sys.argv     # preview mode: bake every slide's END state (exits removed, paths/spins applied), no timing
-src, spec_path, out = [a for a in sys.argv[1:] if a != '--final'][:3]
+POSTER = next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--poster=')), None)   # final mode: show this frame as the video cover
+src, spec_path, out = [a for a in sys.argv[1:] if not a.startswith('--')][:3]
 spec = json.load(open(spec_path, encoding='utf-8'))
 EMU_W, EMU_H = 12192000, 6858000
 
@@ -174,9 +175,19 @@ def transition(n):
 
 zin = zipfile.ZipFile(src)
 zout = zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED)
+covers = set()
+if FINAL and POSTER:               # cover images of slides that hold a video
+    for n in zin.namelist():
+        if re.fullmatch(r'ppt/slides/_rels/slide\d+\.xml\.rels', n):
+            r = zin.read(n).decode('utf-8')
+            if 'relationships/video' in r:
+                covers |= {'ppt/media/' + t.split('/')[-1] for t in re.findall(r'Type="[^"]*/image" Target="([^"]+)"', r)}
 total = 0
 for item in zin.infolist():
     data = zin.read(item.filename)
+    if item.filename in covers:
+        zout.writestr(item, open(POSTER, 'rb').read())
+        continue
     m = re.fullmatch(r'ppt/slides/slide(\d+)\.xml', item.filename)
     if m:
         n = int(m.group(1))
