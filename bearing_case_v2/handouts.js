@@ -27,7 +27,7 @@ const cardHtml = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
 @page { size: A4; margin: 0; }
 * { box-sizing: border-box; }
 body { margin: 0; font-family: ${FONT}; color: #1C2733; }
-.card { width: 210mm; height: 148.5mm; padding: 8mm 10mm 6mm; display: flex; flex-direction: column; }
+.card { width: 210mm; height: 148.4mm; overflow: hidden; padding: 8mm 10mm 6mm; display: flex; flex-direction: column; }
 .card + .card { border-top: 0.4mm dashed #8FB3E0; }
 header { display: flex; align-items: baseline; gap: 5mm; border-bottom: 0.8mm solid #0E2240; padding-bottom: 2mm; }
 header .t { font-size: 17pt; font-weight: 700; color: #0E2240; }
@@ -35,9 +35,9 @@ header .s { font-size: 9.5pt; color: #E8772E; font-weight: 700; }
 .grid { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 1fr 1fr; gap: 3mm; margin-top: 3.5mm; }
 .cell { border-radius: 2mm; padding: 2.5mm 3mm; }
 .cell.a { background: #EEF3FA; } .cell.b { background: #FCF1E8; }
-.cell h3 { margin: 0 0 1.5mm; font-size: 12pt; color: #1D5FAE; }
+.cell h3 { margin: 0 0 1.2mm; font-size: 13pt; color: #1D5FAE; }
 .cell.b h3 { color: #E8772E; }
-ul { margin: 0; padding-left: 4mm; font-size: 9.5pt; line-height: 1.5; }
+ul { margin: 0; padding-left: 4.5mm; font-size: 10.5pt; line-height: 1.45; }
 footer { margin-top: 2.5mm; font-size: 8.5pt; color: #5B6B7C; }
 </style></head><body>${card}${card}</body></html>`;
 
