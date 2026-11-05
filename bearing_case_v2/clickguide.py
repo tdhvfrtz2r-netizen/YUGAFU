@@ -6,7 +6,7 @@ from pptx import Presentation
 deck, spec_path, out_md = sys.argv[1:4]
 spec = json.load(open(spec_path, encoding='utf-8'))
 prs = Presentation(deck)
-FIXED = {1: '开场：电机在转', 2: '故障瞬间（视频）', 20: '总结 + 讨论'}
+FIXED = {1: '开场：电机在转', 2: '故障瞬间（视频）', len(prs.slides._sldIdLst): '总结 + 讨论'}
 rows, total_clicks, total_min = [], 0, 0.0
 for i, sl in enumerate(prs.slides, 1):
     title = FIXED.get(i)
@@ -35,7 +35,7 @@ md = ['# 点击说明（每页点几下）', '',
       '| 页 | 标题 | 换页后 | 点击 | 每次点击出现什么 | 用时 |', '|---|---|---|---|---|---|']
 for r in rows:
     md.append(f'| {r[0]} | {r[1]} | {r[2]} | {r[3]} | {r[4]} | {r[5]:g} 分 |')
-md += ['', '**放映前在 WPS 实测**：第 2 页视频是否自动播放（不播就单击画面）；第 1、8、20 页转动是否连续；第 6 页红灯闪烁、表针摆动；第 9、14、17 页的路径动画终点是否正确。',
+md += ['', '**放映前在 WPS 实测**：第 2 页视频是否自动播放（不播就单击画面）；第 1、8、18 页转动是否连续；第 6 页红灯闪烁、表针摆动；第 9、12、15 页的路径动画终点是否正确。',
        '视频备份：`out/opening.mp4`（嵌入失败时可直接用播放器打开）。']
 open(out_md, 'w', encoding='utf-8').write('\n'.join(md) + '\n')
 print('\n'.join(md))

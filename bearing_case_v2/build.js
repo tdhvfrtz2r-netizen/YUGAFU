@@ -235,7 +235,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
   T(s, '原报告答了"坏了什么、怎么修"；今天多问三个问题', { x: M, y: 3.75, w: 9, h: 0.4, fontSize: 17, bold: true, color: C.text2, margin: 0 }, { st, fx: 'fade', d: 0 });
   const three = [
     ['01', '怎么查', '排查四步法：从"跳闸"一步步缩小到"轴承"', I_.searchB],
-    ['02', '为什么坏', '看证据、算一算、给嫌疑排个序', I_.questA],
+    ['02', '为什么坏', '看证据、给嫌疑排个序', I_.questA],
     ['03', '怎么防', '找出"监测盲区"，在跳闸之前发现它', I_.bulbG],
   ];
   const tw = (CW - 2 * 0.3) / 3;
@@ -250,7 +250,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
   N(s, `【一页看懂 · 约1分钟】
 · 故障链（自动出现）：保持架破损 → 滚珠扎堆卡死 → 电流急剧上升 → 综保过流跳闸 → 生产波动。
 · 综保动作是对的，保护起了作用；问题是没能在跳闸之前发现。
-[点击] 三个问题：怎么查——四步法；为什么坏——证据、计算、嫌疑排序；怎么防——监测盲区、跳闸前发现。
+[点击] 三个问题：怎么查——四步法；为什么坏——看证据、排嫌疑；怎么防——监测盲区、跳闸前发现。
 · 一句话主线：今天不是只讲一个故障，是讲"一份浅报告，怎么挖深"。`);
 
   // =====================================================================
@@ -340,7 +340,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
 · 时间线自动出现：14:05跳闸 → 值班人员立即到场 → 检查判断 → 解体 → 更换修复 → 恢复运行。
 · 处置值得肯定：到场快、判断准、修复及时。
 [点击] 但原报告缺了11项数据：停机时长、产量影响、轴承型号、运行时长、上次加脂、加脂周期、巡检记录、监测路线、皮带张力对中、同型号故障史、旧轴承在不在。
-· 今天凡是用到这些数据的地方，我都标了【假设】或【待双兴提供】，不编数。
+· 今天凡是缺数据的地方，我都标了【待双兴提供】，不编数。
 · 以后我们自己写故障报告，这些要补上。`);
 
   // =====================================================================
@@ -558,7 +558,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
     ['为什么停机？', '综保过电流保护动作 —— 保护是对的'],
     ['为什么过流？', '电机转子被卡住，电流急剧上升'],
     ['为什么卡住？', '负荷侧轴承保持架破损，滚珠扎堆'],
-    ['为什么保持架会破损？', '原报告没回答 → 今天深挖：证据、计算、嫌疑排序'],
+    ['为什么保持架会破损？', '原报告没回答 → 今天深挖：看证据、排嫌疑'],
     ['为什么跳闸前没发现？', '管理原因：这台电机处在"监测盲区" —— 对我们最有借鉴意义'],
   ];
   const nums = ['①', '②', '③', '④', '⑤'];
@@ -583,7 +583,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
   N(s, `【五个为什么 · 约1.5分钟】
 · 一层层往下问，直到问出能"改"的东西。
 · 前三问原报告都答了（自动出现）：停机 ← 过流 ← 卡住 ← 保持架破损。这是"直接原因"。
-[点击] 第④问：保持架为什么会破损？原报告没回答——接下来用三招挖：看证据、算一算、排嫌疑。
+[点击] 第④问：保持架为什么会破损？原报告没回答——接下来两招：看证据、排嫌疑。
 [点击] 第⑤问：为什么跳闸前没发现？这是管理原因，对我们最有借鉴意义，后面专门讲"监测盲区"。`);
 
   // =====================================================================
@@ -645,127 +645,6 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
 [点击] 教训：拆下来的东西就是证据——先拍、先留、先贴标签，再扔。左下是下次拆检必拍的7样：滚道、滚珠、保持架断口、油脂、轴颈、轴承室、密封；旧件封存贴标签。`);
 
   // =====================================================================
-  // 12 DEEP DIVE 2A: relubrication interval waterfall
-  s = newSlide('CONTENT', '03 为什么坏');
-  tagPill(s, '03  深挖②');
-  title(s, '深挖②：算一算 —— 加脂间隔可能只有 1.5–2.5 个月');
-  st = step('auto');
-  const lpX = M, lpW = 4.05;
-  S(s, SH.ROUNDED_RECTANGLE, { x: lpX, y: 1.85, w: lpW, h: 4.9, fill: { color: C.background2 }, line: NONE, rectRadius: 0.1 }, { st, fx: 'fade', d: 0 });
-  I(s, { data: I_.calcB, x: lpX + 0.2, y: 2.0, w: 0.42, h: 0.42 }, { st, fx: 'fade', d: 0 });
-  T(s, '先算速度因子 n·dm', { x: lpX + 0.75, y: 2.0, w: 3.1, h: 0.42, fontSize: 15, bold: true, color: C.text2, margin: 0, valign: 'middle' }, { st, fx: 'fade', d: 0 });
-  const calc = [
-    ['转速 n = 2950 r/min', 'fact'],
-    ['轴承按 6312 估：d = 60、D = 130 mm（型号以实物为准）', 'asm'],
-    ['dm = (60 + 130) / 2 = 95 mm', null],
-    ['n·dm = 2950 × 95 ≈ 28 万', null],
-    ['查 SKF 加脂间隔方法（深沟球、70°C 基准）→ t_f ≈ 6000–7000 h，取 6800 h', 'asm'],
-  ];
-  let cy = 2.6;
-  calc.forEach((c, i) => {
-    const h = i === 1 ? 0.62 : i === 4 ? 0.95 : 0.38, a = { st, fx: 'float', d: 300 + i * 250 };
-    T(s, c[0], { x: lpX + 0.25, y: cy, w: c[1] ? lpW - 1.2 : lpW - 0.4, h, fontSize: 13, bold: i === 3, color: i === 3 ? C.accent1 : C.text1, margin: 0, valign: 'middle' }, a);
-    if (c[1]) badge(s, c[1], lpX + lpW - 0.95, cy + (h - 0.27) / 2, a);
-    cy += h + 0.1;
-  });
-  T(s, '注：6800 h 是二手资料的近似值，正式使用前请用 SKF 官方图表/计算器或 ABB 电机手册（机座号 200）润滑表核对。', { x: lpX + 0.25, y: 5.85, w: lpW - 0.45, h: 0.8, fontSize: 11, color: C.accent5, italic: true, margin: 0, valign: 'top' }, { st, fx: 'fade', d: 1600 });
-  const bx0 = 7.35, bLen = 5.35, kH = bLen / 6800;
-  const wf = [
-    ['基准间隔 t_f', '≈ 6800 h', '70°C、清洁环境', 6800, null, C.accent1],
-    ['温度修正 ×0.5', '≈ 3400 h', '设轴承 85°C：每高 15°C 减半', 3400, 'asm', C.accent2],
-    ['污染修正 ×0.3–0.5', '≈ 1000–1700 h', '设中重度粉尘', 1020, 'asm', C.accent3],
-  ];
-  wf.forEach((r, i) => {
-    st = step('click');
-    const y = 1.95 + i * 1.0, a = { st, fx: 'fade', d: 0 };
-    T(s, [{ text: r[0], options: { fontSize: 13, color: C.text2, bold: true, breakLine: true } }, { text: r[1], options: { fontSize: 16, bold: true, color: r[5] } }],
-      { x: 4.95, y: y - 0.06, w: 2.3, h: 0.72, margin: 0, valign: 'middle' }, a);
-    if (i === 2) S(s, SH.RECTANGLE, { x: bx0, y: y + 0.05, w: 1700 * kH, h: 0.42, fill: { color: r[5], transparency: 65 }, line: NONE }, { st, fx: 'wipeL', d: 200, dur: 700 });
-    S(s, SH.RECTANGLE, { x: bx0, y: y + 0.05, w: r[3] * kH, h: 0.42, fill: { color: r[5] }, line: NONE }, { st, fx: 'wipeL', d: 200, dur: 700 });
-    const capX = r[4] ? bx0 + badge(s, r[4], bx0, y + 0.53, a) + 0.08 : bx0;
-    T(s, r[2], { x: capX, y: y + 0.52, w: 3.2, h: 0.3, fontSize: 11.5, color: C.accent5, margin: 0, valign: 'middle' }, a);
-  });
-  st = step('click');
-  const halfX = bx0 + 4380 * kH;
-  S(s, SH.LINE, { x: halfX, y: 1.85, w: 0, h: 2.98, line: { color: C.text2, width: 1.5, dashType: 'dash' } }, { st, fx: 'wipeL', d: 0 });
-  T(s, '若半年加一次脂\n≈ 4380 h', { x: halfX + 0.1, y: 3.92, w: 1.8, h: 0.5, fontSize: 11.5, bold: true, color: C.text2, margin: 0, valign: 'top' }, { st, fx: 'fade', d: 200 });
-  badge(s, 'asm', halfX + 0.1, 4.45, { st, fx: 'fade', d: 200 });
-  S(s, SH.ROUNDED_RECTANGLE, { x: 4.95, y: 4.92, w: W - M - 4.95, h: 0.82, fill: { color: C.accent3, transparency: 90 }, line: NONE, rectRadius: 0.08 }, { st, fx: 'float', d: 400 });
-  T(s, [{ text: '≈ 1000–1700 h ≈ 1.5–2.5 个月', options: { bold: true, color: C.accent3, fontSize: 18, breakLine: true } }, { text: '按 24 h 连续运行；若轴承到 100°C（×0.25），只剩约 3–5 周', options: { color: C.text1, fontSize: 12.5 } }],
-    { x: 5.15, y: 4.92, w: W - M - 5.3, h: 0.82, margin: 0, valign: 'middle' }, { st, fx: 'float', d: 400 });
-  st = step('click');
-  S(s, SH.ROUNDED_RECTANGLE, { x: 4.95, y: 5.85, w: W - M - 4.95, h: 0.92, fill: { color: C.accent1, transparency: 90 }, line: NONE, rectRadius: 0.08 }, { st, fx: 'float', d: 0 });
-  badge(s, 'inf', 5.12, 5.96, { st, fx: 'float', d: 0 });
-  T(s, '如果加脂周期按半年、甚至没有固定周期，轴承可能有几个月处在缺油状态 —— 与"油脂发黑 + 2 极高速 + 封闭积灰"相吻合。密封轴承（2Z/2RS）同理：脂寿命同样随温度每升 15°C 减半。',
-    { x: 6.1, y: 5.9, w: W - M - 6.25, h: 0.82, fontSize: 12.5, color: C.text2, margin: 0, valign: 'middle' }, { st, fx: 'float', d: 0 });
-  N(s, `【深挖② 润滑寿命 · 约2分钟 · 本页是"为什么坏"的核心】
-· 左边（自动出现）：先算速度因子。转速2950是铭牌事实；轴承按6312估算（机座号200常见规格）【假设】，型号以实物为准。
-· n·dm ≈ 28万，查SKF加脂间隔方法，基准间隔约6800小时——这是近似值，正式用要查官方图表或ABB手册。
-[点击] 基准：70°C、清洁环境，约6800 h。
-[点击] 温度修正：每高15°C减半。设轴承85°C【假设】→ 3400 h。
-[点击] 污染修正：中重度粉尘乘0.3–0.5【假设】→ 1000–1700 h。
-[点击] 对比虚线：如果半年才加一次脂【假设】，4380 h——差了好几千小时。换算：1.5–2.5个月；到100°C只剩3–5周。
-[点击] 结论【推断】：轴承可能有几个月在缺油，和油脂发黑、高速、积灰都对得上——润滑是头号嫌疑。
-· 提醒：要变成结论，需要双兴的加脂周期和实际温度。`);
-
-  // =====================================================================
-  // 13 DEEP DIVE 2B: belt load & current sensitivity
-  s = newSlide('CONTENT', '03 为什么坏');
-  tagPill(s, '03  深挖②');
-  title(s, '再算两笔：皮带拉力不算大，电流发现得最晚');
-  st = step('auto');
-  const colW = (CW - 0.4) / 2, lx = M, rx13 = M + colW + 0.4;
-  T(s, '皮带拉力：没想象中可疑', { x: lx, y: 1.85, w: colW, h: 0.42, fontSize: 17, bold: true, color: C.text2, margin: 0, valign: 'middle' }, { st, fx: 'fade', d: 0 });
-  T(s, '电流：最晚才有反应的信号', { x: rx13, y: 1.85, w: colW, h: 0.42, fontSize: 17, bold: true, color: C.text2, margin: 0, valign: 'middle' }, { st, fx: 'fade', d: 0 });
-  S(s, SH.LINE, { x: M + colW + 0.2, y: 1.9, w: 0, h: 4.85, line: { color: 'E1E7EF', width: 1 } }, { st, fx: 'fade', d: 0 });
-  I(s, { path: G('dial_amp.png'), x: rx13 + 0.05, y: 2.45, w: 2.1, h: 2.1 }, { st, fx: 'fade', d: 200 });
-  const needle13 = I(s, { path: G('needle.png'), x: rx13 + 0.05, y: 2.45, w: 2.1, h: 2.1, rotate: SC.needleDeg(54.8) }, { st, fx: 'fade', d: 200 });
-  st = step('click');
-  T(s, [
-    { text: '转矩  T = 9550 × 30 / 2950 ≈ 97 N·m', options: { breakLine: true } },
-    { text: '皮带轮直径按 250 mm 估（照片估计，需实测）', options: { breakLine: true, color: C.accent2 } },
-    { text: '有效拉力  F_e = 2T / d ≈ 780 N', options: { breakLine: true } },
-    { text: '轴上径向力 ≈ (1.5–2.5) × F_e ≈ 1–2 kN', options: { bold: true, color: C.text2 } },
-  ], { x: lx, y: 2.4, w: colW - 1.0, h: 1.45, fontSize: 13, color: C.text1, margin: 0, valign: 'top', paraSpaceAfter: 4 }, { st, fx: 'float', d: 0 });
-  badge(s, 'asm', lx + colW - 0.95, 2.67, { st, fx: 'float', d: 0 });
-  const kB = 3.3 / 85, barX = lx + 2.35;
-  [['轴上力 1–2 kN', 2, C.accent2], ['严重过紧 5 kN', 5, C.accent3], ['6312 额定动载荷 85 kN', 85, C.accent1]].forEach((b, i) => {
-    const y = 4.0 + i * 0.48;
-    T(s, b[0], { x: lx, y, w: 2.3, h: 0.38, fontSize: 12, color: C.text2, margin: 0, valign: 'middle', bold: i === 2 }, { st, fx: 'fade', d: 300 + i * 200 });
-    S(s, SH.RECTANGLE, { x: barX, y: y + 0.06, w: Math.max(b[1] * kB, 0.05), h: 0.26, fill: { color: b[2] }, line: NONE }, { st, fx: 'wipeL', d: 300 + i * 200, dur: i === 2 ? 900 : 300 });
-  });
-  st = step('click');
-  T(s, [
-    { text: 'L10 = (C / P)³ × 10⁶ 转：', options: { bold: true, color: C.text2, breakLine: true } },
-    { text: 'P = 2 kN → 几十万小时；P = 5 kN → 约 2.8 万 h（约 3 年连续运行）' },
-  ], { x: lx, y: 5.5, w: colW, h: 0.55, fontSize: 12.5, color: C.text1, margin: 0, valign: 'top' }, { st, fx: 'float', d: 0 });
-  S(s, SH.ROUNDED_RECTANGLE, { x: lx, y: 6.1, w: colW, h: 0.68, fill: { color: C.accent1, transparency: 90 }, line: NONE, rectRadius: 0.08 }, { st, fx: 'float', d: 200 });
-  badge(s, 'inf', lx + 0.12, 6.2, { st, fx: 'float', d: 200 });
-  T(s, '正常张紧下，压坏轴承的不是皮带径向力本身；皮带真正的危害是不对中、抖动和额外发热。', { x: lx + 1.05, y: 6.1, w: colW - 1.15, h: 0.68, fontSize: 12, color: C.text2, margin: 0, valign: 'middle' }, { st, fx: 'float', d: 200 });
-  st = step('click');
-  T(s, [
-    { text: '设轴承劣化后多出 300 W 摩擦损耗', options: { breakLine: true, color: C.accent2 } },
-    { text: 'ΔI = 300 / (√3 × 380 × 0.91)', options: { breakLine: true } },
-    { text: '≈ 0.5 A', options: { bold: true, fontSize: 22, color: C.accent3, breakLine: true } },
-    { text: '不到额定 54.8 A 的 1%', options: { bold: true, color: C.text2 } },
-  ], { x: rx13 + 2.35, y: 2.8, w: colW - 2.4, h: 1.95, fontSize: 13, color: C.text1, margin: 0, valign: 'top', paraSpaceAfter: 3 }, { st, fx: 'float', d: 0 });
-  badge(s, 'asm', rx13 + 2.35, 2.45, { st, fx: 'float', d: 0 });
-  reg({ st, fx: 'spin', d: 700, dur: 1500, deg: SC.needleDeg(55.3) - SC.needleDeg(54.8) }, needle13);
-  T(s, '表针几乎不动', { x: rx13 + 0.15, y: 4.62, w: 1.9, h: 0.36, fontSize: 14, bold: true, color: C.accent3, align: 'center', margin: 0 }, { st, fx: 'zoom', d: 2300 });
-  st = step('click');
-  S(s, SH.ROUNDED_RECTANGLE, { x: rx13, y: 5.15, w: colW, h: 1.63, fill: { color: C.accent3, transparency: 91 }, line: NONE, rectRadius: 0.08 }, { st, fx: 'float', d: 0 });
-  T(s, [
-    { text: '电流是"最晚"的信号', options: { bold: true, color: C.accent3, fontSize: 15, breakLine: true } },
-    { text: '等它明显上升，轴承已接近卡死。早期只能靠冲击脉冲 / 测振。', options: { breakLine: true } },
-    { text: '更正 v1："结合综保电流一起看" → 电流只能作后期佐证。', options: { color: C.accent5, fontSize: 12 } },
-  ], { x: rx13 + 0.2, y: 5.2, w: colW - 0.35, h: 1.53, fontSize: 13, color: C.text1, margin: 0, valign: 'middle', paraSpaceAfter: 3 }, { st, fx: 'float', d: 0 });
-  N(s, `【再算两笔 · 约1.5分钟】
-[点击] 左：皮带拉力。转矩97 N·m；皮带轮按250 mm估【假设，需实测】→ 有效拉力约780 N → 作用在轴上约1–2 kN。看柱子：1–2 kN 对比 6312 的额定动载荷85 kN【假设】，非常小。
-[点击] 寿命公式：2 kN时寿命几十万小时；就算严重过紧到5 kN，也还有约2.8万小时。结论【推断】：皮带"压坏"轴承的说法站不住，皮带的真正危害是不对中、抖动和额外发热。
-[点击] 右：电流。设轴承劣化多出300 W摩擦损耗【假设】→ 电流只多0.5 A，不到1%——看表针，几乎不动。
-[点击] 结论：电流是最晚的信号，淹没在负载波动里。更正我上一版讲的"结合综保电流一起看"——早期只能靠冲击脉冲、测振。`);
-
-  // =====================================================================
   // 14 RE-RANKING the suspects (chips travel from the flat v1 grid into ranked rows)
   s = newSlide('CONTENT', '03 为什么坏');
   tagPill(s, '03  为什么坏');
@@ -780,8 +659,8 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
   const chipPos = chipsDef.map(([t, c, r]) => ({ t, x: M + 0.2 + c * (chipW + 0.15), y: 2.55 + r * 0.7 }));
   const rankX = 5.0, rankW = W - M - rankX, rowH14 = 1.12, slotX = [rankX + 0.85, rankX + 0.85 + chipW + 0.12];
   const ranks = [
-    ['润滑失效 + 温度高', '头号嫌疑：油脂发黑、积灰、封闭机箱；算出加脂间隔可能只有 1.5–2.5 个月', [0, 2], C.accent3, 'inf'],
-    ['皮带不对中 / 振动', '坏在负荷侧；需核实张力、对中、地脚', [1, 4], C.accent2, 'inf'],
+    ['润滑失效 + 温度高', '头号嫌疑：油脂发黑、积灰、封闭机箱；高速 + 高温 + 粉尘，油脂老化快得多', [0, 2], C.accent3, 'inf'],
+    ['皮带不对中 / 振动', '坏在负荷侧；查皮带张力、对中、地脚', [1, 4], C.accent2, 'inf'],
     ['2 极高转速', '本身不是"原因"，是"放大器"：让 1、2 的影响更快显现', [3], C.accent1, 'inf'],
     ['轴承寿命 / 安装质量', '缺数据，待核实', [5], C.accent5, 'tbd'],
   ];
@@ -801,11 +680,11 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
     const bw = badge(s, r[4], tx0, y + 0.13, { st, fx: 'fade', d: 1000 });
     T(s, r[1], { x: slotX[0] + 3.5, y: y + 0.42, w: W - M - (slotX[0] + 3.5) - 0.12, h: 0.66, fontSize: 12, color: C.text1, margin: 0, valign: 'top' }, { st, fx: 'fade', d: 1100 });
   });
-  T(s, '排序依据：现场照片 + 计算推断。拿到加脂记录、皮带张力、旧轴承后要再修正。', { x: M, y: 4.95, w: 3.75, h: 0.9, fontSize: 12.5, color: C.accent5, italic: true, margin: 0, valign: 'top' }, { st, fx: 'fade', d: 1500 });
+  T(s, '排序依据：现场照片 + 工况推断。拿到加脂记录、皮带张力、旧轴承后要再修正。', { x: M, y: 4.95, w: 3.75, h: 0.9, fontSize: 12.5, color: C.accent5, italic: true, margin: 0, valign: 'top' }, { st, fx: 'fade', d: 1500 });
   N(s, `【嫌疑排序 · 约1.5分钟】
 · 左边是我上一版的讲法：六个方向平铺——听的人不知道先查哪个。
-[点击] 第1名：润滑失效 + 温度高。"润滑不良"和"散热差、粉尘大"合并：油脂发黑、积灰、封闭机箱，再加上算出来加脂间隔可能只有1–2个月。
-[点击] 第2名：皮带不对中/振动。坏在负荷侧；但上一页算过，皮带拉力本身不大，要查的是对中、张力、地脚。
+[点击] 第1名：润滑失效 + 温度高。"润滑不良"和"散热差、粉尘大"合并：油脂发黑、积灰、封闭机箱。2极高速、高温、粉尘叠在一起，油脂老化比平常快得多，按常规周期加脂很可能不够。
+[点击] 第2名：皮带不对中/振动。坏在负荷侧。正常张紧的皮带拉力不至于压坏轴承，真正要查的是对中、张力、地脚——不对中和抖动才伤轴承。
 [点击] 第3名：2极高转速——它不是原因，是"放大器"，让前两条更快出问题。
 [点击] 第4名：轴承寿命/安装质量——没数据，待双兴提供。
 · 强调：这是推断排序，拿到加脂记录、皮带张力、旧轴承后要再修正。`);
@@ -814,8 +693,8 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
   // 15 DEEP DIVE 3: blind spot
   pres.addSection({ title: '04 怎么防' });
   s = newSlide('CONTENT', '04 怎么防');
-  tagPill(s, '04  深挖③');
-  title(s, '深挖③：为什么跳闸前没人发现？—— 监测盲区');
+  tagPill(s, '04  深挖②');
+  title(s, '深挖②：为什么跳闸前没人发现？—— 监测盲区');
   st = step('auto');
   const ex = 0.85, ey = 1.95, ew = 5.2, eh = 2.9;
   S(s, SH.ROUNDED_RECTANGLE, { x: ex, y: ey, w: ew, h: eh, fill: { color: C.background2 }, line: { color: C.accent5, width: 4 }, rectRadius: 0.08 }, { st, fx: 'fade', d: 0 });
@@ -830,7 +709,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
   [[0.35, 2.55], [1.2, 2.65], [2.1, 2.5], [3.75, 0.95], [4.7, 0.75], [4.0, 1.5], [4.6, 1.95], [0.3, 0.7], [2.5, 0.55]].forEach(([dx, dy], k) =>
     S(s, SH.OVAL, { x: ex + dx, y: ey + dy, w: 0.09 + (k % 3) * 0.03, h: 0.09 + (k % 3) * 0.03, fill: { color: 'A79A86' }, line: NONE }, { st, fx: 'fade', d: 200 }));
   T(s, '粉尘 · 高噪声 · 散热差', { x: ex + 3.15, y: ey + 2.45, w: 1.95, h: 0.3, fontSize: 11, color: C.accent5, margin: 0, align: 'right' }, { st, fx: 'fade', d: 200 });
-  const senses = [[I_.eyeG, '看不见'], [I_.handG, '摸不到'], [I_.earG, '听不清'], [I_.boltG, '电流不敏感（<1%）']];
+  const senses = [[I_.eyeG, '看不见'], [I_.handG, '摸不到'], [I_.earG, '听不清'], [I_.boltG, '电流反应太晚']];
   st = step('click');
   senses.forEach((sn, i) => {
     const x = ex + i * 1.32, y = 5.1, a = { st, fx: 'fade', d: 0 };
@@ -846,14 +725,14 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
     { x: rx15 + 0.2, y: 2.5, w: rw15 - 0.35, h: 1.0, fontSize: 12.5, color: C.text1, margin: 0, valign: 'top' }, { st, fx: 'float', d: 1900 });
   st = step('click');
   T(s, '对策：让盲区"可见"', { x: rx15, y: 3.75, w: rw15, h: 0.4, fontSize: 15, bold: true, color: C.text2, margin: 0 }, { st, fx: 'fade', d: 0 });
-  ['把盲区设备单列出来，建清单', '测点引到机箱外；注油管加长到机箱外', '纳入冲击脉冲巡检路线', '必要时加装在线温度 / 振动传感器', '这类设备缩短加脂周期（按上一节方法修正）'].forEach((t, i) => {
+  ['把盲区设备单列出来，建清单', '测点引到机箱外；注油管加长到机箱外', '纳入冲击脉冲巡检路线', '必要时加装在线温度 / 振动传感器', '这类设备缩短加脂周期（高速、高温、粉尘都要缩短）'].forEach((t, i) => {
     const y = 4.25 + i * 0.5, a = { st, fx: 'float', d: 150 + i * 180 };
     numDot(s, i + 1, rx15, y + 0.04, 0.34, C.accent4, a, 12);
     T(s, t, { x: rx15 + 0.48, y, w: rw15 - 0.5, h: 0.42, fontSize: 13.5, color: C.text1, margin: 0, valign: 'middle' }, a);
   });
-  N(s, `【深挖③ 监测盲区 · 约1.5分钟 · 回答第⑤个为什么】
+  N(s, `【深挖② 监测盲区 · 约1.5分钟 · 回答第⑤个为什么】
 · 左边（自动）：电机在封闭机箱里，粉尘大、噪声大、散热差。下面四个"感官"：看、摸、听、电流。
-[点击] 一个个划掉：看不见、摸不到、听不清，电流又不到1%——结论【推断】：这是一台"监测盲区设备"，很可能也不在冲击脉冲路线上。
+[点击] 一个个划掉：看不见、摸不到、听不清，电流要到快卡死才明显上升——结论【推断】：这是一台"监测盲区设备"，很可能也不在冲击脉冲路线上。
 · 重点：巡检再认真也发现不了，所以原报告"加强巡检"解决不了问题。
 [点击] 对策：单列清单；测点和注油管引到机箱外；纳入冲击脉冲路线；必要时加在线传感器；缩短加脂周期。
 · 互动：我们装置哪几台属于这种情况？（最后讨论时再说）`);
@@ -959,7 +838,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
       ['改设计（向上反馈）', '技术员', '2 极配皮带是否合理；机箱通风；张紧用张力计', '改进建议报车间'],
     ]],
     ['管理层', '定周期、找盲区、选指标', C.accent2, [
-      ['找盲区', '班长 + 各片区', '近不了身、听不清、摸不到、不在测点路线', '盲区清单 + 对策（见第 15 页）'],
+      ['找盲区', '班长 + 各片区', '近不了身、听不清、摸不到、不在测点路线', '盲区清单 + 对策（见第 13 页）'],
       ['润滑周期按工况修正', '润滑责任人', '按转速、温度、污染修正，不一刀切', '加脂台账：哪台、什么脂、加多少、多久、谁加'],
       ['监测选对指标', '测点责任人', '冲击脉冲/振动＝早，温度/听音＝中，电流＝晚', '每台的基准值、趋势、报警线'],
     ]],
@@ -1010,7 +889,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
     ['事件', '时间、位号、现象、保护动作', 'has'], ['影响量化', '停机时长、产量损失', 'need'],
     ['时间线', '发现 → 到场 → 判断 → 修复，带时刻', 'part'], ['证据', '滚道/滚珠/断口/油脂/轴颈照片；旧件留存', 'need'],
     ['直接原因', '哪个零件、怎么坏', 'has'], ['根因（技术 + 管理）', '为什么坏 + 为什么没提前发现', 'need'],
-    ['计算验证', '润滑寿命、载荷、电流灵敏度', 'need'], ['整改（责任人 + 期限）', '每条有人、有日期，不写"加强"', 'part'],
+    ['测量数据', '温度、振动、冲击脉冲、皮带张力', 'need'], ['整改（责任人 + 期限）', '每条有人、有日期，不写"加强"', 'part'],
     ['横向排查', '同类设备清单', 'need'], ['效果验证', '复测基准值，跟踪趋势', 'need'],
   ];
   const tagS = { has: ['原报告有', C.accent4], part: ['部分有', C.accent1], need: ['需补', C.accent2] };
@@ -1030,7 +909,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
   N(s, `【深报告模板 · 约1分钟】
 · 左边是原报告的结构：时间设备、现象、维修办法、防范措施——答了"坏了什么、怎么修"。
 [点击] 模板前6项：事件、影响量化、时间线、证据、直接原因、根因（技术+管理）。原报告有的标绿，要补的标橙。
-[点击] 后4项：计算验证、整改（每条有责任人和期限）、横向排查、效果验证。
+[点击] 后4项：测量数据、整改（每条有责任人和期限）、横向排查、效果验证。
 · 以后我们自己写，至少回答两个问题：为什么坏？为什么没提前发现？`);
 
   // =====================================================================
@@ -1064,7 +943,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
 · （自动）三句话：查——四步缩小范围；追——直接原因之后还有根因；防——在跳闸前发现。
 · 右边电机重新转起来，绿灯"恢复运行"，和开头首尾呼应。
 [点击] 三个讨论题：哪些是"皮带+2极"？哪几台最难巡检到位？上次加脂什么时候、有没有记录？
-· 可以当场把第18页的清单分工定下来。
+· 可以当场把第16页的清单分工定下来。
 · 收尾：谢谢大家。`);
 
   await pres.writeFile({ fileName: OUT });
