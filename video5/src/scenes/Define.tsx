@@ -51,7 +51,9 @@ export const Define: React.FC = () => {
   const toWall = prog(w, 0, 60, ease.inOut);
   const ring = prog(w, 40, 50, ease.inOut);
   const crowd = prog(w, 60, 60);
-  const zoom = prog(w, len('wall') - 90, 90, ease.in);
+  const zoom = prog(w, len('wall') - 70, 70, ease.in);
+  // 问"那，「我们」是谁？"的时候，光罩退后，只留问题一个焦点
+  const quiet = prog(w, 470, 30);
   const wordAt = (k: number) => 214 + k * 36;
 
   return (
@@ -63,9 +65,9 @@ export const Define: React.FC = () => {
       <Cue s="whoosh" at={W0} dur={1} gain={0.7} />
       <Cue s="glass" at={W0 + 70} />
       <Cue s="swell" at={W0 + 60} dur={2.5} gain={0.6} />
-      <Cue s="whoosh" at={END - 90} dur={1.4} gain={0.8} />
+      <Cue s="whoosh" at={END - 70} dur={1.2} gain={0.8} />
 
-      <AbsoluteFill style={{transform: `scale(${1 + zoom * 2.4})`, transformOrigin: `${BX}px ${BY + 60}px`, opacity: 1 - prog(w, len('wall') - 30, 30)}}>
+      <AbsoluteFill style={{transform: `scale(${1 + zoom * 2.4})`, transformOrigin: `${BX}px ${BY + 60}px`, opacity: (1 - 0.65 * quiet) * (1 - prog(w, len('wall') - 30, 30))}}>
         {/* 罩外的大多数人 */}
         <svg width={1920} height={1080} style={{position: 'absolute', inset: 0}}>
           {OUTSIDE.map((p, i) => (

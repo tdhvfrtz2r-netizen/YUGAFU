@@ -47,6 +47,7 @@ python3 scripts/sound.py                    # 合成音效和配乐 → audio/sf
 python3 scripts/mix.py                      # 混音 → audio/mix.wav
 npx remotion render src/index.ts Main out/master.mp4 --crf=14   # 无声母版
 bash scripts/encode.sh                      # 两遍编码 + 合成声音 → out/video.mp4（控制在 100 MB 以内）
+# 只改了一小段时，不必重渲整片：npx remotion render … out/patch_<起始帧>.mp4 --frames=<起>-<止>，encode.sh 会按帧号把它盖在母版上
 bash scripts/check.sh                       # 规格、每 4 秒一帧的总览图、亮度跳变
 npx remotion studio src/index.ts            # 可视化预览、拖时间轴
 ```
