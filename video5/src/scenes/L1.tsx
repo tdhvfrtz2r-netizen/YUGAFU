@@ -2,6 +2,7 @@ import React from 'react';
 import {AbsoluteFill, useCurrentFrame} from 'remotion';
 import {clamp, lerp, mixColor, prog, rng, TAU} from '../kit/anim';
 import {Cam, CanvasLayer, drawGlow, drawPerson, hexToRgb, project} from '../kit/Canvas';
+import {Cue} from '../kit/Sound';
 import {Line, KeySentence, SourceTag} from '../kit/Text';
 import {len} from '../timeline';
 import {color, ease, font} from '../theme';
@@ -108,9 +109,9 @@ const drawPhone = (ctx: CanvasRenderingContext2D, cam: Cam, f: number) => {
 
 export const L1: React.FC = () => {
   const f = useCurrentFrame();
-  const S7 = len('06');
-  const S8 = S7 + len('07');
-  const END = S8 + len('08');
+  const S7 = len('phone');
+  const S8 = S7 + len('grid');
+  const END = S8 + len('key1');
   const cam = camAt(f, S7, S8, END);
   const dome = prog(f, S8 + 10, 70, ease.inOut);
   const dimForKey = prog(f, S8 + 100, 30) * 1.2;
@@ -229,6 +230,16 @@ export const L1: React.FC = () => {
     <AbsoluteFill>
       <CanvasLayer draw={draw} />
       <AbsoluteFill style={{background: '#06080C', opacity: 0.62 * dimForKey}} />
+      <Cue s="notify" at={10} gain={0.55} />
+      <Cue s="whoosh" at={40} dur={1.8} gain={0.8} />
+      <Cue s="rise" at={S7} dur={4} gain={0.7} />
+      <Cue s="sparkle" at={S7 + 120} dur={2.2} gain={0.7} />
+      <Cue s="tick" at={S7 + 110} />
+      <Cue s="tick" at={S7 + 250} pan={0.5} />
+      <Cue s="tick" at={S7 + 390} pan={0.5} />
+      <Cue s="glass" at={S8 + 10} />
+      <Cue s="impact" at={S8 + 144} gain={0.8} />
+      <Cue s="bell" at={S8 + 144} gain={0.6} />
       <Line text="你每天刷到的「正常」……" at={86} out={S7 + 14} y={930} size={60} />
       <Line text="如果全国只有 100 个人" at={S7 + 26} out={S8 - 22} y={120} size={58} />
       {cluster && lbl1 > 0 ? (

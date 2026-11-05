@@ -2,6 +2,7 @@ import React from 'react';
 import {AbsoluteFill, useCurrentFrame} from 'remotion';
 import {clamp, keys, lerp, prog, rng} from '../kit/anim';
 import {Person} from '../kit/Person';
+import {Cue} from '../kit/Sound';
 import {Line} from '../kit/Text';
 import {len} from '../timeline';
 import {b, color, ease, font} from '../theme';
@@ -215,29 +216,48 @@ const Daolang: React.FC<{f: number}> = ({f}) => {
   );
 };
 
-export const L2: React.FC = () => {
+/** 天平的内容整体推后 T0 帧，先让"那，好和土，是谁说了算？"读完 */
+const T0 = 140;
+
+export const ScaleScene: React.FC = () => {
   const f = useCurrentFrame();
-  const S10 = len('09');
-  const END = S10 + len('10');
-  const scaleO = 1 - prog(f, S10 - 18, 18);
+  const END = len('scale');
+  const scaleO = prog(f, 0, 20) * (1 - prog(f, END - 18, 18));
   return (
     <AbsoluteFill>
-      {f < S10 ? (
-        <AbsoluteFill style={{opacity: scaleO}}>
-          <Scale f={f} />
-        </AbsoluteFill>
-      ) : null}
-      <Line text="定义好坏的人，不是掏钱的人。" at={14} out={S10 - 6} y={120} size={62} kind="opinion" opinion />
-      <Line text="乐评 · 媒体 · 从业者 · 做内容的人" at={b(3.6)} out={S10 - 6} x={480} y={845} kind="label" color={color.cool} size={36} />
-      <Line text="大多在少数城市，习惯用自己的口味投票" at={b(5)} out={S10 - 6} x={480} y={915} kind="opinion" size={40} />
-      <Line text="另外那十亿人：花钱，也花时间" at={b(9)} out={S10 - 6} x={1470} y={915} kind="opinion" size={40} />
-      {f >= S10 ? (
-        <AbsoluteFill style={{opacity: 1 - prog(f, END - 18, 18)}}>
-          <Daolang f={f - S10} />
-        </AbsoluteFill>
-      ) : null}
-      <Line text="2004 年，刀郎出道，被乐坛看不上。" at={S10 + 14} out={S10 + 196} y={930} size={58} />
-      <Line text="多年后，因为《罗刹海市》，被网友「封神」。" at={S10 + 214} out={END - 14} y={930} size={58} />
+      <Cue s="whoosh" at={0} dur={0.6} gain={0.45} />
+      {[0, 1, 2].map((k) => (
+        <Cue key={k} s="ping" at={T0 + 125 + k * 88} gain={0.35} pan={-0.5} />
+      ))}
+      {CROWD.map((c, i) => (
+        <Cue key={i} s={c.kind === 'coin' ? 'coin' : 'tick'} at={T0 + c.t + 34} gain={c.kind === 'coin' ? 0.55 : 0.4} pan={0.45} />
+      ))}
+      <Cue s="thud" at={T0 + 476} gain={0.5} />
+      <AbsoluteFill style={{opacity: scaleO}}>
+        <Scale f={f - T0} />
+      </AbsoluteFill>
+      <Line text="那，好和土，是谁说了算？" at={10} out={T0 + 2} y={120} size={62} color={color.warmHi} />
+      <Line text="定义好坏的人，不是掏钱的人。" at={T0 + 14} out={END - 6} y={120} size={62} kind="opinion" opinion />
+      <Line text="乐评 · 媒体 · 从业者 · 做内容的人" at={T0 + b(3.6)} out={END - 6} x={480} y={845} kind="label" color={color.cool} size={36} />
+      <Line text="大多在少数城市，习惯用自己的口味投票" at={T0 + b(5)} out={END - 6} x={480} y={915} kind="opinion" size={40} />
+      <Line text="另外那十亿人：花钱，也花时间" at={T0 + b(9)} out={END - 6} x={1470} y={915} kind="opinion" size={40} />
+    </AbsoluteFill>
+  );
+};
+
+export const DaolangScene: React.FC = () => {
+  const f = useCurrentFrame();
+  const END = len('daolang');
+  return (
+    <AbsoluteFill>
+      <Cue s="whoosh" at={150} dur={1} gain={0.5} />
+      <Cue s="swell" at={190} dur={3} gain={0.7} />
+      <AbsoluteFill style={{opacity: 1 - prog(f, END - 18, 18)}}>
+        <Daolang f={f} />
+      </AbsoluteFill>
+      <Line text="2004 年，刀郎出道，被乐坛看不上。" at={14} out={196} y={930} size={58} />
+      <Line text="多年后，因为《罗刹海市》，被网友「封神」。" at={214} out={420} y={930} size={58} />
+      <Line text="乐评没投给他的票，听众用时间投了。" at={436} out={END - 14} y={930} size={58} kind="opinion" />
     </AbsoluteFill>
   );
 };

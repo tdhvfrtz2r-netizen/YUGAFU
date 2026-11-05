@@ -2,12 +2,13 @@ import React from 'react';
 import {AbsoluteFill, useCurrentFrame} from 'remotion';
 import {prog} from '../kit/anim';
 import {IconBar, IconCup, IconPhone, IconWave} from '../kit/Icons';
+import {Cue} from '../kit/Sound';
 import {Glow} from '../kit/Stage';
 import {Chars, outFactor} from '../kit/Text';
 import {b, color, ease, textStyle} from '../theme';
 
-/** 05 片名：「土」字的位置先是取景框，四拍闪过四把"钥匙"：长教程、奶茶、短剧、旋律 */
-const SLOT_ICONS = [IconBar, IconCup, IconPhone, IconWave];
+/** 05 片名：「土」字的位置先是取景框，四拍闪过四把"钥匙"：奶茶、短剧、旋律、长教程（后三样第三层会讲） */
+const SLOT_ICONS = [IconCup, IconPhone, IconWave, IconBar];
 
 export const Title: React.FC<{dur: number}> = ({dur}) => {
   const f = useCurrentFrame();
@@ -21,6 +22,11 @@ export const Title: React.FC<{dur: number}> = ({dur}) => {
   const Icon = slotIcon;
   return (
     <AbsoluteFill style={{opacity: o, filter: o < 1 ? `blur(${(1 - o) * 10}px)` : undefined}}>
+      {[0, 1, 2, 3].map((k) => (
+        <Cue key={k} s="tick" at={b(k) + 2} gain={0.8} />
+      ))}
+      <Cue s="impact" at={b(4)} />
+      <Cue s="bell" at={b(4) + 2} gain={0.5} />
       <Glow x={960} y={560} r={720} c={color.warmDeep} a={0.1 + 0.08 * tu} />
       <div style={{position: 'absolute', left: 960, top: 470, transform: 'translate(-50%, -50%)', ...textStyle.title, fontSize: size, whiteSpace: 'nowrap'}}>
         <Chars text="为什么我们觉得「" start={4} stagger={2} />

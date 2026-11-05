@@ -1,5 +1,9 @@
 node_modules/
 shots/
 frames/
+audio/*.wav
 out/*
 !out/video.mp4
+!out/music.m4a
+!out/sfx.m4a
+__pycache__/

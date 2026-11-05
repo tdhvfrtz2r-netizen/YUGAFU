@@ -5,14 +5,15 @@ import {Cam, CanvasLayer, drawGlow, drawPerson, project} from '../kit/Canvas';
 import {IconStar} from '../kit/Icons';
 import {Lock} from '../kit/Lock';
 import {Person} from '../kit/Person';
+import {Cue} from '../kit/Sound';
 import {KeySentence, Line} from '../kit/Text';
 import {len} from '../timeline';
 import {color, ease, font} from '../theme';
 
-/** 收尾 20–23：下沉是离信息源的距离 → 我也是 → ③ → 先看锁再评钥匙 → 你觉得土的，是十亿人的日常 */
+/** 收尾 28–31：我们呢？在本行嫌它土，换个领域就是下沉用户 → 下沉是离信息源的距离 → ③ → 先看锁再评钥匙 → 你觉得土的，是十亿人的日常 */
 
 const C = {x: 960, y: 470};
-const FIELDS = ['AI', '理财', '健身'];
+const FIELDS = ['你的本行', '理财', '健身'];
 const N = 30;
 const layout = (seed: number) => {
   const r = rng(seed);
@@ -31,15 +32,15 @@ const ME = [
 
 const Rings: React.FC<{f: number}> = ({f}) => {
   // 0→1：AI 换成理财；1→2：理财换成健身
-  const s1 = prog(f, 262, 50, ease.inOut);
-  const s2 = prog(f, 420, 40, ease.inOut);
+  const s1 = prog(f, 320, 50, ease.inOut);
+  const s2 = prog(f, 478, 40, ease.inOut);
   const stage = s1 + s2;
   const i0 = Math.min(1, Math.floor(stage));
   const t = stage - i0;
   const me = {x: lerp(ME[i0].x, ME[i0 + 1].x, t), y: lerp(ME[i0].y, ME[i0 + 1].y, t)};
   const vis = prog(f, 40, 40);
-  const card = prog(f, 312, 30, ease.out) * (1 - prog(f, 420, 20));
-  const star = prog(f, 360, 16, ease.back);
+  const card = prog(f, 370, 30, ease.out) * (1 - prog(f, 478, 20));
+  const star = prog(f, 418, 16, ease.back);
   return (
     <>
       <CanvasLayer
@@ -119,7 +120,7 @@ const Rings: React.FC<{f: number}> = ({f}) => {
         <div>理财入门</div>
         <div style={{fontSize: 26, fontWeight: 500, color: color.dim, marginTop: 6}}>全网最全 · 不跳步</div>
         <div style={{height: 6, background: color.faint, borderRadius: 3, marginTop: 16, marginRight: 70}} />
-        <div style={{position: 'absolute', right: 20, top: 30, transform: `scale(${0.8 + 0.5 * star - 0.3 * prog(f, 376, 12)})`}}>
+        <div style={{position: 'absolute', right: 20, top: 30, transform: `scale(${0.8 + 0.5 * star - 0.3 * prog(f, 434, 12)})`}}>
           <IconStar size={56} c={color.warm} w={7} fill={star > 0.3 ? color.warm : 'none'} />
         </div>
       </div>
@@ -192,23 +193,42 @@ const Sea: React.FC<{f: number; dur: number}> = ({f, dur}) => (
 
 export const L7: React.FC = () => {
   const f = useCurrentFrame();
-  const S21 = len('20');
-  const S22 = S21 + len('21');
-  const S23 = S22 + len('22');
-  const END = S23 + len('23');
+  const S21 = len('rings');
+  const S22 = S21 + len('many');
+  const S23 = S22 + len('lock');
+  const END = S23 + len('sea');
   const zoomOut = prog(f, S21 - 6, 70, ease.inOut);
   const dim = prog(f, S21 + 240, 26);
   const endFade = prog(f, END - 30, 30, ease.in);
   return (
     <AbsoluteFill>
+      {[0, 1, 2, 3].map((k) => (
+        <Cue key={'r' + k} s="ping" at={48 + k * 72} gain={0.3} />
+      ))}
+      <Cue s="whoosh" at={320} dur={0.9} gain={0.5} />
+      <Cue s="pop" at={372} gain={0.6} pan={0.2} />
+      <Cue s="star" at={418} pan={0.2} />
+      <Cue s="whoosh" at={478} dur={0.8} gain={0.5} />
+      <Cue s="whoosh" at={S21 - 6} dur={1.2} gain={0.55} />
+      {[0, 1, 2, 3, 4].map((k) => (
+        <Cue key={'m' + k} s="ping" at={S21 + 20 + k * 44} gain={0.22} pan={((k * 37) % 9) / 9 - 0.5} />
+      ))}
+      <Cue s="impact" at={S21 + 288} />
+      <Cue s="bell" at={S21 + 288} gain={0.7} />
+      <Cue s="glass" at={S22 + 96} gain={0.45} pan={0.3} />
+      <Cue s="slide" at={S22 + 130} dur={(216 - 130) / 60} pan={0.3} />
+      <Cue s="click" at={S22 + 216} pan={0.3} />
+      <Cue s="swell" at={S23} dur={4} gain={0.6} />
+      <Cue s="sparkle" at={S23 + 10} dur={5} gain={0.4} />
+      <Cue s="bell" at={S23 + 72} gain={0.5} />
       {f < S21 + 80 ? (
         <AbsoluteFill style={{transform: `scale(${1 - 0.62 * zoomOut})`, transformOrigin: `${C.x}px ${C.y}px`, opacity: 1 - prog(f, S21 + 30, 50)}}>
           <Rings f={f} />
         </AbsoluteFill>
       ) : null}
-      <Line text="那我呢？" at={8} out={92} y={150} size={70} />
-      <Line text="我懂 AI，所以嫌那个教程磨叽；" at={100} out={262} y={965} size={56} />
-      <Line text="换到理财、健身，我也要「全网最全、不跳步」。" at={280} out={S21 - 10} y={965} size={56} />
+      <Line text="我们呢？" at={8} out={92} y={150} size={70} />
+      <Line text="在自己的本行，我们嫌长教程磨叽、嫌它土；" at={100} out={320} y={965} size={56} />
+      <Line text="换到理财、健身，我们也要「全网最全、不跳步」。" at={338} out={S21 - 10} y={965} size={56} />
       {f >= S21 && f < S22 ? (
         <AbsoluteFill style={{opacity: (1 - 0.7 * dim) * prog(f, S21, 50)}}>
           <Many f={f - S21} />
@@ -229,7 +249,7 @@ export const L7: React.FC = () => {
       <Line text="比问「他的品味好不好」有用得多。" at={S22 + 272} out={S23 - 14} y={950} size={56} kind="opinion" />
       {f >= S23 ? (
         <AbsoluteFill style={{opacity: prog(f, S23, 30)}}>
-          <Sea f={f - S23} dur={len('23')} />
+          <Sea f={f - S23} dur={len('sea')} />
         </AbsoluteFill>
       ) : null}
       <Line text="你觉得土的，是十亿人的日常。" at={S23 + 21} y={470} kind="key" size={84} />

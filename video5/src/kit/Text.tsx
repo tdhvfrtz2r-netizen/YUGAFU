@@ -27,6 +27,8 @@ export type LineProps = {
   /** *包起来的部分* 用这个颜色 */
   hl?: string;
   opinion?: boolean;
+  /** 标记上的字，默认"观点"；引述别人的话用"引述" */
+  chip?: string;
   source?: string;
   stagger?: number;
   maxWidth?: number;
@@ -81,7 +83,7 @@ export const Chars: React.FC<{text: string; start: number; stagger?: number; hl?
   return <>{out}</>;
 };
 
-export const OpinionChip: React.FC<{at: number; size?: number}> = ({at, size = 26}) => {
+export const OpinionChip: React.FC<{at: number; size?: number; label?: string}> = ({at, size = 26, label = '观点'}) => {
   const f = useCurrentFrame();
   const p = prog(f, at, 24);
   return (
@@ -105,7 +107,7 @@ export const OpinionChip: React.FC<{at: number; size?: number}> = ({at, size = 2
         transform: `scale(${0.85 + 0.15 * p})`,
       }}
     >
-      观点
+      {label}
     </span>
   );
 };
@@ -144,6 +146,7 @@ export const Line: React.FC<LineProps> = ({
   color: c,
   hl,
   opinion,
+  chip,
   source,
   stagger,
   maxWidth,
@@ -151,7 +154,7 @@ export const Line: React.FC<LineProps> = ({
   scrim = true,
 }) => {
   const f = useCurrentFrame();
-  audit('line', useContext(SeqBase), text, at, out, {opinion: Boolean(opinion), stagger: stagger ?? motion.charStagger, source: source ?? null});
+  audit('line', useContext(SeqBase), text, at, out, {opinion: Boolean(opinion || chip), stagger: stagger ?? motion.charStagger, source: source ?? null});
   if (f < at - 1) return null;
   const o = outFactor(f, out);
   if (o <= 0) return null;
@@ -187,8 +190,8 @@ export const Line: React.FC<LineProps> = ({
         />
       ) : null}
       <div style={{...st, fontSize: size ?? st.fontSize, color: c ?? st.color, whiteSpace: maxWidth ? 'normal' : 'nowrap', lineHeight: 1.35}}>
-        {opinion ? <OpinionChip at={at} size={chipSize} /> : null}
-        <Chars text={text} start={at + (opinion ? 6 : 0)} stagger={stagger} hl={hl} />
+        {opinion || chip ? <OpinionChip at={at} size={chipSize} label={chip} /> : null}
+        <Chars text={text} start={at + (opinion || chip ? 6 : 0)} stagger={stagger} hl={hl} />
       </div>
       {source ? (
         <div style={{position: 'absolute', top: '100%', left: align === 'left' ? 0 : align === 'right' ? undefined : '50%', right: align === 'right' ? 0 : undefined, transform: align === 'center' ? 'translateX(-50%)' : undefined}}>

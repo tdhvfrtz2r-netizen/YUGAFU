@@ -1,10 +1,11 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame} from 'remotion';
 import {clamp, lerp, prog} from '../kit/anim';
-import {IconStar} from '../kit/Icons';
+import {IconStar, IconThumb} from '../kit/Icons';
 import {Lock} from '../kit/Lock';
 import {Person} from '../kit/Person';
-import {Line} from '../kit/Text';
+import {Cue} from '../kit/Sound';
+import {Line, SourceTag} from '../kit/Text';
 import {len} from '../timeline';
 import {color, ease, font} from '../theme';
 import {LockCount} from './L3a';
@@ -238,42 +239,184 @@ const Stairs: React.FC<{f: number}> = ({f}) => {
   );
 };
 
-export const L3b: React.FC = () => {
+// ---------- 一个 50 分钟的 AI 教程：播放、点赞、收藏（证据）----------
+const Coin: React.FC<{x: number; y: number; w: number; h: number; r: number; c: string; o: number}> = ({x, y, w, h, r, c, o}) => (
+  <div
+    style={{
+      position: 'absolute',
+      left: x - w / 2,
+      top: y - h / 2,
+      width: w,
+      height: h,
+      borderRadius: r,
+      background: `linear-gradient(180deg, ${c} 0%, rgba(0,0,0,0.25) 140%)`,
+      boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.35), 0 2px 6px rgba(0,0,0,0.45)',
+      opacity: o,
+    }}
+  />
+);
+const BOOK_COLORS = [color.warm, '#E9C98F', color.warmDeep, '#B9A27A', '#F0B967', '#8C7650'];
+
+/** 教程段的起点（相对 know 镜头），楼梯段整体推后的帧数 */
+const TUT0 = 290;
+const STAIRS_SHIFT = 420;
+
+const Tutorial: React.FC<{t: number}> = ({t}) => {
+  const vis = prog(t, 0, 24) * (1 - prog(t, 380, 30));
+  if (vis <= 0) return null;
+  const roll = prog(t, 6, 66, ease.out);
+  const land = prog(t, 72, 30, ease.out);
+  const barIn = prog(t, 10, 30, ease.out);
+  const L_N = 13;
+  const R_N = 26;
+  const THICK = 14;
+  const baseY = 740;
+  const lx = 1250;
+  const rx = 1560;
+  const morph = (i: number) => prog(t, 210 + i * 1.6, 44, ease.inOut);
+  const leftDim = 1 - 0.6 * prog(t, 210, 40);
+  const coins: React.ReactNode[] = [];
+  for (let i = 0; i < L_N; i++) {
+    const p = prog(t, 90 + i * 2.2, 16, ease.out);
+    if (p <= 0) continue;
+    coins.push(<Coin key={'l' + i} x={lx} y={baseY - i * THICK - (1 - p) * 70} w={140} h={40} r={20} c="#7E8DA3" o={p * leftDim} />);
+  }
+  for (let i = 0; i < R_N; i++) {
+    const p = prog(t, 100 + i * 2.2, 16, ease.out);
+    if (p <= 0) continue;
+    const m = morph(i);
+    const bw = 15 + ((i * 7) % 5) * 2;
+    const bh = 110 + ((i * 37) % 6) * 10;
+    let sx = rx - 250;
+    for (let k = 0; k < i; k++) sx += 15 + ((k * 7) % 5) * 2 + 3;
+    const x = lerp(rx, sx + bw / 2, m);
+    const y = lerp(baseY - i * THICK - (1 - p) * 70, baseY - bh / 2 + 20, m);
+    const c = m > 0.5 ? BOOK_COLORS[(i * 5) % BOOK_COLORS.length] : color.warm;
+    coins.push(<Coin key={'r' + i} x={x} y={y} w={lerp(140, bw, m)} h={lerp(40, bh, m)} r={lerp(20, 3, m)} c={c} o={p} />);
+  }
+  const labelsO = prog(t, 150, 24);
+  const shelf = prog(t, 240, 40, ease.inOut);
+  return (
+    <AbsoluteFill style={{opacity: vis}}>
+      {/* 播放量 */}
+      <div style={{position: 'absolute', left: 960, top: 140, transform: 'translate(-50%, -50%)', fontFamily: font.sans, fontWeight: 500, fontSize: 40, color: color.dim, whiteSpace: 'nowrap'}}>
+        一个 50 分钟的 AI 教程
+      </div>
+      <div style={{position: 'absolute', left: 960, top: 290, transform: 'translate(-50%, -50%)', textAlign: 'center', whiteSpace: 'nowrap'}}>
+        <div style={{fontFamily: font.sans, fontWeight: 700, fontSize: 124, color: color.data, lineHeight: 1, textShadow: `0 0 ${40 * (1 - land) + 8}px rgba(142,210,255,${0.3 * (1 - land) + 0.08})`}}>
+          <span style={{fontVariantNumeric: 'tabular-nums', filter: roll < 0.97 ? `blur(${(1 - roll) * 4}px)` : undefined}}>{(133.6 * roll).toFixed(1)}</span>
+          <span style={{fontSize: 58, marginLeft: 14, color: color.ink}}>万次播放</span>
+        </div>
+        <SourceTag text="B站《DeepSeek Harness 教程》页面，截图于 2026 年 11 月" at={72} />
+      </div>
+      {/* 50 分钟的进度条：后面会升成楼梯 */}
+      <svg width={1920} height={1080} style={{position: 'absolute', inset: 0}}>
+        <line x1={260} y1={780} x2={260 + 640 * barIn} y2={780} stroke={color.cool} strokeWidth={4} strokeLinecap="round" />
+        {Array.from({length: 11}).map((_, i) => (
+          <line key={i} x1={260 + i * 64} y1={786} x2={260 + i * 64} y2={798} stroke={color.dim} strokeWidth={2} opacity={barIn} />
+        ))}
+        <circle cx={260} cy={780} r={12} fill={color.cool} opacity={barIn} />
+        <text x={900} y={750} textAnchor="end" fontFamily={font.sans} fontWeight={600} fontSize={32} fill={color.dim} opacity={barIn}>
+          00:00 / 50:00
+        </text>
+      </svg>
+      {/* 点赞 vs 收藏：收藏那摞变成一排"说明书" */}
+      {coins}
+      <div style={{position: 'absolute', left: rx - 260, top: baseY + 22, width: 540 * shelf, height: 4, background: color.brass, opacity: 0.8, borderRadius: 2}} />
+      {[
+        {x: lx, label: '点赞', num: '6.4 万', Icon: IconThumb, c: '#9FB0C8'},
+        {x: rx, label: '收藏', num: '12.9 万', Icon: IconStar, c: color.warm},
+      ].map((d) => (
+        <div
+          key={d.label}
+          style={{
+            position: 'absolute',
+            left: d.x,
+            top: baseY + 44,
+            transform: 'translateX(-50%)',
+            opacity: labelsO,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            whiteSpace: 'nowrap',
+            fontFamily: font.sans,
+            fontWeight: 700,
+            fontSize: 40,
+            color: color.data,
+          }}
+        >
+          <d.Icon size={40} c={d.c} w={7} fill={d.label === '收藏' ? 'rgba(255,181,71,0.25)' : undefined} />
+          <span style={{color: color.dim, fontWeight: 500}}>{d.label}</span>
+          <span>{d.num}</span>
+        </div>
+      ))}
+    </AbsoluteFill>
+  );
+};
+
+export const TimeScene: React.FC = () => {
   const f = useCurrentFrame();
-  const S14 = len('13');
-  const END = S14 + len('14');
-  const g = f - S14;
+  const END = len('time');
   return (
     <AbsoluteFill>
-      {f < S14 ? (
-        <>
-          <LockIntro f={f} label="时间和情绪" icon="phone" bits={[0.6, 0.2, 0.95, 0.4, 0.1]} n={2} />
-          <Day f={f} />
-          <Chart f={f} />
-        </>
-      ) : null}
+      <Cue s="slide" at={2} dur={1.2} />
+      <Cue s="click" at={80} />
+      <Cue s="whoosh" at={98} dur={0.8} gain={0.55} />
+      <Cue s="whoosh" at={150} dur={0.5} gain={0.45} pan={-0.4} />
+      <Cue s="bounce" at={196} pan={-0.3} />
+      <Cue s="whoosh" at={238} dur={1} gain={0.5} />
+      <Cue s="roll" at={296} dur={1.1} gain={0.45} />
+      <Cue s="rise" at={430} dur={1.1} gain={0.6} />
+      <Cue s="tick" at={448} />
+      <LockIntro f={f} label="时间和情绪" icon="phone" bits={[0.6, 0.2, 0.95, 0.4, 0.1]} n={2} />
+      <Day f={f} />
+      <Chart f={f} />
       <Line text="累了一天，只剩碎片时间。" at={84} out={232} y={850} size={58} kind="opinion" opinion />
       <Line text="短剧把爽点压进一两分钟。" at={270} out={420} y={850} size={58} kind="opinion" />
       <Line
         text="2024 年微短剧市场规模 *505 亿元*，首次超过全年电影票房"
         at={430}
-        out={S14 - 14}
+        out={END - 14}
         y={860}
         kind="data"
         size={50}
         hl={color.pink}
         source="《2024年中国微短剧产业研究报告》"
       />
-      {g >= 0 ? (
-        <>
-          <LockIntro f={g} label="知识门槛" icon="stairs" bits={[0.15, 0.75, 0.35, 0.9, 0.5]} n={3} />
-          <Steps f={g} />
-          <Stairs f={g} />
-        </>
-      ) : null}
-      <Line text="你眼里的一步，是别人眼里的十步。" at={S14 + 84} out={S14 + 270} y={900} size={58} kind="opinion" opinion />
-      <Line text="不会的人要的不是精华，是不跳步。" at={S14 + 290} out={S14 + 476} y={930} size={58} kind="opinion" />
-      <Line text="长教程、「全几百集」的课，卖的是确定性。" at={S14 + 488} out={END - 14} y={930} size={58} kind="opinion" />
+    </AbsoluteFill>
+  );
+};
+
+export const KnowScene: React.FC = () => {
+  const g = useCurrentFrame();
+  const END = len('know');
+  return (
+    <AbsoluteFill>
+      <Cue s="slide" at={2} dur={1.2} />
+      <Cue s="click" at={80} />
+      <Cue s="whoosh" at={98} dur={0.8} gain={0.55} />
+      {Array.from({length: 10}).map((_, i) => (
+        <Cue key={'w' + i} s="step" at={176 + i * 5} gain={0.3} />
+      ))}
+      <Cue s="tick" at={220} pan={0.4} />
+      <Cue s="roll" at={TUT0 + 6} dur={1.1} gain={0.6} />
+      <Cue s="tick" at={TUT0 + 72} />
+      <Cue s="coins" at={TUT0 + 90} dur={1.1} gain={0.5} pan={0.45} />
+      <Cue s="tick" at={TUT0 + 150} pan={0.45} />
+      <Cue s="peel" at={TUT0 + 216} gain={0.45} pan={0.45} />
+      {Array.from({length: 10}).map((_, i) => (
+        <Cue key={'s' + i} s="step" at={STAIRS_SHIFT + 318 + i * 6} gain={0.35} pan={-0.4} />
+      ))}
+      <Cue s="tick" at={STAIRS_SHIFT + 458} gain={0.5} pan={0.3} />
+      <Cue s="star" at={STAIRS_SHIFT + 488} pan={-0.6} />
+      <LockIntro f={g} label="知识门槛" icon="stairs" bits={[0.15, 0.75, 0.35, 0.9, 0.5]} n={3} />
+      <Steps f={g} />
+      <Tutorial t={g - TUT0} />
+      <Stairs f={g - STAIRS_SHIFT} />
+      <Line text="你眼里的一步，是别人眼里的十步。" at={84} out={270} y={900} size={58} kind="opinion" opinion />
+      <Line text="很多人，把它当说明书存了起来。" at={TUT0 + 220} out={TUT0 + 400} y={930} size={58} kind="opinion" />
+      <Line text="不会的人要的不是精华，是不跳步。" at={STAIRS_SHIFT + 310} out={STAIRS_SHIFT + 490} y={930} size={58} kind="opinion" />
+      <Line text="长教程、「全几百集」的课，卖的是确定性。" at={STAIRS_SHIFT + 500} out={END - 14} y={930} size={58} kind="opinion" />
     </AbsoluteFill>
   );
 };

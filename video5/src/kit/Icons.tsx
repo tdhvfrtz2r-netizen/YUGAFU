@@ -114,6 +114,38 @@ export const IconOrb: React.FC<P> = (p) => (
   </Svg>
 );
 
+export const IconGlass: React.FC<P> = (p) => (
+  <Svg {...p}>
+    <path d="M30 10 L70 10 Q72 44 50 54 Q28 44 30 10 Z" />
+    <path d="M50 54 L50 84" />
+    <path d="M34 88 L66 88" />
+    <path d="M33 26 L67 26" opacity={0.5} />
+  </Svg>
+);
+
+export const IconVinyl: React.FC<P> = (p) => (
+  <Svg {...p}>
+    <circle cx={50} cy={50} r={40} />
+    <circle cx={50} cy={50} r={26} opacity={0.45} />
+    <circle cx={50} cy={50} r={9} />
+  </Svg>
+);
+
+export const IconFrame: React.FC<P> = (p) => (
+  <Svg {...p}>
+    <rect x={12} y={18} width={76} height={64} rx={3} />
+    <path d="M22 72 L40 48 L52 62 L62 52 L78 72" />
+    <circle cx={66} cy={34} r={6} />
+  </Svg>
+);
+
+export const IconCamera: React.FC<P> = (p) => (
+  <Svg {...p}>
+    <path d="M10 32 L32 32 L40 20 L60 20 L68 32 L90 32 L90 82 L10 82 Z" />
+    <circle cx={50} cy={56} r={16} />
+  </Svg>
+);
+
 export const ICONS = {
   bar: IconBar,
   cup: IconCup,

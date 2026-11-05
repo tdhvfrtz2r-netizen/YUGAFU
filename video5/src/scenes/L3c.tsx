@@ -4,6 +4,7 @@ import {clamp, lerp, prog, rng, TAU} from '../kit/anim';
 import {CanvasLayer, drawGlow} from '../kit/Canvas';
 import {Lock} from '../kit/Lock';
 import {Person} from '../kit/Person';
+import {Cue} from '../kit/Sound';
 import {KeySentence, Line} from '../kit/Text';
 import {len} from '../timeline';
 import {color, ease, font} from '../theme';
@@ -30,7 +31,7 @@ const FANS = Array.from({length: 34}, (_, i) => ({
 }));
 
 const Express: React.FC<{f: number}> = ({f}) => {
-  const vis = prog(f, 120, 30) * (1 - prog(f, len('15') - 18, 18));
+  const vis = prog(f, 120, 30) * (1 - prog(f, len('express') - 18, 18));
   if (vis <= 0) return null;
   const m = prog(f, 168, 54, ease.inOut);
   let d = '';
@@ -139,8 +140,8 @@ const AllOpen: React.FC<{f: number}> = ({f}) => {
 
 export const L3c: React.FC = () => {
   const f = useCurrentFrame();
-  const S16 = len('15');
-  const END = S16 + len('16');
+  const S16 = len('express');
+  const END = S16 + len('allOpen');
   const g = f - S16;
   const zoom = prog(f, 98, 44, ease.in);
   const dim = prog(g, 250, 24);
@@ -151,6 +152,22 @@ export const L3c: React.FC = () => {
           <Lock x={1160} y={520} scale={0.72} bits={LOCKS[3].bits} lockIn={-8} keyIn={2} click={80} label="表达" icon="wave" />
         </AbsoluteFill>
       ) : null}
+      <Cue s="slide" at={2} dur={1.2} />
+      <Cue s="click" at={80} />
+      <Cue s="whoosh" at={98} dur={0.8} gain={0.55} />
+      <Cue s="whoosh" at={168} dur={0.9} gain={0.5} pan={-0.4} />
+      <Cue s="chime" at={222} gain={0.55} pan={-0.4} />
+      {[0, 1, 2, 3].map((k) => (
+        <Cue key={k} s="ping" at={222 + k * 80} gain={0.35} pan={-0.3} />
+      ))}
+      <Cue s="swell" at={230} dur={3} gain={0.6} pan={0.3} />
+      {[0, 1, 2, 3].map((k) => (
+        <Cue key={'p' + k} s="peel" at={S16 + 48 + k * 10} gain={0.55} pan={k % 2 ? 0.4 : -0.4} />
+      ))}
+      <Cue s="whoosh" at={S16 + 90} dur={1.2} gain={0.5} />
+      <Cue s="sparkle" at={S16 + 100} dur={2.8} gain={0.7} />
+      <Cue s="impact" at={S16 + 288} gain={0.85} />
+      <Cue s="bell" at={S16 + 288} gain={0.65} />
       {f < S16 ? <LockCount n={4} at={2} out={130} /> : null}
       {f < S16 ? <Express f={f} /> : null}
       <Line text="好记、能跟着唱的旋律，" at={96} out={S16 - 14} y={170} size={58} />

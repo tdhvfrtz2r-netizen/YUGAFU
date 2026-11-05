@@ -3,35 +3,41 @@ import {AbsoluteFill, useCurrentFrame} from 'remotion';
 import {clamp, keys, lerp, prog} from '../kit/anim';
 import {IconBottle, IconBroom, IconCap} from '../kit/Icons';
 import {Person} from '../kit/Person';
+import {Cue} from '../kit/Sound';
 import {Line} from '../kit/Text';
 import {len} from '../timeline';
 import {color, ease, font} from '../theme';
 
-/** 第四层 17–18："土"的东西沿台阶往上爬（三站数据）→ 管理学里的"低端颠覆" */
+/** 第四层："土"的东西沿台阶往上爬（四站数据）→ 管理学里的"低端颠覆" */
 
 const STEP_W = 120;
 const STEP_H = 60;
 const NS = 24;
 const WH = NS * STEP_H;
 const stepTop = (i: number) => ({x: i * STEP_W, y: WH - (i + 1) * STEP_H});
-const ST = [2, 8, 14].map((i) => ({x: stepTop(i).x + STEP_W * 0.5, y: stepTop(i).y}));
+const ST = [2, 8, 14, 20].map((i) => ({x: stepTop(i).x + STEP_W * 0.5, y: stepTop(i).y}));
 
 const Climb: React.FC<{f: number}> = ({f}) => {
+  // 四站：镜头在每站停住，站与站之间 1 秒
   const camX = keys(f, [
     [0, ST[0].x],
     [278, ST[0].x],
     [338, ST[1].x],
-    [568, ST[1].x],
-    [628, ST[2].x],
-    [936, ST[2].x + 40],
+    [560, ST[1].x],
+    [620, ST[2].x],
+    [930, ST[2].x],
+    [990, ST[3].x],
+    [1224, ST[3].x + 40],
   ]);
   const camY = keys(f, [
     [0, ST[0].y],
     [278, ST[0].y],
     [338, ST[1].y],
-    [568, ST[1].y],
-    [628, ST[2].y],
-    [936, ST[2].y - 20],
+    [560, ST[1].y],
+    [620, ST[2].y],
+    [930, ST[2].y],
+    [990, ST[3].y],
+    [1224, ST[3].y - 20],
   ]);
   const tx = 960 - camX;
   const ty = 560 - camY;
@@ -39,11 +45,13 @@ const Climb: React.FC<{f: number}> = ({f}) => {
     [0, 2],
     [278, 2],
     [338, 8],
+    [560, 8],
+    [620, 14],
   ]);
   const amberTo = keys(f, [
     [0, 0],
-    [540, 0],
-    [650, 14],
+    [880, 0],
+    [1000, 20],
   ]);
   const nose = (to: number, dy: number) => {
     let d = `M0 ${WH - STEP_H + dy}`;
@@ -59,8 +67,10 @@ const Climb: React.FC<{f: number}> = ({f}) => {
   const vis = prog(f, 0, 24);
   // 站 2：光罩里的手机一部部亮起
   const s2 = ST[1];
-  const s4 = ST[2];
-  const grow = prog(f, 644, 70, ease.out);
+  const s3 = ST[2];
+  const s4 = ST[3];
+  const bars = prog(f, 640, 60, ease.out);
+  const grow = prog(f, 1000, 70, ease.out);
   return (
     <svg width={1920} height={1080} style={{position: 'absolute', inset: 0, opacity: vis}}>
       <defs>
@@ -79,7 +89,7 @@ const Climb: React.FC<{f: number}> = ({f}) => {
         {amberTo > 0 ? <path d={nose(amberTo, 6)} fill="none" stroke={color.warm} strokeWidth={6} strokeLinejoin="round" /> : null}
 
         {/* 站 1：2023，最先亮起来的手机（镜头离开后压暗，留作走过的台阶） */}
-        <g opacity={lerp(1, 0.3, prog(f, 300, 40))}>
+        <g opacity={lerp(1, 0.22, prog(f, 300, 40))}>
         {[-80, 0, 80].map((dx, i) => {
           const Icon = [IconCap, IconBroom, IconBottle][i];
           const x = ST[0].x + dx - 60;
@@ -98,7 +108,7 @@ const Climb: React.FC<{f: number}> = ({f}) => {
         </g>
 
         {/* 站 2：爬进光罩 */}
-        <g opacity={lerp(1, 0.3, prog(f, 590, 40))}>
+        <g opacity={lerp(1, 0.22, prog(f, 590, 40))}>
         <path d={`M${s2.x - 230} ${s2.y} A230 190 0 0 1 ${s2.x + 230} ${s2.y} Z`} fill="url(#dome4)" stroke="rgba(190,232,255,0.5)" strokeWidth={2} />
         {[-150, -90, -30, 30, 90, 150].map((dx, i) => {
           const lit = prog(f, 322 + i * 9, 16);
@@ -119,8 +129,26 @@ const Climb: React.FC<{f: number}> = ({f}) => {
           </text>
         </g>
 
-        {/* 站 3：一个光点长成一间大店，旁边一个小人作比例尺 */}
-        <g transform={`translate(${s4.x + 40} ${s4.y})`} opacity={prog(f, 620, 20)}>
+        {/* 站 3：产值 vs 票房（柱高按真实比例 1000 : 518.32） */}
+        <g transform={`translate(${s3.x} ${s3.y})`} opacity={lerp(1, 0.1, prog(f, 950, 40))}>
+          <rect x={-170} y={-340 * bars} width={120} height={340 * bars} rx={6} fill={color.pink} />
+          <rect x={30} y={-340 * 0.51832 * bars} width={120} height={340 * 0.51832 * bars} rx={6} fill="#5B6A80" />
+          <text x={-110} y={-340 * bars - 58} textAnchor="middle" fontFamily={font.sans} fontWeight={700} fontSize={40} fill={color.data} opacity={bars}>
+            约千亿元
+          </text>
+          <text x={-110} y={-340 * bars - 20} textAnchor="middle" fontFamily={font.sans} fontWeight={500} fontSize={28} fill={color.dim} opacity={bars}>
+            微短剧、漫剧产值
+          </text>
+          <text x={90} y={-340 * 0.51832 * bars - 58} textAnchor="middle" fontFamily={font.sans} fontWeight={700} fontSize={40} fill={color.data} opacity={bars}>
+            518.32 亿元
+          </text>
+          <text x={90} y={-340 * 0.51832 * bars - 20} textAnchor="middle" fontFamily={font.sans} fontWeight={500} fontSize={28} fill={color.dim} opacity={bars}>
+            全国电影总票房
+          </text>
+        </g>
+
+        {/* 站 4：一个光点长成一间大店，旁边一个小人作比例尺 */}
+        <g transform={`translate(${s4.x + 40} ${s4.y})`} opacity={prog(f, 980, 20)}>
           <ellipse cx={0} cy={-70 * grow} rx={300 * grow + 20} ry={150 * grow + 10} fill={color.warm} opacity={0.1 * grow} />
           <rect x={-220 * grow} y={-128 * grow} width={440 * grow} height={128 * grow} rx={4} fill="#3B2E1C" stroke={color.warm} strokeWidth={3} />
           <rect x={-236 * grow} y={-140 * grow} width={472 * grow} height={18 * grow} rx={4} fill={color.warm} />
@@ -131,7 +159,7 @@ const Climb: React.FC<{f: number}> = ({f}) => {
             : null}
           {grow > 0.6 ? <rect x={-6} y={-70} width={34} height={70} rx={2} fill={color.warmHi} opacity={(grow - 0.6) * 2.4} /> : null}
           <circle cx={0} cy={-6} r={7} fill={color.warmHi} opacity={1 - grow} />
-          <Person x={262} y={0} s={16} c={color.ink} o={prog(f, 710, 20)} />
+          <Person x={262} y={0} s={16} c={color.ink} o={prog(f, 1070, 20)} />
         </g>
       </g>
     </svg>
@@ -139,7 +167,7 @@ const Climb: React.FC<{f: number}> = ({f}) => {
 };
 
 const Disrupt: React.FC<{f: number}> = ({f}) => {
-  const vis = prog(f, 0, 30) * (1 - prog(f, len('18') - 18, 18));
+  const vis = prog(f, 0, 30) * (1 - prog(f, len('disrupt') - 18, 18));
   const draw = prog(f, 40, 220, ease.inOut);
   const oldDraw = prog(f, 20, 120, ease.inOut);
   const X0 = 260;
@@ -198,11 +226,30 @@ const Disrupt: React.FC<{f: number}> = ({f}) => {
 
 export const L4: React.FC = () => {
   const f = useCurrentFrame();
-  const S18 = len('17');
-  const END = S18 + len('18');
+  const S18 = len('climb');
+  const END = S18 + len('disrupt');
   const climbO = 1 - prog(f, S18 - 20, 20);
   return (
     <AbsoluteFill>
+      {[0, 1, 2].map((i) => (
+        <Cue key={'n' + i} s="notify" at={30 + i * 12} gain={0.3} pan={-0.3 + i * 0.1} />
+      ))}
+      <Cue s="whoosh" at={278} dur={1} gain={0.5} />
+      {[0, 1, 2, 3, 4, 5].map((i) => (
+        <Cue key={'m' + i} s="notify" at={322 + i * 9} gain={0.22} />
+      ))}
+      <Cue s="rise" at={356} dur={0.9} gain={0.4} />
+      <Cue s="whoosh" at={560} dur={1} gain={0.5} />
+      <Cue s="rise" at={640} dur={1} gain={0.6} />
+      <Cue s="whoosh" at={930} dur={1} gain={0.5} />
+      <Cue s="rise" at={880} dur={2} gain={0.35} pan={-0.3} />
+      <Cue s="swell" at={1000} dur={1.8} gain={0.5} />
+      <Cue s="chime" at={1060} gain={0.45} />
+      <Cue s="scribble" at={S18 + 20} dur={2} gain={0.4} />
+      <Cue s="scribble" at={S18 + 60} dur={3.4} gain={0.45} />
+      <Cue s="tick" at={S18 + 96} pan={-0.5} />
+      <Cue s="tick" at={S18 + 170} pan={-0.5} />
+      <Cue s="tick" at={S18 + 250} pan={0.3} />
       {f < S18 ? (
         <AbsoluteFill style={{opacity: climbO}}>
           <Climb f={f} />
@@ -210,7 +257,9 @@ export const L4: React.FC = () => {
       ) : null}
       <Line text="2023 年：微短剧用户以保安、保洁、保姆为主" at={30} out={290} y={900} kind="data" size={50} source="WETRUE《2025年微短剧行业洞察报告》" />
       <Line text="2025 年：一线城市观众占比 *21.73%*" at={348} out={580} y={900} kind="data" size={50} hl={color.pink} source="WETRUE《2025年微短剧行业洞察报告》" />
-      <Line text="蜜雪集团南京旗舰店：约 *2000 平方米*" at={650} out={S18 - 16} y={900} kind="data" size={50} hl={color.warm} source="蜜雪集团 2026 年中期报告" />
+      <Line text="2025 年：微短剧、漫剧全年产值约 *千亿元*" at={630} out={950} y={852} kind="data" size={50} hl={color.pink} />
+      <Line text="同期全国电影总票房 *518.32 亿元*" at={670} out={950} y={924} kind="data" size={46} hl={color.ink} source="DataEye 研究院，2025（含漫剧，和前面 2024 年的数字口径不同）" />
+      <Line text="蜜雪集团南京旗舰店：约 *2000 平方米*" at={1000} out={S18 - 14} y={900} kind="data" size={50} hl={color.warm} source="蜜雪集团 2026 年中期报告" />
       {f >= S18 ? <Disrupt f={f - S18} /> : null}
       <Line text="管理学里有个概念：「低端颠覆」（克里斯坦森）" at={S18 + 16} out={END - 16} y={150} size={56} />
       <Line text="① 先服务被忽视的大多数" at={S18 + 96} out={END - 16} x={286} y={772} kind="label" color={color.warmHi} size={34} align="left" />

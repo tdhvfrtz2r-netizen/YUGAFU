@@ -2,27 +2,28 @@ import React from 'react';
 import {AbsoluteFill, useCurrentFrame} from 'remotion';
 import {prog, rng} from '../kit/anim';
 import {CanvasLayer, drawGlow} from '../kit/Canvas';
+import {Cue} from '../kit/Sound';
 import {Line} from '../kit/Text';
 import {len} from '../timeline';
 import {color, ease, font} from '../theme';
 import {drawStores} from './L3a';
 
-/** 反面 19：店越开越密，利润第一次掉头；我们看见的，多是活下来的 */
+/** 反面 26–27：店越开越密，利润第一次掉头；我们看见的，多是活下来的（幸存者偏差）。"土"不是配方，对准处境才是。 */
 
 const R = rng(99);
 const PRODUCTS = Array.from({length: 420}, (_, i) => ({
   x: 140 + R() * 1640,
   y: 150 + R() * 600,
-  die: 434 + R() * 200,
+  die: 60 + R() * 200,
   keep: i % 37 === 0,
 }));
 
 const Survivors: React.FC<{f: number}> = ({f}) => (
   <CanvasLayer
     draw={(ctx) => {
-      const vis = prog(f, 404, 30);
+      const vis = prog(f, 0, 30);
       if (vis <= 0) return;
-      const spot = prog(f, 574, 50);
+      const spot = prog(f, 200, 50);
       for (const p of PRODUCTS) {
         const dead = p.keep ? 0 : prog(f, p.die, 20);
         const a = vis * (1 - dead * 0.92);
@@ -55,7 +56,7 @@ const Survivors: React.FC<{f: number}> = ({f}) => (
 );
 
 const Profit: React.FC<{f: number}> = ({f}) => {
-  const vis = prog(f, 84, 24) * (1 - prog(f, 408, 24));
+  const vis = prog(f, 84, 24) * (1 - prog(f, 600, 30));
   if (vis <= 0) return null;
   const grow = prog(f, 90, 44, ease.out);
   const drop = prog(f, 136, 40, ease.inOut);
@@ -81,25 +82,42 @@ const Profit: React.FC<{f: number}> = ({f}) => {
 
 export const L6: React.FC = () => {
   const f = useCurrentFrame();
-  const END = len('19');
-  const fieldO = (1 - prog(f, 398, 30)) * prog(f, 0, 20);
+  const S = len('profit');
+  const END = S + len('survive');
+  const fieldO = (1 - prog(f, 590, 30)) * prog(f, 0, 20);
   const pack = prog(f, 0, 120, ease.inOut);
   const shift = prog(f, 40, 50, ease.inOut);
   return (
     <AbsoluteFill>
-      {fieldO > 0 ? (
-        <AbsoluteFill style={{opacity: fieldO, transform: `translateX(${-330 * shift}px) scale(${1 - 0.4 * shift})`, transformOrigin: '960px 450px'}}>
-          <CanvasLayer draw={(ctx) => drawStores(ctx, 1000, pack)} />
+      <Cue s="whoosh" at={0} dur={0.6} gain={0.45} />
+      <Cue s="sparkle" at={0} dur={2} gain={0.35} pan={-0.4} />
+      <Cue s="rise" at={90} dur={0.7} gain={0.5} pan={0.4} />
+      <Cue s="drop" at={136} gain={0.75} pan={0.4} />
+      <Cue s="tick" at={170} pan={0.6} />
+      <Cue s="fizzle" at={S + 60} dur={3.8} gain={0.6} />
+      <Cue s="whoosh" at={S + 200} dur={1} gain={0.45} />
+      <Cue s="chime" at={S + 226} gain={0.35} />
+      {f < S ? (
+        <>
+          {fieldO > 0 ? (
+            <AbsoluteFill style={{opacity: fieldO, transform: `translateX(${-330 * shift}px) scale(${1 - 0.4 * shift})`, transformOrigin: '960px 450px'}}>
+              <CanvasLayer draw={(ctx) => drawStores(ctx, 1000, pack)} />
+            </AbsoluteFill>
+          ) : null}
+          <Profit f={f} />
+        </>
+      ) : null}
+      {f >= S - 10 ? (
+        <AbsoluteFill style={{opacity: 1 - prog(f, END - 22, 22)}}>
+          <Survivors f={f - S} />
         </AbsoluteFill>
       ) : null}
-      <Profit f={f} />
-      <AbsoluteFill style={{opacity: 1 - prog(f, END - 22, 22)}}>
-        <Survivors f={f} />
-      </AbsoluteFill>
       <Line text="蜜雪集团 2026 年上半年净利润同比下降 *14.7%*" at={70} out={410} y={830} kind="data" size={52} hl={color.red} />
       <Line text="上市后首次半年度利润下滑" at={120} out={410} y={905} kind="data" size={44} color={color.ink} source="蜜雪集团 2026 年中期报告" />
-      <Line text="下沉市场很大，但不是无限大；" at={428} out={END - 14} y={850} size={58} kind="opinion" opinion />
-      <Line text="火起来的被看见了，失败的更多。" at={536} out={END - 14} y={935} size={58} kind="opinion" />
+      <Line text="下沉市场很大，但不是无限大。" at={428} out={S - 14} y={880} size={60} kind="opinion" opinion />
+      <Line text="火起来的被看见了，失败的更多。" at={S + 30} out={S + 270} y={900} size={60} kind="opinion" />
+      <Line text="这叫「幸存者偏差」：我们只看得见活下来的。" at={S + 286} out={S + 540} y={900} size={58} />
+      <Line text="「土」不是成功的配方，对准处境才是。" at={S + 556} out={END - 14} y={900} size={62} kind="opinion" opinion />
     </AbsoluteFill>
   );
 };
