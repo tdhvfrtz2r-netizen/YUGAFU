@@ -57,9 +57,11 @@ async function icon(name, bg, fg = 'FFFFFF') {
 const ANIM = {};
 const TRANS = {};
 let cur = null, slideNo = 0;
+const FIT = [];
 function newSlide(master, section) {
   const s = pres.addSlide({ masterName: master, sectionTitle: section });
   slideNo++;
+  if (master === 'CONTENT') FIT.push(slideNo);
   cur = { no: slideNo, steps: [], n: 0 };
   ANIM[slideNo] = cur.steps;
   return s;
@@ -97,7 +99,7 @@ const isCJK = (ch) => /[　-鿿＀-￯‘-”]/.test(ch);
 function textW(text, pt) { let w = 0; for (const ch of text) w += isCJK(ch) ? pt / 72 : 0.56 * pt / 72; return w; }
 
 function tagPill(s, text) {
-  T(s, text, { x: M, y: 0.36, w: textW(text, 11) + 0.36, h: 0.32, fontSize: 11, bold: true, color: C.accent1,
+  T(s, text, { x: W - M - textW(text, 11) - 0.36, y: 0.62, w: textW(text, 11) + 0.36, h: 0.32, fontSize: 11, bold: true, color: C.accent1,
     fill: { color: C.accent1, transparency: 88 }, shape: SH.ROUNDED_RECTANGLE, rectRadius: 0.16, align: 'center', valign: 'middle', margin: 0 });
 }
 function title(s, text) { s.addText(cq(text), { placeholder: 'title' }); }
@@ -130,7 +132,7 @@ function drive(s, ox, oy, k, st, opts = {}) {
   S(s, SH.OVAL, { x: L.x - 2.2 * L.r, y: L.y - 2.2 * L.r, w: 4.4 * L.r, h: 4.4 * L.r, fill: { color: C.accent4, transparency: 75 }, line: NONE });
   S(s, SH.OVAL, { x: L.x - L.r, y: L.y - L.r, w: 2 * L.r, h: 2 * L.r, fill: { color: C.accent4 }, line: { color: 'E8EEF6', width: 1.5 } });
   if (opts.noLabels) return;
-  const lab = (t, x, y, w, al = 'center') => T(s, t, { x, y, w, h: 0.3, fontSize: 11, color: C.accent6, align: al, margin: 0, valign: 'middle' }, opts.labelA);
+  const lab = (t, x, y, w, al = 'center') => T(s, t, { x, y, w, h: 0.3, fontSize: 11, color: opts.labelColor || C.accent6, align: al, margin: 0, valign: 'middle' }, opts.labelA);
   lab(opts.lampText || '运行', L.x + 2.4 * L.r, L.y - 0.15, 1.3, 'left');
   lab('电流表（约 55 A）', ox + (D.A.x - 0.9) * k, oy + (D.A.y + D.rA) * k + 0.04, 1.8 * k);
   lab('风机皮带轮', ox + (D.F.x + 0.1) * k, oy + (D.F.y + D.Hh) * k + 0.05, 1.5 * k, 'left');
@@ -139,18 +141,18 @@ function drive(s, ox, oy, k, st, opts = {}) {
 }
 
 // ---------- layouts ----------
-const FOOT = '双兴分公司电机轴承保持架破损停机故障案例 · 班组学习分享';
+// Company frame copied from materials/original.pptx: white background, group logo top-left; the two bottom waves are
+// injected into these layouts by anim.py (pptxgenjs cannot draw their bezier outlines).
+const LOGO_O = { image: { x: 770255 / 914400, y: 276225 / 914400, w: 6412865 / 914400, h: 868680 / 914400, path: path.join(__dirname, 'materials', 'photos_original', 'image2.jpeg'), altText: '北方华锦 logo' } };
+const SLNUM = { x: W - 1.25, y: 7.08, w: 0.7, h: 0.3, fontSize: 11, color: 'FFFFFF', align: 'right', margin: 0 };
 pres.defineSlideMaster({
-  title: 'CONTENT',
-  background: { color: HX.lt1 },
-  objects: [
-    { image: { x: W - M - 2.6, y: 0.33, w: 2.6, h: 2.6 * 104 / 614, path: A('logo_color.png'), altText: '北方华锦 logo' } },
-    { text: { text: FOOT, options: { x: M, y: 7.0, w: 8, h: 0.3, fontSize: 10, color: C.accent5, margin: 0, valign: 'middle' } } },
-    { placeholder: { options: { name: 'title', type: 'title', x: M, y: 0.78, w: 10.5, h: 0.78, fontSize: 28, bold: true,
-      color: C.text2, valign: 'middle', align: 'left', margin: 0 }, text: '' } },
-  ],
-  slideNumber: { x: W - M - 0.6, y: 7.0, w: 0.6, h: 0.3, fontSize: 10, color: HX.accent5, align: 'right', margin: 0 },
+  title: 'CONTENT', background: { color: 'FFFFFF' },
+  objects: [LOGO_O,
+    { placeholder: { options: { name: 'title', type: 'title', x: M, y: 1.28, w: 12.1, h: 0.5, fontSize: 24, bold: true,
+      color: C.text2, valign: 'middle', align: 'left', margin: 0 }, text: '' } }],
+  slideNumber: SLNUM,
 });
+pres.defineSlideMaster({ title: 'FRAME', background: { color: 'FFFFFF' }, objects: [LOGO_O], slideNumber: SLNUM });
 pres.defineSlideMaster({
   title: 'DARK', background: { color: HX.dk2 },
   objects: [{ image: { x: 0.7, y: 0.55, w: 3.0, h: 3.0 * 104 / 614, path: A('logo_white.png'), altText: '北方华锦 logo' } }],
@@ -183,18 +185,17 @@ pres.defineSlideMaster({ title: 'COVER', background: { color: 'FFFFFF' }, object
   // =====================================================================
   // 1 OPENING: the motor is running (dark)
   pres.addSection({ title: '开场' });
-  s = newSlide('DARK', '开场');
-  TRANS[slideNo] = 'black';
+  s = newSlide('FRAME', '开场');
   let st = step('auto');
-  drive(s, D.slideX, D.slideY, 1, st, { labelA: { st, fx: 'fade', d: 1600 } });
-  T(s, '设备故障案例 · 班组学习分享', { x: 0.7, y: 2.0, w: 6.4, h: 0.4, fontSize: 16, bold: true, color: C.accent2, margin: 0 }, { st, fx: 'float', d: 300 });
-  T(s, 'BL-1655C\n负压风机电机', { x: 0.7, y: 2.5, w: 6.5, h: 1.6, fontSize: 36, bold: true, color: C.background1, margin: 0, lineSpacingMultiple: 1.1, valign: 'top' }, { st, fx: 'float', d: 500 });
-  T(s, '30 kW · 2950 r/min · 皮带传动 · 封闭机箱', { x: 0.7, y: 4.2, w: 6.5, h: 0.45, fontSize: 17, color: C.accent6, margin: 0, valign: 'top' }, { st, fx: 'float', d: 800 });
-  T(s, '2023 年 1 月 3 日 14:05 之前，它一直这样转着……', { x: 0.7, y: 4.75, w: 6.5, h: 0.45, fontSize: 16, bold: true, color: C.accent2, margin: 0, valign: 'top' }, { st, fx: 'float', d: 1100 });
+  drive(s, 7.95, 1.4, 0.83, st, { labelA: { st, fx: 'fade', d: 1600 }, labelColor: C.accent5 });
+  T(s, '设备故障案例 · 班组学习分享', { x: 0.7, y: 1.75, w: 6.4, h: 0.4, fontSize: 16, bold: true, color: C.accent2, margin: 0 }, { st, fx: 'float', d: 300 });
+  T(s, 'BL-1655C\n负压风机电机', { x: 0.7, y: 2.2, w: 6.5, h: 1.6, fontSize: 36, bold: true, color: C.text2, margin: 0, lineSpacingMultiple: 1.1, valign: 'top' }, { st, fx: 'float', d: 500 });
+  T(s, '30 kW · 2950 r/min · 皮带传动 · 封闭机箱', { x: 0.7, y: 3.95, w: 6.5, h: 0.45, fontSize: 17, color: C.accent1, margin: 0, valign: 'top' }, { st, fx: 'float', d: 800 });
+  T(s, '2023 年 1 月 3 日 14:05 之前，它一直这样转着……', { x: 0.7, y: 4.5, w: 6.5, h: 0.45, fontSize: 16, bold: true, color: C.accent2, margin: 0, valign: 'top' }, { st, fx: 'float', d: 1100 });
   T(s, [
-    { text: '案例时间　', options: { color: C.accent6 } }, { text: '2023年1月3日 · 双兴分公司', options: { color: C.background1, breakLine: true } },
-    { text: '分 享 人　', options: { color: C.accent6 } }, { text: '于家福 · 炼化电气部 本体电气班', options: { color: C.background1 } },
-  ], { x: 0.7, y: 5.75, w: 6.5, h: 0.8, fontSize: 13, margin: 0, lineSpacingMultiple: 1.3, valign: 'top' }, { st, fx: 'fade', d: 1400 });
+    { text: '案例时间　', options: { color: C.accent5 } }, { text: '2023年1月3日 · 双兴分公司', options: { color: C.text1, breakLine: true } },
+    { text: '分 享 人　', options: { color: C.accent5 } }, { text: '于家福 · 炼化电气部 本体电气班', options: { color: C.text1 } },
+  ], { x: 0.7, y: 5.3, w: 6.5, h: 0.8, fontSize: 13, margin: 0, lineSpacingMultiple: 1.3, valign: 'top' }, { st, fx: 'fade', d: 1400 });
   N(s, `【开场 · 约1分钟 · 本页不用点击】
 · 右边是这台电机的示意：电机皮带轮带着风机转，下面放大的是负荷侧轴承——内圈跟轴转，滚珠和保持架慢一点公转；左上电流表约55A，绿灯运行。
 · 今天讲双兴分公司2023年1月3日的一起故障：负压风机电机轴承保持架破损，过流跳闸停机。
@@ -853,10 +854,10 @@ pres.defineSlideMaster({ title: 'COVER', background: { color: 'FFFFFF' }, object
 
   // =====================================================================
   // 17b ON-SITE CHECK POINTS (dark): numbered hotspots on the running drive
-  s = newSlide('DARK', '04 怎么防');
+  s = newSlide('FRAME', '04 怎么防');
   st = step('auto');
-  T(s, '现场怎么查：一台皮带传动电机，盯住这 6 个点', { x: 0.7, y: 1.2, w: 11.9, h: 0.6, fontSize: 26, bold: true, color: C.background1, margin: 0, valign: 'middle' }, { st, fx: 'fade', d: 0 });
-  const hk = 0.9, hox = 0.75, hoy = 1.95;
+  T(s, '现场怎么查：一台皮带传动电机，盯住这 6 个点', { x: M, y: 1.28, w: 12.1, h: 0.5, fontSize: 24, bold: true, color: C.text2, margin: 0, valign: 'middle' }, { st, fx: 'fade', d: 0 });
+  const hk = 0.78, hox = 0.95, hoy = 1.95;
   drive(s, hox, hoy, hk, st, { noLabels: true });
   const HS = [
     ['轴承', '听音棒听、测温枪测、冲击脉冲测；每次同一个点，记下来比趋势', [3.55, 3.6]],
@@ -872,12 +873,12 @@ pres.defineSlideMaster({ title: 'COVER', background: { color: 'FFFFFF' }, object
     const [lx_, ly_] = h[2], mx = hox + lx_ * hk, my = hoy + ly_ * hk, d = (i % 2) * 400;
     S(s, SH.OVAL, { x: mx - 0.32, y: my - 0.32, w: 0.64, h: 0.64, fill: { color: C.accent2, transparency: 65 }, line: NONE }, [{ st, fx: 'zoom', d }, { st, fx: 'blink', d: d + 500, dur: 400, repeat: 3 }]);
     numDot(s, i + 1, mx - 0.21, my - 0.21, 0.42, C.accent2, { st, fx: 'zoom', d }, 15);
-    const y = 2.05 + i * 0.8, a = { st, fx: 'float', d };
+    const y = 2.0 + i * 0.7, a = { st, fx: 'float', d };
     numDot(s, i + 1, hlx, y + 0.04, 0.4, C.accent2, a, 14);
-    T(s, h[0], { x: hlx + 0.55, y, w: 1.2, h: 0.48, fontSize: 17, bold: true, color: C.background1, margin: 0, valign: 'middle' }, a);
-    T(s, h[1], { x: hlx + 1.75, y: y - 0.04, w: hlw - 1.75, h: 0.62, fontSize: 13, color: 'D6E2F2', margin: 0, valign: 'middle' }, a);
+    T(s, h[0], { x: hlx + 0.55, y, w: 1.2, h: 0.48, fontSize: 17, bold: true, color: C.text2, margin: 0, valign: 'middle' }, a);
+    T(s, h[1], { x: hlx + 1.75, y: y - 0.04, w: hlw - 1.75, h: 0.62, fontSize: 13, color: C.text1, margin: 0, valign: 'middle' }, a);
   });
-  T(s, '看不到、够不着的点，按"盲区"处理：测点、注油管引到机箱外', { x: hlx, y: 6.9, w: hlw, h: 0.36, fontSize: 12.5, bold: true, color: C.accent2, margin: 0, valign: 'middle' }, { st, fx: 'fade', d: 900 });
+  T(s, '看不到、够不着的点，按"盲区"处理：测点、注油管引到机箱外', { x: hlx, y: 6.2, w: hlw, h: 0.36, fontSize: 12.5, bold: true, color: C.accent2, margin: 0, valign: 'middle' }, { st, fx: 'fade', d: 900 });
   N(s, `【现场检查要点 · 约1.5分钟 · 落到每天的巡检】
 · 还是开头那台电机，在转。今天讲的东西落到现场，就是盯住6个点。
 [点击] ①轴承：听音棒听、测温枪测、冲击脉冲测——关键是每次同一个点，记下来比趋势。②加脂：按台账，高速电机少量多次、别加满，加完盯温度。
@@ -965,30 +966,30 @@ pres.defineSlideMaster({ title: 'COVER', background: { color: 'FFFFFF' }, object
   // =====================================================================
   // 20 CLOSING (dark): three sentences + discussion; the motor is running again
   pres.addSection({ title: '总结' });
-  s = newSlide('DARK', '总结');
+  s = newSlide('FRAME', '总结');
   st = step('auto');
-  T(s, '记住三句话', { x: 0.7, y: 1.3, w: 6.5, h: 0.65, fontSize: 30, bold: true, color: C.background1, margin: 0 }, { st, fx: 'float', d: 0 });
+  T(s, '记住三句话', { x: 0.7, y: 1.3, w: 6.5, h: 0.6, fontSize: 28, bold: true, color: C.text2, margin: 0 }, { st, fx: 'float', d: 0 });
   [['01', '查', '四步缩小范围：看保护 → 测绝缘 → 断负载 → 解体'],
     ['02', '追', '直接原因之后还有根因：润滑、温度、对中、盲区'],
     ['03', '防', '在跳闸前发现：盲区可见、周期按工况、冲击脉冲连成趋势']].forEach((r, i) => {
-    const y = 2.15 + i * 0.95, a = { st, fx: 'float', d: 400 + i * 400 };
+    const y = 2.05 + i * 0.85, a = { st, fx: 'float', d: 400 + i * 400 };
     T(s, r[0], { x: 0.7, y, w: 0.8, h: 0.75, fontSize: 28, bold: true, color: C.accent2, margin: 0, valign: 'middle', fontFace: 'Arial' }, a);
-    T(s, r[1], { x: 1.5, y: y + 0.07, w: 0.6, h: 0.6, fontSize: 21, bold: true, color: C.text2, fill: { color: C.background1 }, shape: SH.OVAL, align: 'center', valign: 'middle', margin: 0 }, a);
-    T(s, r[2], { x: 2.3, y, w: 5.2, h: 0.75, fontSize: 15.5, color: C.background1, margin: 0, valign: 'middle', lineSpacingMultiple: 1.05 }, a);
+    T(s, r[1], { x: 1.5, y: y + 0.07, w: 0.6, h: 0.6, fontSize: 21, bold: true, color: C.background1, fill: { color: C.accent1 }, shape: SH.OVAL, align: 'center', valign: 'middle', margin: 0 }, a);
+    T(s, r[2], { x: 2.3, y, w: 5.2, h: 0.75, fontSize: 15.5, color: C.text1, margin: 0, valign: 'middle', lineSpacingMultiple: 1.05 }, a);
   });
-  drive(s, 7.85, 1.15, 0.85, st, { lampText: '恢复运行', labelA: { st, fx: 'fade', d: 0 } });
-  T(s, '谢谢大家 · 欢迎交流', { x: 7.85, y: 6.55, w: 4.76, h: 0.4, fontSize: 16, bold: true, color: C.accent6, margin: 0, align: 'center' }, { st, fx: 'fade', d: 1800 });
+  drive(s, 8.0, 1.45, 0.8, st, { lampText: '恢复运行', labelA: { st, fx: 'fade', d: 0 }, labelColor: C.accent5 });
+  T(s, '谢谢大家 · 欢迎交流', { x: 8.0, y: 6.22, w: 4.48, h: 0.36, fontSize: 16, bold: true, color: C.accent1, margin: 0, align: 'center' }, { st, fx: 'fade', d: 1800 });
   st = step('click');
   const dA = { st, fx: 'zoom', d: 0 };
-  S(s, SH.ROUNDED_RECTANGLE, { x: 0.7, y: 5.1, w: 6.8, h: 1.85, fill: { color: C.background1, transparency: 92 }, line: { color: C.accent6, width: 1 }, rectRadius: 0.12 }, dA);
-  I(s, { data: I_.commA, x: 0.95, y: 5.25, w: 0.45, h: 0.45 }, dA);
-  T(s, '讨论一下', { x: 1.55, y: 5.25, w: 3, h: 0.45, fontSize: 16, bold: true, color: C.accent2, margin: 0, valign: 'middle' }, dA);
+  S(s, SH.ROUNDED_RECTANGLE, { x: 0.7, y: 4.6, w: 6.8, h: 1.7, fill: { color: C.background2 }, line: { color: C.accent6, width: 1 }, rectRadius: 0.12 }, dA);
+  I(s, { data: I_.commA, x: 0.95, y: 4.73, w: 0.45, h: 0.45 }, dA);
+  T(s, '讨论一下', { x: 1.55, y: 4.73, w: 3, h: 0.45, fontSize: 16, bold: true, color: C.accent2, margin: 0, valign: 'middle' }, dA);
   T(s, [
     { text: '我们装置哪些电机是"皮带 + 2 极"？', options: { breakLine: true } },
     { text: '哪几台巡检最难到位（盲区）？', options: { breakLine: true } },
     { text: '它们上次加脂是什么时候？有记录吗？' },
   ].map((r) => ({ text: r.text, options: { ...r.options, bullet: { type: 'number' } } })),
-  { x: 0.95, y: 5.78, w: 6.4, h: 1.1, fontSize: 14, color: C.background1, margin: 0, valign: 'top', paraSpaceAfter: 2 }, dA);
+  { x: 0.95, y: 5.24, w: 6.4, h: 1.0, fontSize: 14, color: C.text1, margin: 0, valign: 'top', paraSpaceAfter: 2 }, dA);
   N(s, `【总结 · 约1分钟 + 讨论3–5分钟】
 · （自动）三句话：查——四步缩小范围；追——直接原因之后还有根因；防——在跳闸前发现。
 · 右边电机重新转起来，绿灯"恢复运行"，和开头首尾呼应。
@@ -997,6 +998,6 @@ pres.defineSlideMaster({ title: 'COVER', background: { color: 'FFFFFF' }, object
 · 收尾：谢谢大家。`);
 
   await pres.writeFile({ fileName: OUT });
-  fs.writeFileSync(path.join(path.dirname(OUT), 'anim.json'), JSON.stringify({ _theme: THEME.colors, _transitions: TRANS, _cover: { slide: 1, src: path.join(__dirname, 'materials', 'original.pptx'), srcSlide: 1, anchor: 'cover_logo' }, ...ANIM }, null, 1));
+  fs.writeFileSync(path.join(path.dirname(OUT), 'anim.json'), JSON.stringify({ _theme: THEME.colors, _transitions: TRANS, _fit: { slides: FIT, top_from: 1.8, top_to: 1.98, bottom_max: 6.3, k_max: 0.93 }, _frame: { layouts: ['CONTENT', 'FRAME'], src: path.join(__dirname, 'materials', 'original.pptx'), srcSlide: 2, shapes: ['等腰三角形 4', 'Freeform 19'] }, _cover: { slide: 1, src: path.join(__dirname, 'materials', 'original.pptx'), srcSlide: 1, anchor: 'cover_logo' }, ...ANIM }, null, 1));
   console.log('wrote', OUT, 'slides', slideNo);
 })().catch((e) => { console.error(e); process.exit(1); });

@@ -196,6 +196,65 @@ def put_cover(x, n):
     return x[:m.start()] + before + m.group(0) + after + x[m.end():]
 
 
+def frame_shapes():
+    """The bottom waves of the company frame, copied from the original deck."""
+    fr = spec.get('_frame')
+    if not fr:
+        return None
+    x = zipfile.ZipFile(fr['src']).read(f"ppt/slides/slide{fr['srcSlide']}.xml").decode('utf-8')
+    out, nid = [], itertools.count(8001)
+    for m in re.finditer(r'<p:sp>.*?</p:sp>', x, re.S):
+        el = m.group(0)
+        if not any(f'name="{nm}"' in el for nm in fr['shapes']):
+            continue
+        el = re.sub(r'<p:custDataLst>.*?</p:custDataLst>', '', el, flags=re.S)
+        el = re.sub(r'\s+descr="[^"]*"', '', el)
+        el = re.sub(r'<p:cNvPr id="\d+"', lambda _: f'<p:cNvPr id="{next(nid)}"', el, count=1)
+        out.append(el)
+    assert len(out) == len(fr['shapes']), 'frame shapes not found'
+    return fr['layouts'], ''.join(out)
+
+
+FRAME = frame_shapes()
+
+
+def fit_content(x, n):
+    """Content slides: scale everything below the title band uniformly (about the slide's centre line) so it sits
+    between the big logo and the bottom waves. Returns (xml, k)."""
+    f = spec.get('_fit')
+    if not f or n not in f['slides']:
+        return x, 1.0
+    y0, y1, ymax = (round(v * 914400) for v in (f['top_from'], f['top_to'], f['bottom_max']))
+    els = [m for m in re.finditer(r'<p:(sp|pic)>.*?</p:\1>', x, re.S) if '<p:ph ' not in m.group(0)]
+    geo = []
+    for m in els:
+        o = re.search(r'<a:off x="(-?\d+)" y="(-?\d+)"/>\s*<a:ext cx="(\d+)" cy="(\d+)"/>', m.group(0))
+        if o and int(o.group(2)) >= y0 - 200000:
+            geo.append((m, [int(v) for v in o.groups()]))
+    if not geo:
+        return x, 1.0
+    bottom = max(g[1] + g[3] for _, g in geo)
+    k = min(f['k_max'], (ymax - y1) / max(bottom - y0, 1))
+    cx = EMU_W / 2
+    for m, (ox, oy, w, h) in reversed(geo):          # replace from the end so offsets stay valid
+        el = m.group(0)
+        nx, ny = round(cx + (ox - cx) * k), round(y1 + (oy - y0) * k)
+        el = re.sub(r'<a:off x="-?\d+" y="-?\d+"/>\s*<a:ext cx="\d+" cy="\d+"/>',
+                    f'<a:off x="{nx}" y="{ny}"/><a:ext cx="{round(w * k)}" cy="{round(h * k)}"/>', el, count=1)
+        el = re.sub(r'(<a:(?:rPr|endParaRPr|defRPr)[^>]*\bsz=")(\d+)"', lambda q: f'{q.group(1)}{max(800, round(int(q.group(2)) * k))}"', el)
+        x = x[:m.start()] + el + x[m.end():]
+    print(f"slide {n}: content scale {k:.2f}", file=sys.stderr)
+    return x, k
+
+
+def scale_paths(steps, k):
+    for st in steps:
+        for it in st['items']:
+            if it['fx'] == 'path' and not it.get('_scaled'):
+                it['path'] = re.sub(r'-?\d+(?:\.\d+)?', lambda q: f'{float(q.group(0)) * k:.4f}', it['path'])
+                it['_scaled'] = True
+
+
 def transition(n):
     t = spec.get('_transitions', {}).get(str(n))
     if t == 'fast':
@@ -223,7 +282,9 @@ for item in zin.infolist():
     m = re.fullmatch(r'ppt/slides/slide(\d+)\.xml', item.filename)
     if m:
         n = int(m.group(1))
-        x = put_cover(data.decode('utf-8'), n)
+        x, kfit = fit_content(put_cover(data.decode('utf-8'), n), n)
+        if kfit != 1.0:
+            scale_paths(spec.get(str(n), []), kfit)
         name2id, kinds = {}, {}
         for el in re.finditer(r'<p:(sp|pic|cxnSp)>.*?</p:\1>', x, re.S):
             mm = re.search(r'<p:cNvPr id="(\d+)" name="([^"]*)"', el.group(0))
@@ -243,6 +304,10 @@ for item in zin.infolist():
         assert '<p:timing' not in x and '<p:transition' not in x
         x = x.replace('</p:clrMapOvr>', '</p:clrMapOvr>' + transition(n) + tim, 1)
         data = x.encode('utf-8')
+    elif FRAME and re.fullmatch(r'ppt/slideLayouts/slideLayout\d+\.xml', item.filename) and any(f'<p:cSld name="{nm}"' in data.decode('utf-8') for nm in FRAME[0]):
+        x = data.decode('utf-8')
+        i = x.index('</p:grpSpPr>') + len('</p:grpSpPr>')
+        data = (x[:i] + FRAME[1] + x[i:]).encode('utf-8')        # waves behind everything else on the layout
     elif item.filename == 'ppt/theme/theme1.xml':
         x = data.decode('utf-8')
         for k, v in spec.get('_theme', {}).items():   # theme colors (what pptxgenjs cannot write itself)
