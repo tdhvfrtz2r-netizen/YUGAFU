@@ -164,6 +164,38 @@ def bake_final(x, steps):
     return x
 
 
+def cover_shapes():
+    """Shapes of the original company cover (everything except its logo picture), split around the logo."""
+    cv = spec.get('_cover')
+    if not cv:
+        return None
+    x = zipfile.ZipFile(cv['src']).read(f"ppt/slides/slide{cv['srcSlide']}.xml").decode('utf-8')
+    tree = x[x.index('</p:grpSpPr>') + len('</p:grpSpPr>'):x.index('</p:spTree>')]
+    before, after, seen_pic, nid = [], [], False, itertools.count(9001)
+    for m in re.finditer(r'<p:(sp|pic)>.*?</p:\1>', tree, re.S):
+        el = m.group(0)
+        if m.group(1) == 'pic':
+            seen_pic = True
+            continue
+        el = re.sub(r'<p:custDataLst>.*?</p:custDataLst>', '', el, flags=re.S)
+        el = re.sub(r'\s+descr="[^"]*"', '', el)
+        el = re.sub(r'<p:cNvPr id="\d+"', lambda _: f'<p:cNvPr id="{next(nid)}"', el, count=1)
+        (after if seen_pic else before).append(el)
+    return cv, ''.join(before), ''.join(after)
+
+
+COVER = cover_shapes()
+
+
+def put_cover(x, n):
+    if not COVER or COVER[0]['slide'] != n:
+        return x
+    cv, before, after = COVER
+    m = re.search(r'<p:pic>(?:(?!</p:pic>).)*?name="' + re.escape(cv['anchor']) + r'".*?</p:pic>', x, re.S)
+    assert m, 'cover anchor picture not found'
+    return x[:m.start()] + before + m.group(0) + after + x[m.end():]
+
+
 def transition(n):
     t = spec.get('_transitions', {}).get(str(n))
     if t == 'fast':
@@ -191,7 +223,7 @@ for item in zin.infolist():
     m = re.fullmatch(r'ppt/slides/slide(\d+)\.xml', item.filename)
     if m:
         n = int(m.group(1))
-        x = data.decode('utf-8')
+        x = put_cover(data.decode('utf-8'), n)
         name2id, kinds = {}, {}
         for el in re.finditer(r'<p:(sp|pic|cxnSp)>.*?</p:\1>', x, re.S):
             mm = re.search(r'<p:cNvPr id="(\d+)" name="([^"]*)"', el.group(0))

@@ -156,6 +156,7 @@ pres.defineSlideMaster({
   objects: [{ image: { x: 0.7, y: 0.55, w: 3.0, h: 3.0 * 104 / 614, path: A('logo_white.png'), altText: '北方华锦 logo' } }],
 });
 pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects: [] });
+pres.defineSlideMaster({ title: 'COVER', background: { color: 'FFFFFF' }, objects: [] });
 
 (async () => {
   const I_ = {
@@ -170,30 +171,41 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
   };
 
   // =====================================================================
+  // 0 COVER: the original company cover, kept as is (anim.py copies its shapes from materials/original.pptx)
+  pres.addSection({ title: '封面' });
+  let s = newSlide('COVER', '封面');
+  const EMU = 914400;
+  I(s, { path: path.join(__dirname, 'materials', 'photos_original', 'image2.jpeg'), x: 770255 / EMU, y: 587742 / EMU, w: 6412865 / EMU, h: 868680 / EMU, _name: 'cover_logo', altText: '北方华锦 logo' });
+  N(s, `【封面 · 约0.5分钟】
+· 各位师傅，今天分享一起兄弟单位的电机故障：双兴分公司负压风机电机，轴承保持架破损，过流跳闸停机。
+· 讲三件事：怎么查、为什么坏、怎么防。最后留几分钟讨论咱们自己装置的情况。`);
+
+  // =====================================================================
   // 1 OPENING: the motor is running (dark)
   pres.addSection({ title: '开场' });
-  let s = newSlide('DARK', '开场');
-  TRANS[1] = 'black';
+  s = newSlide('DARK', '开场');
+  TRANS[slideNo] = 'black';
   let st = step('auto');
   drive(s, D.slideX, D.slideY, 1, st, { labelA: { st, fx: 'fade', d: 1600 } });
   T(s, '设备故障案例 · 班组学习分享', { x: 0.7, y: 2.0, w: 6.4, h: 0.4, fontSize: 16, bold: true, color: C.accent2, margin: 0 }, { st, fx: 'float', d: 300 });
-  T(s, '双兴分公司电机轴承保持架\n破损停机故障案例', { x: 0.7, y: 2.5, w: 6.5, h: 1.6, fontSize: 34, bold: true, color: C.background1, margin: 0, lineSpacingMultiple: 1.1, valign: 'top' }, { st, fx: 'float', d: 500 });
-  T(s, '从一次过流跳闸，看懂轴承故障的排查、根因与预防', { x: 0.7, y: 4.3, w: 6.5, h: 0.75, fontSize: 17, color: C.accent6, margin: 0, valign: 'top' }, { st, fx: 'float', d: 800 });
+  T(s, 'BL-1655C\n负压风机电机', { x: 0.7, y: 2.5, w: 6.5, h: 1.6, fontSize: 36, bold: true, color: C.background1, margin: 0, lineSpacingMultiple: 1.1, valign: 'top' }, { st, fx: 'float', d: 500 });
+  T(s, '30 kW · 2950 r/min · 皮带传动 · 封闭机箱', { x: 0.7, y: 4.2, w: 6.5, h: 0.45, fontSize: 17, color: C.accent6, margin: 0, valign: 'top' }, { st, fx: 'float', d: 800 });
+  T(s, '2023 年 1 月 3 日 14:05 之前，它一直这样转着……', { x: 0.7, y: 4.75, w: 6.5, h: 0.45, fontSize: 16, bold: true, color: C.accent2, margin: 0, valign: 'top' }, { st, fx: 'float', d: 1100 });
   T(s, [
     { text: '案例时间　', options: { color: C.accent6 } }, { text: '2023年1月3日 · 双兴分公司', options: { color: C.background1, breakLine: true } },
     { text: '分 享 人　', options: { color: C.accent6 } }, { text: '于家福 · 炼化电气部 本体电气班', options: { color: C.background1 } },
-  ], { x: 0.7, y: 5.55, w: 6.5, h: 0.8, fontSize: 13, margin: 0, lineSpacingMultiple: 1.3, valign: 'top' }, { st, fx: 'fade', d: 1100 });
+  ], { x: 0.7, y: 5.75, w: 6.5, h: 0.8, fontSize: 13, margin: 0, lineSpacingMultiple: 1.3, valign: 'top' }, { st, fx: 'fade', d: 1400 });
   N(s, `【开场 · 约1分钟 · 本页不用点击】
 · 右边是这台电机的示意：电机皮带轮带着风机转，下面放大的是负荷侧轴承——内圈跟轴转，滚珠和保持架慢一点公转；左上电流表约55A，绿灯运行。
 · 今天讲双兴分公司2023年1月3日的一起故障：负压风机电机轴承保持架破损，过流跳闸停机。
-· 原报告只写到"坏了什么、怎么修"，今天想多挖三层：怎么查、为什么坏、怎么防。
-· 先看它是怎么"停下来"的——翻下一页。
+· 30kW、2极2950转、皮带传动、装在封闭机箱里——这几个特点后面都会用到。
+· 14:05之前，它一直这样转着。先看它是怎么"停下来"的——翻下一页。
 （动画随换页自动播放：皮带轮、轴承一直转，表针轻微摆动）`);
 
   // =====================================================================
   // 2 THE MOMENT: embedded clip (no logo master; video covers the slide)
   s = newSlide('VIDEO', '开场');
-  TRANS[2] = 'fast';
+  TRANS[slideNo] = 'fast';
   const poster = 'data:image/png;base64,' + fs.readFileSync(G('opening_poster.png')).toString('base64');
   s.addMedia({ type: 'video', path: G('opening.mp4'), x: 0, y: 0, w: W, h: H, cover: poster, objectName: 's2_video' });
   st = step('auto');
@@ -204,20 +216,20 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
   T(s, '2023年1月3日　14:05', { x: 0.95, y: 1.5, w: 5.6, h: 0.45, fontSize: 20, bold: true, color: C.accent2, margin: 0, fontFace: 'Microsoft YaHei' }, a2);
   T(s, 'BL-1655C 负压风机电机\n过电流跳闸', { x: 0.95, y: 2.05, w: 5.7, h: 1.3, fontSize: 30, bold: true, color: C.background1, margin: 0, lineSpacingMultiple: 1.05, valign: 'top' }, a2);
   T(s, '综保显示过电流保护动作 → 电机停机 → 生产波动', { x: 0.95, y: 3.5, w: 5.7, h: 0.4, fontSize: 15, color: C.accent6, margin: 0 }, a2);
-  T(s, '原报告：负荷侧轴承"支持架"（规范名称：保持架）破损', { x: 0.95, y: 4.05, w: 5.7, h: 0.6, fontSize: 13, color: 'C9D6E8', margin: 0, valign: 'top' }, a2);
+  T(s, '故障部位：负荷侧轴承保持架（又称"支持架"）破损', { x: 0.95, y: 4.05, w: 5.7, h: 0.6, fontSize: 13, color: 'C9D6E8', margin: 0, valign: 'top' }, a2);
   N(s, `【故障瞬间 · 约1分钟】
 · 视频随换页自动播放，约14秒，无声音。如果没有自动播放，单击一下视频画面。
 · 边看边说：正常运行2950转、约55A → 镜头推近负荷侧轴承 → 保持架断裂、滚珠挤成一堆、转子卡死 → 电流冲高 → 综保过流动作，跳闸。
 · 强调：这是示意动画，不是现场录像；真实过程中轴承往往已经"病"了很久。
 [点击] 出现事件卡：14:05，BL-1655C，过流跳闸，生产波动。
-· 过渡：这就是原报告记录的全部经过。下面先用一页把故障链理清。`);
+· 过渡：下面先用一页把故障链理清。`);
 
   // =====================================================================
   // 3 OVERVIEW
   pres.addSection({ title: '01 案例回顾' });
   s = newSlide('CONTENT', '01 案例回顾');
   tagPill(s, '导读');
-  title(s, '一页看懂：一份浅报告，今天挖深三层');
+  title(s, '一页看懂：这起故障，讲清三件事');
   st = step('auto');
   const chain = [
     ['保持架破损', '负荷侧轴承', I_.cogA], ['滚珠扎堆卡死', '电机转不动', I_.compA], ['电流急剧上升', '接近堵转', I_.boltR],
@@ -233,7 +245,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
     if (i < 4) S(s, SH.CHEVRON, { x: x + nw + 0.13, y: y + 0.6, w: 0.2, h: 0.3, fill: { color: i < 1 ? C.accent2 : C.accent3 }, line: NONE }, { st, fx: 'fade', d: d + 200 });
   });
   st = step('click');
-  T(s, '原报告答了"坏了什么、怎么修"；今天多问三个问题', { x: M, y: 3.75, w: 9, h: 0.4, fontSize: 17, bold: true, color: C.text2, margin: 0 }, { st, fx: 'fade', d: 0 });
+  T(s, '今天讲清三件事', { x: M, y: 3.75, w: 9, h: 0.4, fontSize: 17, bold: true, color: C.text2, margin: 0 }, { st, fx: 'fade', d: 0 });
   const three = [
     ['01', '怎么查', '排查四步法：从"跳闸"一步步缩小到"轴承"', I_.searchB],
     ['02', '为什么坏', '看证据、给嫌疑排个序', I_.questA],
@@ -252,7 +264,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
 · 故障链（自动出现）：保持架破损 → 滚珠扎堆卡死 → 电流急剧上升 → 综保过流跳闸 → 生产波动。
 · 综保动作是对的，保护起了作用；问题是没能在跳闸之前发现。
 [点击] 三个问题：怎么查——四步法；为什么坏——看证据、排嫌疑；怎么防——监测盲区、跳闸前发现。
-· 一句话主线：今天不是只讲一个故障，是讲"一份浅报告，怎么挖深"。`);
+· 一句话主线：不只讲"坏了什么、怎么修"，还要讲"为什么坏、怎么提前发现"。`);
 
   // =====================================================================
   // 4 EQUIPMENT
@@ -295,7 +307,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
 · 左边现场照片，右边铭牌：ABB M2QA200L2A，EFF2。
 [点击] 关键参数：30kW、2极 2950转、额定电流54.8A（380V三角形）、皮带传动。
 [点击] 照片里能看出两件事：皮带传动；散热筋上积灰已经结块。
-[点击] 工况特点——这是我根据照片和铭牌的推断，原报告没写：高转速 + 皮带拉力 + 封闭粉尘环境，三样叠在一起。
+[点击] 工况特点——这是根据照片和铭牌的推断：高转速 + 皮带拉力 + 封闭粉尘环境，三样叠在一起。
 · 互动：我们装置有没有"皮带 + 2极 + 封闭机箱"的电机？先记着，最后讨论。`);
 
   // =====================================================================
@@ -323,26 +335,22 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
   });
   st = step('click');
   a3 = { st, fx: 'float', d: 0 };
-  S(s, SH.ROUNDED_RECTANGLE, { x: M, y: 4.75, w: CW, h: 2.0, fill: { color: C.accent2, transparency: 91 }, line: NONE, rectRadius: 0.1 }, a3);
-  I(s, { data: I_.fileA, x: M + 0.25, y: 4.92, w: 0.45, h: 0.45 }, a3);
-  T(s, '原报告缺了这些——查根因恰恰要用', { x: M + 0.85, y: 4.92, w: 6, h: 0.45, fontSize: 15, bold: true, color: C.accent2, margin: 0, valign: 'middle' }, a3);
-  badge(s, 'tbd', M + 0.85 + textW('原报告缺了这些——查根因恰恰要用', 15) + 0.2, 4.99, a3);
-  const miss = ['停机时长', '产量影响', '轴承型号', '这套轴承运行时长', '上次加脂 / 换轴承时间', '加脂周期', '故障前巡检记录',
-    '是否在冲击脉冲 / 测振路线上', '皮带张力和对中', '同型号电机故障史', '旧轴承是否留存'];
-  let cx0 = M + 0.3, cy0 = 5.55;
-  miss.forEach((t, i) => {
-    const w = textW(t, 12) + 0.36;
-    if (cx0 + w > M + CW - 0.25) { cx0 = M + 0.3; cy0 += 0.52; }
-    T(s, t, { x: cx0, y: cy0, w, h: 0.4, fontSize: 12, color: C.text2, fill: { color: C.background1 }, line: { color: C.accent5, width: 0.75, dashType: 'dash' },
-      shape: SH.ROUNDED_RECTANGLE, rectRadius: 0.2, align: 'center', valign: 'middle', margin: 0 }, { st, fx: 'zoom', d: 200 + i * 70 });
-    cx0 += w + 0.14;
+  T(s, '故障现象（4 项）', { x: M, y: 4.78, w: 4, h: 0.4, fontSize: 16, bold: true, color: C.text2, margin: 0, valign: 'middle' }, a3);
+  const sym = [['综保', '过电流保护动作', C.accent3], ['绝缘电阻', '合格', C.accent4], ['拆皮带后盘车', '电机轴转不动', C.accent2], ['解体检查', '负荷侧轴承保持架破损', C.accent3]];
+  const sw5 = (CW - 3 * 0.25) / 4;
+  sym.forEach((t, i) => {
+    const x = M + i * (sw5 + 0.25), a = { st, fx: 'float', d: 150 + i * 200 };
+    S(s, SH.ROUNDED_RECTANGLE, { x, y: 5.3, w: sw5, h: 1.4, fill: { color: t[2], transparency: 90 }, line: NONE, rectRadius: 0.1 }, a);
+    S(s, SH.RECTANGLE, { x, y: 5.3, w: 0.07, h: 1.4, fill: { color: t[2] }, line: NONE }, a);
+    numDot(s, i + 1, x + 0.25, 5.45, 0.38, t[2], a, 13);
+    T(s, t[0], { x: x + 0.75, y: 5.45, w: sw5 - 0.85, h: 0.38, fontSize: 13, color: C.accent5, margin: 0, valign: 'middle' }, a);
+    T(s, t[1], { x: x + 0.25, y: 5.92, w: sw5 - 0.4, h: 0.65, fontSize: 16, bold: true, color: t[2], margin: 0, valign: 'middle' }, a);
   });
   N(s, `【故障经过 · 约1分钟】
 · 时间线自动出现：14:05跳闸 → 值班人员立即到场 → 检查判断 → 解体 → 更换修复 → 恢复运行。
 · 处置值得肯定：到场快、判断准、修复及时。
-[点击] 但原报告缺了11项数据：停机时长、产量影响、轴承型号、运行时长、上次加脂、加脂周期、巡检记录、监测路线、皮带张力对中、同型号故障史、旧轴承在不在。
-· 今天凡是缺数据的地方，我都标了【待双兴提供】，不编数。
-· 以后我们自己写故障报告，这些要补上。`);
+[点击] 四个故障现象：综保过电流动作；绝缘电阻合格；拆皮带后盘车，轴转不动；解体发现负荷侧轴承保持架破损。
+· 这四条正好对应下一页的"排查四步法"。`);
 
   // =====================================================================
   // 6 DIAGNOSIS: four steps, each with a mini animation
@@ -448,7 +456,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
 · 四张照片依次讲：①负荷侧轴端 ②轴承室内部 ③④断裂的保持架（冲压钢，两半铆接式）。
 [点击] 圈出两处：①油脂发黑；②滚珠挤在一侧、另一侧空着——保持架断了就是这个样子。
 [点击] 判断：油脂发黑通常是长期高温或混入杂质/磨损金属 → 轴承是慢慢劣化的。
-· 措辞注意：这是看照片的推断【推断】，原报告没有化验油脂。`);
+· 措辞注意：这是看照片的推断【推断】，没有做油脂化验。`);
 
   // =====================================================================
   // 8 KNOWLEDGE: what a cage is (spinning PNG parts)
@@ -480,12 +488,12 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
     T(s, p[0], { x: 7.3, y, w: 1.05, h: 0.66, fontSize: 16, bold: true, color: i === 2 ? C.accent2 : C.text2, margin: 0, valign: 'top' }, a);
     T(s, p[1], { x: 8.4, y: y + 0.02, w: W - M - 8.55, h: hgt, fontSize: 13, color: C.text1, margin: 0, valign: 'top', lineSpacingMultiple: 1.1 }, a);
   });
-  T(s, '注：原报告写作"支持架"，规范名称为"保持架"（cage / retainer）', { x: 7.3, y: 6.25, w: W - M - 7.3, h: 0.32, fontSize: 12, color: C.accent5, margin: 0, italic: true }, { st, fx: 'fade', d: 2000 });
+  T(s, '注：保持架也常被叫作"支持架"（英文 cage / retainer）', { x: 7.3, y: 6.25, w: W - M - 7.3, h: 0.32, fontSize: 12, color: C.accent5, margin: 0, italic: true }, { st, fx: 'fade', d: 2000 });
   N(s, `【知识点：保持架 · 约1分钟】
 · （自动）轴承转起来：外圈不动；内圈跟轴一起转（看白点）；滚珠和保持架慢一些，大约0.4倍轴速公转。
 · 四个部件：外圈装在轴承室、内圈套在轴上、滚珠在中间滚、保持架把滚珠隔开。
 · 保持架就是"隔离栏"：每颗滚珠各占各的位置，受力均匀。本例是薄钢板冲压件，相对单薄。
-· 统一术语：原报告写"支持架"，规范叫"保持架"。下一页看它断了会怎样。`);
+· 术语：保持架也有人叫"支持架"，是同一个零件，规范叫法是"保持架"。下一页看它断了会怎样。`);
 
   // =====================================================================
   // 9 THE CAGE BREAKS (native shapes; balls travel along the raceway on motion paths)
@@ -547,19 +555,19 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
 [点击] 保持架断成几段 → 滚珠沿滚道滑过去挤成一堆 → "卡死"。右边同时出现第1、2步：失去隔离栏、互相摩擦卡住。
 [点击] 第3、4步：阻力剧增，接近堵转 → 电流飙升 → 综保过流动作停机。
 · 小结：过流只是"结果"，保持架断裂只是"直接原因"。对照照片②，滚珠就是挤在一侧。
-· 过渡：那保持架为什么会断？原报告没回答，这就是下面要挖的。`);
+· 过渡：那保持架为什么会断？这就是下面要挖的。`);
 
   // =====================================================================
   // 10 FIVE WHYS
   pres.addSection({ title: '03 为什么坏' });
   s = newSlide('CONTENT', '03 为什么坏');
   tagPill(s, '03  为什么坏');
-  title(s, '追问五个"为什么"：原报告只答到第三个');
+  title(s, '追问五个"为什么"：从"跳闸"追到根因');
   const whys = [
     ['为什么停机？', '综保过电流保护动作 —— 保护是对的'],
     ['为什么过流？', '电机转子被卡住，电流急剧上升'],
     ['为什么卡住？', '负荷侧轴承保持架破损，滚珠扎堆'],
-    ['为什么保持架会破损？', '原报告没回答 → 今天深挖：看证据、排嫌疑'],
+    ['为什么保持架会破损？', '深挖：看证据、排嫌疑（后面两页）'],
     ['为什么跳闸前没发现？', '管理原因：这台电机处在"监测盲区" —— 对我们最有借鉴意义'],
   ];
   const nums = ['①', '②', '③', '④', '⑤'];
@@ -576,15 +584,15 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
   });
   const st0 = cur.steps[0], stLast = cur.steps[2];
   S(s, SH.RIGHT_BRACE, { x: 9.75, y: 1.9, w: 0.28, h: 2.7, fill: CLEAR, line: { color: C.accent5, width: 1.5 } }, { st: st0, fx: 'fade', d: 900 });
-  T(s, [{ text: '原报告写到这里', options: { breakLine: true } }, { text: '（直接原因）', options: { fontSize: 12, bold: false } }],
+  T(s, [{ text: '直接原因', options: { breakLine: true } }, { text: '（看得见的）', options: { fontSize: 12, bold: false } }],
     { x: 10.15, y: 2.85, w: 2.55, h: 0.8, fontSize: 14, bold: true, color: C.accent5, margin: 0, valign: 'middle' }, { st: st0, fx: 'fade', d: 1000 });
   S(s, SH.RIGHT_BRACE, { x: 10.75, y: 4.75, w: 0.28, h: 1.75, fill: CLEAR, line: { color: C.accent2, width: 1.5 } }, { st: stLast, fx: 'fade', d: 300 });
-  T(s, [{ text: '今天要追问', options: { breakLine: true } }, { text: '（根本原因）', options: { fontSize: 12, bold: false } }],
+  T(s, [{ text: '根本原因', options: { breakLine: true } }, { text: '（要追问的）', options: { fontSize: 12, bold: false } }],
     { x: 11.12, y: 5.2, w: 1.6, h: 0.8, fontSize: 14, bold: true, color: C.accent2, margin: 0, valign: 'middle' }, { st: stLast, fx: 'fade', d: 400 });
   N(s, `【五个为什么 · 约1.5分钟】
 · 一层层往下问，直到问出能"改"的东西。
-· 前三问原报告都答了（自动出现）：停机 ← 过流 ← 卡住 ← 保持架破损。这是"直接原因"。
-[点击] 第④问：保持架为什么会破损？原报告没回答——接下来两招：看证据、排嫌疑。
+· 前三问（自动出现）：停机 ← 过流 ← 卡住 ← 保持架破损。这是"直接原因"，很多分析就停在这里。
+[点击] 第④问：保持架为什么会破损？接下来两招：看证据、排嫌疑。
 [点击] 第⑤问：为什么跳闸前没发现？这是管理原因，对我们最有借鉴意义，后面专门讲"监测盲区"。`);
 
   // =====================================================================
@@ -651,7 +659,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
   tagPill(s, '03  为什么坏');
   title(s, '嫌疑排序：从"六个方向平铺"到"有轻有重"');
   st = step('auto');
-  T(s, '上一版：六个方向平铺', { x: M, y: 1.9, w: 3.6, h: 0.38, fontSize: 14, bold: true, color: C.accent5, margin: 0 }, { st, fx: 'fade', d: 0 });
+  T(s, '先列全：六个可能方向', { x: M, y: 1.9, w: 3.6, h: 0.38, fontSize: 14, bold: true, color: C.accent5, margin: 0 }, { st, fx: 'fade', d: 0 });
   S(s, SH.ROUNDED_RECTANGLE, { x: M, y: 2.35, w: 3.75, h: 2.35, fill: CLEAR, line: { color: C.accent6, width: 1, dashType: 'dash' }, rectRadius: 0.1 }, { st, fx: 'fade', d: 0 });
   const chipW = 1.6, chipH = 0.45;
   const chipsDef = [
@@ -663,7 +671,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
     ['润滑失效 + 温度高', '头号嫌疑：油脂发黑、积灰、封闭机箱；高速 + 高温 + 粉尘，油脂老化快得多', [0, 2], C.accent3, 'inf'],
     ['皮带不对中 / 振动', '坏在负荷侧；查皮带张力、对中、地脚', [1, 4], C.accent2, 'inf'],
     ['2 极高转速', '本身不是"原因"，是"放大器"：让 1、2 的影响更快显现', [3], C.accent1, 'inf'],
-    ['轴承寿命 / 安装质量', '缺数据，待核实', [5], C.accent5, 'tbd'],
+    ['轴承寿命 / 安装质量', '结合运行年限、安装记录判断', [5], C.accent5, 'inf'],
   ];
   const chipNames = chipPos.map((p) => T(s, p.t, { x: p.x, y: p.y, w: chipW, h: chipH, fontSize: 12.5, bold: true, color: C.text2, fill: { color: C.background2 }, line: { color: C.accent6, width: 1 },
     shape: SH.ROUNDED_RECTANGLE, rectRadius: 0.2, align: 'center', valign: 'middle', margin: 0 }, { st, fx: 'zoom', d: 200 }));
@@ -689,11 +697,11 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
   ], { x: M + 0.25, y: 2.55, w: 3.3, h: 1.95, fontSize: 13.5, color: C.text2, margin: 0, valign: 'middle', paraSpaceAfter: 6 }, { st, fx: 'float', d: 1500 });
   T(s, '排序依据：现场照片 + 工况推断。拿到加脂记录、皮带张力、旧轴承后要再修正。', { x: M, y: 4.95, w: 3.75, h: 0.9, fontSize: 12.5, color: C.accent5, italic: true, margin: 0, valign: 'top' }, { st, fx: 'fade', d: 1500 });
   N(s, `【嫌疑排序 · 约1.5分钟】
-· 左边是我上一版的讲法：六个方向平铺——听的人不知道先查哪个。
+· 左边先把可能的方向列全：六个——但平铺着，不知道先查哪个，所以要排序。
 [点击] 第1名：润滑失效 + 温度高。"润滑不良"和"散热差、粉尘大"合并：油脂发黑、积灰、封闭机箱。2极高速、高温、粉尘叠在一起，油脂老化比平常快得多，按常规周期加脂很可能不够。
 [点击] 第2名：皮带不对中/振动。坏在负荷侧。正常张紧的皮带拉力不至于压坏轴承，真正要查的是对中、张力、地脚——不对中和抖动才伤轴承。
 [点击] 第3名：2极高转速——它不是原因，是"放大器"，让前两条更快出问题。
-[点击] 第4名：轴承寿命/安装质量——没数据，待双兴提供。左边同时出现"落到现场"的查找顺序：先查加脂记录和轴承温度，再查皮带，最后查轴承型号和安装。
+[点击] 第4名：轴承寿命/安装质量——要结合运行年限、安装记录判断。左边同时出现"落到现场"的查找顺序：先查加脂记录和轴承温度，再查皮带，最后查轴承型号和安装。
 · 强调：这是推断排序，拿到加脂记录、皮带张力、旧轴承后要再修正。`);
 
   // =====================================================================
@@ -737,7 +745,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
   S(s, SH.ROUNDED_RECTANGLE, { x: rx15, y: 1.95, w: rw15, h: 1.6, fill: { color: C.accent3, transparency: 90 }, line: NONE, rectRadius: 0.1 }, { st, fx: 'float', d: 1900 });
   T(s, '结论：这是一台"监测盲区设备"', { x: rx15 + 0.2, y: 2.05, w: rw15 - 1.3, h: 0.42, fontSize: 16, bold: true, color: C.accent3, margin: 0, valign: 'middle' }, { st, fx: 'float', d: 1900 });
   badge(s, 'inf', rx15 + rw15 - 1.0, 2.12, { st, fx: 'float', d: 1900 });
-  T(s, '封闭机箱 + 负压风机噪声大 → 看不见、摸不到、听不清；很可能不在冲击脉冲/测振路线上；电流又对早期故障不敏感。巡检再认真也发现不了——原报告的"加强巡检"解决不了盲区。',
+  T(s, '封闭机箱 + 负压风机噪声大 → 看不见、摸不到、听不清；很可能不在冲击脉冲/测振路线上；电流又对早期故障不敏感。巡检再认真也发现不了——单靠"加强巡检"解决不了盲区。',
     { x: rx15 + 0.2, y: 2.5, w: rw15 - 0.35, h: 1.0, fontSize: 12.5, color: C.text1, margin: 0, valign: 'top' }, { st, fx: 'float', d: 1900 });
   st = step('click');
   T(s, '对策：让盲区"可见"', { x: rx15, y: 3.75, w: rw15, h: 0.4, fontSize: 15, bold: true, color: C.text2, margin: 0 }, { st, fx: 'fade', d: 0 });
@@ -750,7 +758,7 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
 · 左边（自动）：电机在封闭机箱里，粉尘大、噪声大、散热差；橙点在闪——负荷侧轴承已经在"生病"。
 · 巡检的人沿路线走过去："看着都正常。"——不是他不认真，是根本看不到。
 [点击] 一个个划掉：看不见、摸不到、听不清，电流要到快卡死才明显上升——结论【推断】：这是一台"监测盲区设备"，很可能也不在冲击脉冲路线上。
-· 重点：巡检再认真也发现不了，所以原报告"加强巡检"解决不了问题。
+· 重点：巡检再认真也发现不了，所以单靠"加强巡检"解决不了问题。
 [点击] 对策：单列清单；测点和注油管引到机箱外；纳入冲击脉冲路线；必要时加在线传感器；缩短加脂周期。
 · 互动：我们装置哪几台属于这种情况？（最后讨论时再说）`);
 
@@ -917,49 +925,40 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
   T(s, '分工为建议，现场定人、定期限；下次班组会对账。', { x: M + 2 * (lcw + 0.25), y: 5.5, w: lcw, h: 1.2, fontSize: 13, bold: true, color: C.accent4,
     fill: CLEAR, line: { color: C.accent4, width: 1.25, dashType: 'dash' }, shape: SH.ROUNDED_RECTANGLE, rectRadius: 0.08, align: 'center', valign: 'middle', margin: 8 }, { st, fx: 'fade', d: 700 });
   N(s, `【举一反三 2.0 · 约1.5分钟 · 落地】
-· 原报告的防范措施是"加强巡检、加强润滑、做好预知性检维修"——方向对，但没法检查。今天把它拆成三层、八件事，每件都写清"谁、查什么、交什么"。
+· 防范措施如果只写"加强巡检、加强润滑、做好预知性检维修"，方向对，但没法检查。今天把它拆成三层、八件事，每件都写清"谁、查什么、交什么"。
 · 设备层（自动出现）：①筛同类——2极（≥2900转）、皮带、封闭/粉尘/高温，占两条就列入。清单字段：位号、功率、转速、传动方式、环境、轴承型号、能否加脂、上次加脂、监测方式、最近一次冲击脉冲值。②泵、风机、空压机同理："高速+高温+污染＝润滑寿命成倍缩短"。③向上反馈：2极配皮带是否合理（直连、改4极、调皮带轮）、机箱通风、张紧用张力计。
 [点击] 管理层：④找盲区；⑤润滑周期按工况修正，写进加脂台账；⑥冲击脉冲/振动是早期信号，温度/听音是中期，电流是晚期——每台建基准值、趋势和报警线。
 [点击] 方法层：⑦证据保全清单；⑧故障报告写深，模板见下一页。
 · 分工是我的建议，可以当场定人、定期限。`);
 
   // =====================================================================
-  // 19 SHALLOW vs DEEP REPORT TEMPLATE
+  // 19 FAULT REPORT TEMPLATE
   s = newSlide('CONTENT', '04 怎么防');
   tagPill(s, '04  方法');
-  title(s, '故障报告怎么写深：一张模板');
+  title(s, '以后写故障报告：一张模板（10 项）');
   st = step('auto');
-  const lw19 = 3.45;
-  S(s, SH.ROUNDED_RECTANGLE, { x: M, y: 1.85, w: lw19, h: 4.9, fill: { color: C.background2 }, line: NONE, rectRadius: 0.1 }, { st, fx: 'fade', d: 0 });
-  T(s, '原报告（8 页）', { x: M + 0.25, y: 2.0, w: lw19 - 0.4, h: 0.42, fontSize: 16, bold: true, color: C.accent5, margin: 0, valign: 'middle' }, { st, fx: 'fade', d: 0 });
-  ['时间、设备、事件', '故障现象（4 条）', '维修办法（3 条）', '防范措施："加强巡检、加强润滑……"'].forEach((t, i) => {
-    T(s, t, { x: M + 0.25, y: 2.6 + i * 0.72, w: lw19 - 0.5, h: 0.6, fontSize: 13, color: C.text1, fill: { color: C.background1 }, shape: SH.ROUNDED_RECTANGLE, rectRadius: 0.06, margin: 6, valign: 'middle' }, { st, fx: 'float', d: 200 + i * 150 });
-  });
-  T(s, '答了"坏了什么、怎么修"；没答"为什么坏""为什么没提前发现"。', { x: M + 0.25, y: 5.55, w: lw19 - 0.45, h: 1.0, fontSize: 12.5, bold: true, color: C.accent2, margin: 0, valign: 'top' }, { st, fx: 'fade', d: 900 });
+  T(s, '至少回答两个问题：为什么坏？为什么没提前发现？', { x: M, y: 1.82, w: CW, h: 0.4, fontSize: 16, bold: true, color: C.accent2, margin: 0, valign: 'middle' }, { st, fx: 'fade', d: 0 });
   const tpl = [
-    ['事件', '时间、位号、现象、保护动作', 'has'], ['影响量化', '停机时长、产量损失', 'need'],
-    ['时间线', '发现 → 到场 → 判断 → 修复，带时刻', 'part'], ['证据', '滚道/滚珠/断口/油脂/轴颈照片；旧件留存', 'need'],
-    ['直接原因', '哪个零件、怎么坏', 'has'], ['根因（技术 + 管理）', '为什么坏 + 为什么没提前发现', 'need'],
-    ['测量数据', '温度、振动、冲击脉冲、皮带张力', 'need'], ['整改（责任人 + 期限）', '每条有人、有日期，不写"加强"', 'part'],
-    ['横向排查', '同类设备清单', 'need'], ['效果验证', '复测基准值，跟踪趋势', 'need'],
+    ['事件', '时间、位号、现象、保护动作'], ['影响量化', '停机时长、产量损失'],
+    ['时间线', '发现 → 到场 → 判断 → 修复，带时刻'], ['证据', '滚道/滚珠/断口/油脂/轴颈照片；旧件留存'],
+    ['直接原因', '哪个零件、怎么坏'], ['根因（技术 + 管理）', '为什么坏 + 为什么没提前发现'],
+    ['测量数据', '温度、振动、冲击脉冲、皮带张力'], ['整改（责任人 + 期限）', '每条有人、有日期，不写"加强"'],
+    ['横向排查', '同类设备清单'], ['效果验证', '复测基准值，跟踪趋势'],
   ];
-  const tagS = { has: ['原报告有', C.accent4], part: ['部分有', C.accent1], need: ['需补', C.accent2] };
-  const tx19 = M + lw19 + 0.3, tw19 = (W - M - tx19 - 0.15) / 2;
-  T(s, '深报告模板（10 项）', { x: tx19, y: 1.85, w: 4, h: 0.4, fontSize: 16, bold: true, color: C.text2, margin: 0, valign: 'middle' }, { st, fx: 'fade', d: 0 });
+  const tw19 = (CW - 0.25) / 2;
   tpl.forEach((t, i) => {
     if (i === 0) st = step('click');
     if (i === 6) st = step('click');
-    const col = i % 2, row = Math.floor(i / 2), x = tx19 + col * (tw19 + 0.15), y = 2.35 + row * 0.88, a = { st, fx: 'float', d: (i % 6) * 120 };
-    const [tg, tc] = tagS[t[2]];
-    S(s, SH.ROUNDED_RECTANGLE, { x, y, w: tw19, h: 0.78, fill: { color: C.background1 }, line: { color: t[2] === 'need' ? C.accent2 : 'D5DEE9', width: 1 }, rectRadius: 0.08 }, a);
-    numDot(s, i + 1, x + 0.12, y + 0.2, 0.36, tc, a, 12);
-    T(s, t[0], { x: x + 0.58, y: y + 0.05, w: tw19 - 1.6, h: 0.36, fontSize: 13.5, bold: true, color: C.text2, margin: 0, valign: 'middle' }, a);
-    T(s, tg, { x: x + tw19 - 0.98, y: y + 0.1, w: 0.86, h: 0.27, fontSize: 10.5, bold: true, color: tc, fill: { color: tc, transparency: 88 }, shape: SH.ROUNDED_RECTANGLE, rectRadius: 0.13, align: 'center', valign: 'middle', margin: 0 }, a);
-    T(s, t[1], { x: x + 0.58, y: y + 0.4, w: tw19 - 0.68, h: 0.34, fontSize: 12, color: C.text1, margin: 0, valign: 'middle' }, a);
+    const col = i % 2, row = Math.floor(i / 2), x = M + col * (tw19 + 0.25), y = 2.4 + row * 0.9, a = { st, fx: 'float', d: (i % 6) * 120 };
+    const tc = i < 5 ? C.accent1 : i === 5 ? C.accent2 : C.accent4;
+    S(s, SH.ROUNDED_RECTANGLE, { x, y, w: tw19, h: 0.78, fill: { color: C.background2 }, line: NONE, rectRadius: 0.08 }, a);
+    numDot(s, i + 1, x + 0.18, y + 0.19, 0.4, tc, a, 13);
+    T(s, t[0], { x: x + 0.75, y, w: 2.4, h: 0.78, fontSize: 15, bold: true, color: C.text2, margin: 0, valign: 'middle' }, a);
+    T(s, t[1], { x: x + 3.2, y, w: tw19 - 3.35, h: 0.78, fontSize: 13, color: C.text1, margin: 0, valign: 'middle' }, a);
   });
   N(s, `【深报告模板 · 约1分钟】
-· 左边是原报告的结构：时间设备、现象、维修办法、防范措施——答了"坏了什么、怎么修"。
-[点击] 模板前6项：事件、影响量化、时间线、证据、直接原因、根因（技术+管理）。原报告有的标绿，要补的标橙。
+· 一份好的故障报告，不只写"坏了什么、怎么修"，至少还要回答：为什么坏？为什么没提前发现？
+[点击] 前6项：事件、影响量化、时间线、证据、直接原因、根因（技术+管理）。
 [点击] 后4项：测量数据、整改（每条有责任人和期限）、横向排查、效果验证。
 · 以后我们自己写，至少回答两个问题：为什么坏？为什么没提前发现？`);
 
@@ -998,6 +997,6 @@ pres.defineSlideMaster({ title: 'VIDEO', background: { color: HX.dk2 }, objects:
 · 收尾：谢谢大家。`);
 
   await pres.writeFile({ fileName: OUT });
-  fs.writeFileSync(path.join(path.dirname(OUT), 'anim.json'), JSON.stringify({ _theme: THEME.colors, _transitions: TRANS, ...ANIM }, null, 1));
+  fs.writeFileSync(path.join(path.dirname(OUT), 'anim.json'), JSON.stringify({ _theme: THEME.colors, _transitions: TRANS, _cover: { slide: 1, src: path.join(__dirname, 'materials', 'original.pptx'), srcSlide: 1, anchor: 'cover_logo' }, ...ANIM }, null, 1));
   console.log('wrote', OUT, 'slides', slideNo);
 })().catch((e) => { console.error(e); process.exit(1); });
